@@ -15,11 +15,11 @@ function ProjectRow({ label, value }: { label: string; value: string }) {
 
 export function PlaygroundExportProject() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 pt-8">
       <ExportPanel />
 
       {/* Project card — shell only (no backend / cloud) */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <span className="px-1 text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
           Project
         </span>

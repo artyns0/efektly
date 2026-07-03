@@ -75,14 +75,14 @@ function Switch({
         onClick();
       }}
       className={cn(
-        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-        on ? "bg-flame" : "bg-white/12",
+        "relative h-[18px] w-8 shrink-0 rounded-full transition-colors",
+        on ? "bg-flame" : "bg-white/[0.14]",
       )}
     >
       <span
         className={cn(
-          "absolute top-0.5 size-4 rounded-full bg-linen shadow transition-all",
-          on ? "left-[1.125rem]" : "left-0.5",
+          "absolute top-0.5 size-3.5 rounded-full bg-linen shadow transition-all",
+          on ? "left-[15px]" : "left-0.5",
         )}
       />
     </button>
@@ -96,17 +96,24 @@ export function EffectAccordion() {
   const toggleEffect = useAppStore((s) => s.toggleEffect);
   const [expanded, setExpanded] = useState<string | null>(selectedEffectId);
 
+  const enabledCount = effects.filter((fx) => fx.enabled).length;
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
-          Effects
-        </span>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between px-0.5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
+            Effects
+          </span>
+          <span className="font-mono text-[10px] text-linen/30">
+            {enabledCount}/{effects.length} on
+          </span>
+        </div>
         <button
           type="button"
           disabled
           title="All effects are in the stack"
-          className="inline-flex h-7 cursor-not-allowed items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 text-xs text-linen/40"
+          className="inline-flex h-7 cursor-not-allowed items-center gap-1.5 rounded-lg border border-dashed border-white/[0.12] bg-white/[0.02] px-2.5 text-xs text-linen/45"
         >
           <Plus className="size-3.5" />
           Add Effect
@@ -123,12 +130,19 @@ export function EffectAccordion() {
             <div
               key={fx.id}
               className={cn(
-                "overflow-hidden rounded-xl border transition-colors",
+                "relative overflow-hidden rounded-xl border transition-colors",
                 selected
-                  ? "border-flame/45 bg-flame/[0.06]"
-                  : "border-white/[0.06] bg-linen/[0.02]",
+                  ? "border-flame/45 bg-flame/[0.07]"
+                  : fx.enabled
+                    ? "border-white/[0.1] bg-linen/[0.03]"
+                    : "border-white/[0.05] bg-linen/[0.015]",
               )}
             >
+              {/* Enabled accent bar */}
+              {fx.enabled && (
+                <span className="absolute inset-y-0 left-0 w-[3px] bg-flame/80" />
+              )}
+
               {/* Header row */}
               <button
                 type="button"
@@ -136,32 +150,41 @@ export function EffectAccordion() {
                   selectEffect(fx.id);
                   setExpanded(isOpen ? null : fx.id);
                 }}
-                className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left focus-visible:outline-none"
+                className="flex w-full items-center gap-2 py-[7px] pl-2.5 pr-2 text-left focus-visible:outline-none"
               >
                 <ChevronDown
                   className={cn(
-                    "size-4 shrink-0 text-linen/40 transition-transform",
+                    "size-3.5 shrink-0 text-linen/35 transition-transform",
                     isOpen && "rotate-180",
                   )}
                 />
                 <span
                   className={cn(
-                    "grid size-7 shrink-0 place-items-center rounded-lg border",
-                    selected
+                    "grid size-[26px] shrink-0 place-items-center rounded-lg border transition-colors",
+                    fx.enabled
                       ? "border-flame/40 bg-flame/15 text-flame"
-                      : "border-white/[0.07] bg-black/20 text-linen/55",
-                    !fx.enabled && "opacity-40",
+                      : "border-white/[0.07] bg-black/20 text-linen/45",
                   )}
                 >
-                  <Icon className="size-4" strokeWidth={1.85} />
+                  <Icon className="size-[15px]" strokeWidth={1.85} />
                 </span>
-                <span
-                  className={cn(
-                    "flex-1 truncate text-sm font-medium",
-                    fx.enabled ? "text-linen" : "text-linen/45",
-                  )}
-                >
-                  {fx.name}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span
+                    className={cn(
+                      "truncate text-[13px] font-medium leading-tight",
+                      fx.enabled ? "text-linen" : "text-linen/45",
+                    )}
+                  >
+                    {fx.name}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[9px] leading-tight",
+                      fx.enabled ? "text-flame/70" : "text-linen/30",
+                    )}
+                  >
+                    {fx.enabled ? "Active" : "Off"}
+                  </span>
                 </span>
                 <Switch
                   on={fx.enabled}
