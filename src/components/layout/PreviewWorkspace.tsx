@@ -5,6 +5,7 @@ import { PreviewPlaceholder } from "../preview/PreviewPlaceholder";
 import { PreviewCanvas } from "../preview/PreviewCanvas";
 import { ShaderCanvas } from "../preview/ShaderCanvas";
 import { PreviewZoomControls } from "../preview/PreviewZoomControls";
+import { PreviewErrorBoundary } from "../preview/PreviewErrorBoundary";
 import { MediaVideoControls } from "../media/MediaVideoControls";
 
 const MIN_ZOOM = 0.25;
@@ -161,16 +162,18 @@ export function PreviewWorkspace() {
                 transformOrigin: "top left",
               }}
             >
-              {mode === "shader" ? (
-                <ShaderCanvas />
-              ) : activeSource ? (
-                <PreviewCanvas
-                  key={mediaImage ? "image" : "video"}
-                  source={activeSource}
-                />
-              ) : (
-                <PreviewPlaceholder />
-              )}
+              <PreviewErrorBoundary>
+                {mode === "shader" ? (
+                  <ShaderCanvas />
+                ) : activeSource ? (
+                  <PreviewCanvas
+                    key={mediaImage ? "image" : "video"}
+                    source={activeSource}
+                  />
+                ) : (
+                  <PreviewPlaceholder />
+                )}
+              </PreviewErrorBoundary>
             </div>
           </div>
         </div>
