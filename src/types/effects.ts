@@ -1,0 +1,200 @@
+/* ------------------------------------------------------------------ */
+/*  Efektly Effect Stack — category model.                             */
+/*  UI/state architecture only: these describe the five effect         */
+/*  categories and their settings. No canvas processing is wired to    */
+/*  them yet — that is reconnected in a later step.                    */
+/* ------------------------------------------------------------------ */
+
+export type EffectType =
+  | "dither"
+  | "ascii"
+  | "glitch"
+  | "lineArt"
+  | "grain"
+  | "reflectionGrid"
+  | "verticalEcho";
+
+/** Drives the small status chip shown on each stack item. */
+export type EffectStatus = "ui-ready" | "controls-ready" | "coming-next";
+
+/** Shared tint mode used by several effects. */
+export type ColorMode = "mono" | "original" | "brand";
+
+/* ----- Dither ----- */
+
+export type DitherPreset =
+  | "floyd-steinberg"
+  | "ordered"
+  | "bayer"
+  | "atkinson";
+
+export interface DitherSettings {
+  preset: DitherPreset;
+  pointSize: number;
+  threshold: number;
+  contrast: number;
+  palette: string[];
+  invert: boolean;
+  bloom: boolean;
+}
+
+/* ----- ASCII ----- */
+
+export type AsciiPreset = "standard" | "dense" | "minimal" | "blocks";
+export type AsciiCharSet = "standard" | "dense" | "minimal" | "blocks";
+
+export interface AsciiSettings {
+  preset: AsciiPreset;
+  cellSize: number;
+  charSet: AsciiCharSet;
+  invert: boolean;
+  colorMode: ColorMode;
+  rotation: boolean;
+  fgColor: string;
+  bgColor: string;
+}
+
+/* ----- Glitch ----- */
+
+export type GlitchPreset = "vhs" | "digital" | "rgb-split" | "signal-break";
+
+export interface GlitchSettings {
+  preset: GlitchPreset;
+  rgbShift: number;
+  scanlines: number;
+  distortion: number;
+  noise: number;
+  glitches: number;
+  grain: number;
+  animation: boolean;
+}
+
+/* ----- Line Art ----- */
+
+export type LineArtPreset = "clean" | "sketch" | "ink" | "technical";
+
+export interface LineArtSettings {
+  preset: LineArtPreset;
+  threshold: number;
+  thickness: number;
+  softness: number;
+  fill: number;
+  lineWeight: number;
+  wave: number;
+  waveFrequency: number;
+  invert: boolean;
+  lineColor: string;
+  fillColor: string;
+  bgColor: string;
+}
+
+/* ----- Grain ----- */
+
+export type GrainBlend = "normal" | "overlay" | "soft-light" | "screen";
+
+export interface GrainSettings {
+  amount: number;
+  size: number;
+  speed: number;
+  monochrome: boolean;
+  blendMode: GrainBlend;
+}
+
+/* ----- Reflection Grid ----- */
+
+export type ReflectionGridPreset =
+  | "soft-mirror"
+  | "radial-tile"
+  | "tunnel-grid"
+  | "kaleido"
+  | "dark-glow";
+
+export interface ReflectionGridSettings {
+  preset: ReflectionGridPreset;
+  cellSize: number; // 0–100, sample region size
+  repeatCount: number; // grid cells per axis
+  mirrorAmount: number; // 0–100, mirror blend
+  rotation: number; // degrees
+  scale: number; // 0.25–4 sample zoom
+  softness: number; // 0–100 blur
+  glow: number; // 0–100 bloom
+  contrast: number; // -100–100
+  colorShift: number; // 0–360 hue rotate
+  noise: number; // 0–100
+  centerX: number; // 0–1 sample center
+  centerY: number; // 0–1
+  invert: boolean;
+  colorMode: ColorMode;
+}
+
+/* ----- Vertical Echo ----- */
+
+export type VerticalEchoPreset =
+  | "clean-echo"
+  | "long-streak"
+  | "ghost-fade"
+  | "high-contrast"
+  | "soft-scan";
+
+export type EchoDirection = "up" | "down" | "both";
+
+export interface VerticalEchoSettings {
+  preset: VerticalEchoPreset;
+  direction: EchoDirection;
+  echoLength: number; // 0–100, trail distance
+  repeatCount: number; // ghost layers
+  opacityFade: number; // 0–100, fade per layer
+  stretchAmount: number; // 0–100, vertical stretch
+  blur: number; // 0–100
+  threshold: number; // 0–100, luminance keying
+  contrast: number; // -100–100
+  noise: number; // 0–100
+  offsetJitter: number; // 0–100, horizontal jitter
+  backgroundFade: number; // 0–100, background wash
+  invert: boolean;
+  colorMode: ColorMode;
+  fgColor: string;
+  bgColor: string;
+  accentColor: string;
+}
+
+/* ----- Instance model ----- */
+
+export interface EffectSettingsMap {
+  dither: DitherSettings;
+  ascii: AsciiSettings;
+  glitch: GlitchSettings;
+  lineArt: LineArtSettings;
+  grain: GrainSettings;
+  reflectionGrid: ReflectionGridSettings;
+  verticalEcho: VerticalEchoSettings;
+}
+
+/** A patch carries a partial of exactly one effect's settings. */
+export type EffectSettingsPatch =
+  | Partial<DitherSettings>
+  | Partial<AsciiSettings>
+  | Partial<GlitchSettings>
+  | Partial<LineArtSettings>
+  | Partial<GrainSettings>
+  | Partial<ReflectionGridSettings>
+  | Partial<VerticalEchoSettings>;
+
+interface EffectBase<T extends EffectType> {
+  id: string;
+  type: T;
+  name: string;
+  enabled: boolean;
+  status: EffectStatus;
+  settings: EffectSettingsMap[T];
+}
+
+/** Discriminated union so `settings` narrows by `type`. */
+export type EffectInstance =
+  | EffectBase<"dither">
+  | EffectBase<"ascii">
+  | EffectBase<"glitch">
+  | EffectBase<"lineArt">
+  | EffectBase<"grain">
+  | EffectBase<"reflectionGrid">
+  | EffectBase<"verticalEcho">;

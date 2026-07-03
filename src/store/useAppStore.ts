@@ -1,0 +1,395 @@
+import { create } from "zustand";
+import { DEFAULT_PALETTE, SAMPLE_SOURCE } from "../data/mockData";
+import { createInitialEffects } from "../data/effects";
+import {
+  createInitialShaderSettings,
+  DEFAULT_PRESET,
+  DEFAULT_SHADER_ANIMATION,
+  SHADER_PRESETS,
+} from "../data/shaders";
+import type { EffectInstance, EffectSettingsPatch } from "../types/effects";
+import type {
+  ShaderAnimation,
+  ShaderSettingsMap,
+  ShaderSettingsPatch,
+  ShaderTypeId,
+} from "../types/shaders";
+import type {
+  AnimationDirection,
+  AppMode,
+  MediaType,
+  ExportFormat,
+  ExportFraming,
+  Fps,
+  InputSource,
+  Orientation,
+  PreviewQuality,
+  ResolutionId,
+  SourceMedia,
+  ThemePreference,
+} from "../types/app";
+
+/* ------------------------------------------------------------------ */
+/*  Single source of truth for UI state.                               */
+/*  This step only manages presentation state — no media processing.   */
+/* ------------------------------------------------------------------ */
+
+interface AppState {
+  /* navigation */
+  mode: AppMode;
+  setMode: (mode: AppMode) => void;
+
+  /* media panel */
+  inputSource: InputSource;
+  setInputSource: (source: InputSource) => void;
+  source: SourceMedia;
+  /* uploaded media — local-first, never leaves the browser */
+  mediaType: MediaType | null;
+  mediaImage: HTMLImageElement | null;
+  mediaVideo: HTMLVideoElement | null;
+  mediaUrl: string | null;
+  setImageMedia: (payload: {
+    image: HTMLImageElement;
+    url: string;
+    meta: SourceMedia;
+  }) => void;
+  setVideoMedia: (payload: {
+    video: HTMLVideoElement;
+    url: string;
+    meta: SourceMedia;
+  }) => void;
+  clearMedia: () => void;
+  /* video playback (mirrors the <video> element for the UI) */
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  loop: boolean;
+  muted: boolean;
+  togglePlay: () => void;
+  setLoop: (loop: boolean) => void;
+  toggleMute: () => void;
+  seek: (time: number) => void;
+  /* effect stack */
+  effects: EffectInstance[];
+  selectedEffectId: string;
+  selectEffect: (id: string) => void;
+  toggleEffect: (id: string) => void;
+  updateEffectSettings: (id: string, patch: EffectSettingsPatch) => void;
+  speed: number; // 0.25x – 3x
+  setSpeed: (speed: number) => void;
+  direction: AnimationDirection;
+  setDirection: (direction: AnimationDirection) => void;
+  palette: string[];
+  addPaletteColor: () => void;
+  activeSwatch: number;
+  setActiveSwatch: (index: number) => void;
+
+  /* shader mode — procedural visuals, separate from media/effects */
+  shaderType: ShaderTypeId;
+  setShaderType: (type: ShaderTypeId) => void;
+  shaderSettings: ShaderSettingsMap;
+  updateShaderSettings: (type: ShaderTypeId, patch: ShaderSettingsPatch) => void;
+  shaderPresetByType: Record<ShaderTypeId, string>;
+  applyShaderPreset: (type: ShaderTypeId, presetName: string) => void;
+  shaderAnimation: ShaderAnimation;
+  setShaderAnimation: (patch: Partial<ShaderAnimation>) => void;
+
+  /* export panel */
+  format: ExportFormat;
+  setFormat: (format: ExportFormat) => void;
+  orientation: Orientation;
+  setOrientation: (orientation: Orientation) => void;
+  resolution: ResolutionId;
+  setResolution: (resolution: ResolutionId) => void;
+  fps: Fps;
+  setFps: (fps: Fps) => void;
+  quality: number; // 0 – 100
+  setQuality: (quality: number) => void;
+  /** Video export / recording resolution — separate from image `resolution`. */
+  videoResolution: ResolutionId;
+  setVideoResolution: (resolution: ResolutionId) => void;
+  /** Export framing (fit = letterbox, crop = center-fill). */
+  imageFraming: ExportFraming;
+  setImageFraming: (framing: ExportFraming) => void;
+  videoFraming: ExportFraming;
+  setVideoFraming: (framing: ExportFraming) => void;
+
+  /* preview zoom — inspection only, never affects export */
+  previewZoom: number; // 0.25 – 4
+  setPreviewZoom: (zoom: number) => void;
+
+  /* capture — latest still frame from the preview canvas */
+  capturedFrame: HTMLCanvasElement | null;
+  capturedThumb: string | null; // data URL for the thumbnail
+  capturedAt: number | null; // epoch ms
+  setCapture: (frame: HTMLCanvasElement, thumb: string) => void;
+  clearCapture: () => void;
+
+  /* recording — WebM clip of the preview canvas */
+  isRecording: boolean;
+  recordElapsedMs: number;
+  recordedUrl: string | null;
+  recordedSize: number | null;
+  recordedDurationMs: number | null;
+  setRecording: (v: boolean) => void;
+  setRecordElapsed: (ms: number) => void;
+  setRecordedClip: (payload: { blob: Blob; durationMs: number }) => void;
+  clearRecording: () => void;
+
+  /* settings panel */
+  theme: ThemePreference;
+  setTheme: (theme: ThemePreference) => void;
+  gridVisible: boolean;
+  setGridVisible: (visible: boolean) => void;
+  previewQuality: PreviewQuality;
+  setPreviewQuality: (quality: PreviewQuality) => void;
+  rememberExport: boolean;
+  setRememberExport: (value: boolean) => void;
+  hardwareAccel: boolean;
+  setHardwareAccel: (value: boolean) => void;
+}
+
+const EXTRA_SWATCHES = ["#D8B08C", "#A8C0B0", "#B45A3C", "#8A8170"];
+
+const initialEffects = createInitialEffects();
+
+/** Pause + detach a video element so it can be garbage-collected. */
+function teardownVideo(video: HTMLVideoElement | null) {
+  if (!video) return;
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+}
+
+export const useAppStore = create<AppState>((set, get) => ({
+  /* navigation */
+  mode: "media",
+  setMode: (mode) => set({ mode }),
+
+  /* media */
+  inputSource: "media",
+  setInputSource: (inputSource) => set({ inputSource }),
+  source: SAMPLE_SOURCE,
+  mediaType: null,
+  mediaImage: null,
+  mediaVideo: null,
+  mediaUrl: null,
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  loop: true,
+  muted: true,
+
+  setImageMedia: ({ image, url, meta }) => {
+    const { mediaUrl, mediaVideo } = get();
+    if (mediaUrl) URL.revokeObjectURL(mediaUrl);
+    teardownVideo(mediaVideo);
+    set({
+      mediaType: "image",
+      mediaImage: image,
+      mediaVideo: null,
+      mediaUrl: url,
+      source: meta,
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+    });
+  },
+
+  setVideoMedia: ({ video, url, meta }) => {
+    const { mediaUrl, mediaVideo, loop, muted } = get();
+    if (mediaUrl) URL.revokeObjectURL(mediaUrl);
+    teardownVideo(mediaVideo);
+
+    video.loop = loop;
+    video.muted = muted;
+    // Mirror the element's state into the store for the UI.
+    video.addEventListener("timeupdate", () =>
+      set({ currentTime: video.currentTime }),
+    );
+    video.addEventListener("durationchange", () =>
+      set({ duration: isFinite(video.duration) ? video.duration : 0 }),
+    );
+    video.addEventListener("play", () => set({ isPlaying: true }));
+    video.addEventListener("pause", () => set({ isPlaying: false }));
+    video.addEventListener("ended", () => set({ isPlaying: false }));
+
+    set({
+      mediaType: "video",
+      mediaImage: null,
+      mediaVideo: video,
+      mediaUrl: url,
+      source: meta,
+      isPlaying: false,
+      currentTime: 0,
+      duration: isFinite(video.duration) ? video.duration : 0,
+    });
+  },
+
+  clearMedia: () => {
+    const { mediaUrl, mediaVideo } = get();
+    if (mediaUrl) URL.revokeObjectURL(mediaUrl);
+    teardownVideo(mediaVideo);
+    set({
+      mediaType: null,
+      mediaImage: null,
+      mediaVideo: null,
+      mediaUrl: null,
+      source: SAMPLE_SOURCE,
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+    });
+  },
+
+  togglePlay: () => {
+    const v = get().mediaVideo;
+    if (!v) return;
+    if (v.paused || v.ended) void v.play();
+    else v.pause();
+  },
+  setLoop: (loop) => {
+    const v = get().mediaVideo;
+    if (v) v.loop = loop;
+    set({ loop });
+  },
+  toggleMute: () => {
+    const muted = !get().muted;
+    const v = get().mediaVideo;
+    if (v) v.muted = muted;
+    set({ muted });
+  },
+  seek: (time) => {
+    const v = get().mediaVideo;
+    if (v) v.currentTime = time;
+    set({ currentTime: time });
+  },
+  effects: initialEffects,
+  selectedEffectId: initialEffects[0].id,
+  selectEffect: (selectedEffectId) => set({ selectedEffectId }),
+  toggleEffect: (id) =>
+    set((state) => ({
+      effects: state.effects.map((fx) =>
+        fx.id === id ? { ...fx, enabled: !fx.enabled } : fx,
+      ),
+    })),
+  updateEffectSettings: (id, patch) =>
+    set((state) => ({
+      effects: state.effects.map((fx) =>
+        fx.id === id
+          ? ({
+              ...fx,
+              settings: { ...fx.settings, ...(patch as object) },
+            } as EffectInstance)
+          : fx,
+      ),
+    })),
+  speed: 1.25,
+  setSpeed: (speed) => set({ speed }),
+  direction: "loop",
+  setDirection: (direction) => set({ direction }),
+  palette: DEFAULT_PALETTE,
+  activeSwatch: 1,
+  setActiveSwatch: (activeSwatch) => set({ activeSwatch }),
+  addPaletteColor: () =>
+    set((state) => {
+      const next = EXTRA_SWATCHES[state.palette.length % EXTRA_SWATCHES.length];
+      return { palette: [...state.palette, next] };
+    }),
+
+  /* shader mode */
+  shaderType: "dotGrid",
+  setShaderType: (shaderType) => set({ shaderType }),
+  shaderSettings: createInitialShaderSettings(),
+  updateShaderSettings: (type, patch) =>
+    set((state) => ({
+      shaderSettings: {
+        ...state.shaderSettings,
+        [type]: { ...state.shaderSettings[type], ...patch },
+      },
+    })),
+  shaderPresetByType: { ...DEFAULT_PRESET },
+  applyShaderPreset: (type, presetName) =>
+    set((state) => {
+      const preset = SHADER_PRESETS[type].find((p) => p.name === presetName);
+      if (!preset) return {};
+      return {
+        shaderPresetByType: { ...state.shaderPresetByType, [type]: presetName },
+        shaderSettings: {
+          ...state.shaderSettings,
+          [type]: { ...state.shaderSettings[type], ...preset.settings },
+        },
+      };
+    }),
+  shaderAnimation: { ...DEFAULT_SHADER_ANIMATION },
+  setShaderAnimation: (patch) =>
+    set((state) => ({ shaderAnimation: { ...state.shaderAnimation, ...patch } })),
+
+  /* export */
+  format: "png",
+  setFormat: (format) => set({ format }),
+  orientation: "horizontal",
+  setOrientation: (orientation) => set({ orientation }),
+  resolution: "original",
+  setResolution: (resolution) => set({ resolution }),
+  fps: 30,
+  setFps: (fps) => set({ fps }),
+  quality: 90,
+  setQuality: (quality) => set({ quality }),
+  videoResolution: "original",
+  setVideoResolution: (videoResolution) => set({ videoResolution }),
+  imageFraming: "fit",
+  setImageFraming: (imageFraming) => set({ imageFraming }),
+  videoFraming: "fit",
+  setVideoFraming: (videoFraming) => set({ videoFraming }),
+
+  /* preview zoom */
+  previewZoom: 1,
+  setPreviewZoom: (zoom) =>
+    set({ previewZoom: Math.min(4, Math.max(0.25, zoom)) }),
+
+  /* capture (latest still frame) */
+  capturedFrame: null,
+  capturedThumb: null,
+  capturedAt: null,
+  setCapture: (frame, thumb) =>
+    set({ capturedFrame: frame, capturedThumb: thumb, capturedAt: Date.now() }),
+  clearCapture: () =>
+    set({ capturedFrame: null, capturedThumb: null, capturedAt: null }),
+
+  /* recording (WebM clip) */
+  isRecording: false,
+  recordElapsedMs: 0,
+  recordedUrl: null,
+  recordedSize: null,
+  recordedDurationMs: null,
+  setRecording: (isRecording) =>
+    set({ isRecording, recordElapsedMs: isRecording ? 0 : get().recordElapsedMs }),
+  setRecordElapsed: (recordElapsedMs) => set({ recordElapsedMs }),
+  setRecordedClip: ({ blob, durationMs }) => {
+    const prev = get().recordedUrl;
+    if (prev) URL.revokeObjectURL(prev);
+    set({
+      recordedUrl: URL.createObjectURL(blob),
+      recordedSize: blob.size,
+      recordedDurationMs: durationMs,
+    });
+  },
+  clearRecording: () => {
+    const prev = get().recordedUrl;
+    if (prev) URL.revokeObjectURL(prev);
+    set({ recordedUrl: null, recordedSize: null, recordedDurationMs: null });
+  },
+
+  /* settings */
+  theme: "onyx",
+  setTheme: (theme) => set({ theme }),
+  gridVisible: true,
+  setGridVisible: (gridVisible) => set({ gridVisible }),
+  previewQuality: "balanced",
+  setPreviewQuality: (previewQuality) => set({ previewQuality }),
+  rememberExport: true,
+  setRememberExport: (rememberExport) => set({ rememberExport }),
+  hardwareAccel: true,
+  setHardwareAccel: (hardwareAccel) => set({ hardwareAccel }),
+}));
