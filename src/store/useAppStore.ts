@@ -24,6 +24,7 @@ import type {
   InputSource,
   Orientation,
   PreviewQuality,
+  RailSection,
   ResolutionId,
   SourceMedia,
   ThemePreference,
@@ -38,6 +39,9 @@ interface AppState {
   /* navigation */
   mode: AppMode;
   setMode: (mode: AppMode) => void;
+  /** Playground-shell rail selection (additive; classic shell ignores it). */
+  railSection: RailSection;
+  setRailSection: (section: RailSection) => void;
 
   /* media panel */
   inputSource: InputSource;
@@ -165,6 +169,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   /* navigation */
   mode: "media",
   setMode: (mode) => set({ mode }),
+  railSection: "effects",
+  setRailSection: (railSection) => set({ railSection }),
 
   /* media */
   inputSource: "media",

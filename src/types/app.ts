@@ -5,6 +5,21 @@
 /** Which left-panel view is showing. Driven by the side nav + Export CTA. */
 export type AppMode = "media" | "shader" | "export" | "settings";
 
+/**
+ * Playground-layout rail section (Phase 3+). Selects the left panel content
+ * in the new shell; the classic shell ignores it. "animate" | "text" |
+ * "shapes" | "audio" | "presets" are future stubs.
+ */
+export type RailSection =
+  | "source"
+  | "effects"
+  | "animate"
+  | "text"
+  | "shapes"
+  | "audio"
+  | "presets"
+  | "settings";
+
 /** The input the canvas is built from. */
 export type InputSource = "media" | "shader";
 
