@@ -7,6 +7,7 @@ import { PlaygroundPanel } from "./PlaygroundPanel";
 import { PlaygroundTimeline } from "./PlaygroundTimeline";
 import { PlaygroundExportProject } from "./PlaygroundExportProject";
 import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
+import { useTimeline } from "./useTimeline";
 
 /* ------------------------------------------------------------------ */
 /*  Motion-design playground layout (behind ?layout=playground).       */
@@ -17,6 +18,7 @@ import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 export function PlaygroundShell() {
   const rightOpen = useAppStore((s) => s.exportPanelOpen);
   const setRightOpen = useAppStore((s) => s.setExportPanelOpen);
+  useTimeline();
 
   return (
     <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-onyx text-linen">

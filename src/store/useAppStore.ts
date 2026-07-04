@@ -48,6 +48,15 @@ interface AppState {
   /** Editable project name (persisted to localStorage). */
   projectName: string;
   setProjectName: (name: string) => void;
+  /* timeline (playground only) — general project clock */
+  tlTime: number;
+  tlDuration: number;
+  tlPlaying: boolean;
+  tlLoop: boolean;
+  setTlTime: (t: number) => void; // scrub — also seeks video
+  setTlPlaying: (p: boolean) => void; // play/pause — also drives video
+  setTlLoop: (v: boolean) => void;
+  setTlDuration: (d: number) => void;
 
   /* media panel */
   inputSource: InputSource;
@@ -190,6 +199,32 @@ export const useAppStore = create<AppState>((set, get) => ({
       /* ignore storage failures */
     }
     set({ projectName });
+  },
+
+  /* timeline */
+  tlTime: 0,
+  tlDuration: 10,
+  tlPlaying: false,
+  tlLoop: true,
+  setTlDuration: (tlDuration) => set({ tlDuration }),
+  setTlLoop: (tlLoop) => set({ tlLoop }),
+  setTlTime: (t) => {
+    const { tlDuration, mediaVideo } = get();
+    const clamped = Math.max(0, Math.min(t, tlDuration));
+    if (mediaVideo) {
+      mediaVideo.currentTime = isFinite(mediaVideo.duration)
+        ? Math.min(clamped, mediaVideo.duration)
+        : clamped;
+    }
+    set({ tlTime: clamped });
+  },
+  setTlPlaying: (p) => {
+    const v = get().mediaVideo;
+    if (v) {
+      if (p) void v.play().catch(() => {});
+      else v.pause();
+    }
+    set({ tlPlaying: p });
   },
 
   /* media */
