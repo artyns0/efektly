@@ -143,55 +143,58 @@ export function EffectAccordion() {
                 <span className="absolute inset-y-0 left-0 w-[3px] bg-flame/80" />
               )}
 
-              {/* Header row */}
-              <button
-                type="button"
-                onClick={() => {
-                  selectEffect(fx.id);
-                  setExpanded(isOpen ? null : fx.id);
-                }}
-                className="flex w-full items-center gap-2 py-[7px] pl-2.5 pr-2 text-left focus-visible:outline-none"
-              >
-                <ChevronDown
-                  className={cn(
-                    "size-3.5 shrink-0 text-linen/35 transition-transform",
-                    isOpen && "rotate-180",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "grid size-[26px] shrink-0 place-items-center rounded-lg border transition-colors",
-                    fx.enabled
-                      ? "border-flame/40 bg-flame/15 text-flame"
-                      : "border-white/[0.07] bg-black/20 text-linen/45",
-                  )}
+              {/* Header row — expand button + enable switch as siblings */}
+              <div className="flex items-center gap-2 py-[7px] pl-2.5 pr-2">
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  onClick={() => {
+                    selectEffect(fx.id);
+                    setExpanded(isOpen ? null : fx.id);
+                  }}
+                  className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none"
                 >
-                  <Icon className="size-[15px]" strokeWidth={1.85} />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
+                  <ChevronDown
+                    className={cn(
+                      "size-3.5 shrink-0 text-linen/35 transition-transform",
+                      isOpen && "rotate-180",
+                    )}
+                  />
                   <span
                     className={cn(
-                      "truncate text-[13px] font-medium leading-tight",
-                      fx.enabled ? "text-linen" : "text-linen/45",
+                      "grid size-[26px] shrink-0 place-items-center rounded-lg border transition-colors",
+                      fx.enabled
+                        ? "border-flame/40 bg-flame/15 text-flame"
+                        : "border-white/[0.07] bg-black/20 text-linen/45",
                     )}
                   >
-                    {fx.name}
+                    <Icon className="size-[15px]" strokeWidth={1.85} />
                   </span>
-                  <span
-                    className={cn(
-                      "text-[9px] leading-tight",
-                      fx.enabled ? "text-flame/70" : "text-linen/30",
-                    )}
-                  >
-                    {fx.enabled ? "Active" : "Off"}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span
+                      className={cn(
+                        "truncate text-[13px] font-medium leading-tight",
+                        fx.enabled ? "text-linen" : "text-linen/45",
+                      )}
+                    >
+                      {fx.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[9px] leading-tight",
+                        fx.enabled ? "text-flame/70" : "text-linen/30",
+                      )}
+                    >
+                      {fx.enabled ? "Active" : "Off"}
+                    </span>
                   </span>
-                </span>
+                </button>
                 <Switch
                   on={fx.enabled}
                   onClick={() => toggleEffect(fx.id)}
                   label={fx.enabled ? `Disable ${fx.name}` : `Enable ${fx.name}`}
                 />
-              </button>
+              </div>
 
               {/* Expanded controls */}
               {isOpen && (

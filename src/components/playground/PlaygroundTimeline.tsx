@@ -80,19 +80,19 @@ export function PlaygroundTimeline() {
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-linen/[0.02]">
       {/* Toolbar */}
       <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.06] px-3 py-2">
-        <span className="text-[13px] font-medium text-linen">Timeline</span>
-        <span className="rounded bg-flame/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-flame/70">
-          Preview
+        <span className="text-[13px] font-medium text-linen">Timeline Preview</span>
+        <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-linen/45">
+          Coming next
         </span>
-        <span className="ml-2 font-mono text-[11px] tabular-nums text-linen/40">
-          00:02.2 / 00:10.0
+        <span className="ml-2 min-w-0 flex-1 truncate text-[11px] text-linen/30">
+          Keyframes and parameter animation arrive in the next phase.
         </span>
         <div className="ml-auto flex items-center gap-1.5">
           <ToolbarButton icon={<Plus className="size-3.5" />}>Add Keyframe</ToolbarButton>
           <ToolbarButton icon={<ChevronDown className="size-3.5" />}>
             Preset Animations
           </ToolbarButton>
-          <ToolbarButton active icon={<Repeat className="size-3.5" />}>Loop</ToolbarButton>
+          <ToolbarButton icon={<Repeat className="size-3.5" />}>Loop</ToolbarButton>
           <ToolbarButton>Range</ToolbarButton>
         </div>
       </div>

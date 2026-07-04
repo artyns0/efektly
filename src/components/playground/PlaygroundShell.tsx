@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { PanelRightClose, Upload } from "lucide-react";
+import { useAppStore } from "../../store/useAppStore";
 import { PreviewWorkspace } from "../layout/PreviewWorkspace";
 import { PlaygroundToolbar } from "./PlaygroundToolbar";
 import { PlaygroundRail } from "./PlaygroundRail";
@@ -15,7 +15,8 @@ import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 /* ------------------------------------------------------------------ */
 
 export function PlaygroundShell() {
-  const [rightOpen, setRightOpen] = useState(true);
+  const rightOpen = useAppStore((s) => s.exportPanelOpen);
+  const setRightOpen = useAppStore((s) => s.setExportPanelOpen);
 
   return (
     <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-onyx text-linen">

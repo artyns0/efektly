@@ -42,6 +42,12 @@ interface AppState {
   /** Playground-shell rail selection (additive; classic shell ignores it). */
   railSection: RailSection;
   setRailSection: (section: RailSection) => void;
+  /** Playground right (Export) panel open/collapsed. */
+  exportPanelOpen: boolean;
+  setExportPanelOpen: (open: boolean) => void;
+  /** Editable project name (persisted to localStorage). */
+  projectName: string;
+  setProjectName: (name: string) => void;
 
   /* media panel */
   inputSource: InputSource;
@@ -171,6 +177,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMode: (mode) => set({ mode }),
   railSection: "effects",
   setRailSection: (railSection) => set({ railSection }),
+  exportPanelOpen: true,
+  setExportPanelOpen: (exportPanelOpen) => set({ exportPanelOpen }),
+  projectName:
+    (typeof localStorage !== "undefined" &&
+      localStorage.getItem("efektly.projectName")) ||
+    "Efektly Project 01",
+  setProjectName: (projectName) => {
+    try {
+      localStorage.setItem("efektly.projectName", projectName);
+    } catch {
+      /* ignore storage failures */
+    }
+    set({ projectName });
+  },
 
   /* media */
   inputSource: "media",

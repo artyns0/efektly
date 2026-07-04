@@ -47,7 +47,17 @@ export interface CaptureRecordApi {
   handleRecord: () => void;
 }
 
-export function useCaptureRecord(): CaptureRecordApi {
+export interface CaptureRecordOptions {
+  /**
+   * Called after a capture is stored or a recording completes, to surface the
+   * export result. Defaults to switching to Export mode (classic shell); the
+   * playground passes its own (open the always-visible export panel) so the
+   * source mode (media/shader) is never disturbed.
+   */
+  onResult?: () => void;
+}
+
+export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordApi {
   const setMode = useAppStore((s) => s.setMode);
   const setCapture = useAppStore((s) => s.setCapture);
   const isRecording = useAppStore((s) => s.isRecording);
@@ -62,6 +72,8 @@ export function useCaptureRecord(): CaptureRecordApi {
   const isShader = mode === "shader";
   const canCapture = mediaImage !== null || mediaVideo !== null || isShader;
 
+  const reveal = options?.onResult ?? (() => setMode("export"));
+
   const handleCapture = () => {
     const { mediaImage: img, mediaVideo: vid, effects, mode: m } =
       useAppStore.getState();
@@ -75,7 +87,7 @@ export function useCaptureRecord(): CaptureRecordApi {
     }
     if (!frame) return;
     setCapture(frame, makeThumb(frame));
-    setMode("export");
+    reveal();
   };
 
   const handleRecord = () => {
@@ -100,7 +112,7 @@ export function useCaptureRecord(): CaptureRecordApi {
           const s = useAppStore.getState();
           s.setRecording(false);
           s.setRecordedClip({ blob, durationMs });
-          s.setMode("export");
+          reveal();
         },
         onError: () => {
           recorderRef.current = null;
@@ -145,7 +157,7 @@ export function useCaptureRecord(): CaptureRecordApi {
         const s = useAppStore.getState();
         s.setRecording(false);
         s.setRecordedClip({ blob, durationMs });
-        s.setMode("export");
+        reveal();
       },
       onError: () => {
         stopLoop();

@@ -300,7 +300,7 @@ export function ExportPanel() {
                   className="h-10"
                   onClick={clearRecording}
                 >
-                  Clear
+                  Clear Recording
                 </Button>
               </div>
             </div>

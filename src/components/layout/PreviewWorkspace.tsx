@@ -20,6 +20,18 @@ export function PreviewWorkspace() {
 
   const zoomApi = usePreviewZoom();
 
+  const toggleFullscreen = () => {
+    const el = zoomApi.stageRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {
+        /* fullscreen unsupported / blocked — ignore */
+      });
+    }
+  };
+
   return (
     <main className="relative flex min-w-0 flex-1 flex-col p-5">
       {/* Header */}
@@ -46,6 +58,7 @@ export function PreviewWorkspace() {
           />
           <button
             aria-label="Fullscreen preview"
+            onClick={toggleFullscreen}
             className="grid size-9 place-items-center rounded-lg text-linen/45 transition-colors hover:bg-linen/[0.06] hover:text-linen"
           >
             <Maximize2 className="size-4" strokeWidth={1.8} />

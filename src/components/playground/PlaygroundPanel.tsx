@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { Bookmark, Film, Plus } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { MediaSource } from "../media/MediaSource";
 import { SettingsPanel } from "../panels/SettingsPanel";
 import { EffectAccordion } from "./EffectAccordion";
+import { ShaderControls } from "./ShaderControls";
 
 function PanelHeader({ title }: { title: string }) {
   return (
@@ -14,23 +15,7 @@ function PanelHeader({ title }: { title: string }) {
   );
 }
 
-/** Disabled stub control row for shell-only sections. */
-function StubRow({ label, value }: { label: string; value?: ReactNode }) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-linen/[0.02] px-3 py-2.5 text-sm">
-      <span className="text-linen/60">{label}</span>
-      <span className="font-mono text-xs text-linen/40">{value ?? "—"}</span>
-    </div>
-  );
-}
-
-function StubButton({
-  children,
-  icon,
-}: {
-  children: ReactNode;
-  icon?: ReactNode;
-}) {
+function StubButton({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
   return (
     <button
       type="button"
@@ -46,45 +31,31 @@ function StubButton({
   );
 }
 
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="grid flex-1 place-items-center rounded-2xl border border-dashed border-white/[0.08] bg-linen/[0.015] p-6 text-center">
-      <div className="flex flex-col items-center gap-1.5">
-        <span className="text-sm font-medium text-linen/70">{title}</span>
-        <span className="text-xs text-linen/35">Coming soon</span>
-      </div>
-    </div>
-  );
-}
-
 export function PlaygroundPanel() {
+  const mode = useAppStore((s) => s.mode);
   const railSection = useAppStore((s) => s.railSection);
 
+  // Settings is global — available in Media and Shader modes.
+  if (railSection === "settings") {
+    return (
+      <div className="flex flex-col gap-3">
+        <PanelHeader title="Settings" />
+        <SettingsPanel />
+      </div>
+    );
+  }
+
+  // In Shader mode the panel shows procedural shader controls.
+  if (mode === "shader") {
+    return <ShaderControls />;
+  }
+
+  // Media mode — rail selects the section.
   if (railSection === "source") {
     return (
       <div className="flex flex-col gap-3">
         <PanelHeader title="Source" />
         <MediaSource />
-      </div>
-    );
-  }
-
-  if (railSection === "effects") {
-    return <EffectAccordion />;
-  }
-
-  if (railSection === "animate") {
-    return (
-      <div className="flex flex-col gap-3">
-        <PanelHeader title="Animate" />
-        <p className="px-1 text-xs text-linen/35">
-          Keyframe timeline arrives in a later step.
-        </p>
-        <StubRow label="Duration" value="00:10:00" />
-        <StubRow label="FPS" value="60 fps" />
-        <StubRow label="Loop" value="On" />
-        <StubButton icon={<Plus className="size-4" />}>Add Keyframe</StubButton>
-        <StubButton icon={<Film className="size-4" />}>Preset Animations</StubButton>
       </div>
     );
   }
@@ -114,20 +85,6 @@ export function PlaygroundPanel() {
     );
   }
 
-  if (railSection === "settings") {
-    return (
-      <div className="flex flex-col gap-3">
-        <PanelHeader title="Settings" />
-        <SettingsPanel />
-      </div>
-    );
-  }
-
-  // text / shapes / audio (rail-disabled, but handle gracefully)
-  const titles: Record<string, string> = {
-    text: "Text",
-    shapes: "Shapes",
-    audio: "Audio",
-  };
-  return <ComingSoon title={titles[railSection] ?? "Section"} />;
+  // Default: Effects.
+  return <EffectAccordion />;
 }

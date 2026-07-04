@@ -23,12 +23,12 @@ const ASPECTS: { value: Orientation; label: string }[] = [
 ];
 
 export function PlaygroundToolbar() {
-  const setMode = useAppStore((s) => s.setMode);
   const setRailSection = useAppStore((s) => s.setRailSection);
+  const setExportPanelOpen = useAppStore((s) => s.setExportPanelOpen);
   const orientation = useAppStore((s) => s.orientation);
   const setOrientation = useAppStore((s) => s.setOrientation);
   const { canCapture, isRecording, recordElapsedMs, handleCapture, handleRecord } =
-    useCaptureRecord();
+    useCaptureRecord({ onResult: () => setExportPanelOpen(true) });
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/[0.06] px-5">
@@ -115,7 +115,7 @@ export function PlaygroundToolbar() {
         <Button
           variant="primary"
           icon={<Upload className="size-4" />}
-          onClick={() => setMode("export")}
+          onClick={() => setExportPanelOpen(true)}
         >
           Export
         </Button>
