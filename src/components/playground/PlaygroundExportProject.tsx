@@ -1,5 +1,6 @@
 import { useAppStore } from "../../store/useAppStore";
 import { ExportPanel } from "../panels/ExportPanel";
+import { VideoRecordButton } from "./VideoRecordButton";
 
 /* ------------------------------------------------------------------ */
 /*  Right panel: the real Export panel + a compact Project card.       */
@@ -22,7 +23,7 @@ export function PlaygroundExportProject() {
 
   return (
     <div className="flex flex-col gap-4 pt-8">
-      <ExportPanel />
+      <ExportPanel videoRecordAction={<VideoRecordButton />} />
 
       {/* Project card — name editable; other fields display-only for now */}
       <div className="flex flex-col gap-2">

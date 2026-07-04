@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Download, ImageDown, Trash2 } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
@@ -117,7 +117,13 @@ function ResolutionGrid({
   );
 }
 
-export function ExportPanel() {
+export function ExportPanel({
+  videoRecordAction,
+}: {
+  /** Optional action rendered in the Video Export card when no clip exists
+   *  (playground provides a Record/Stop button; classic passes nothing). */
+  videoRecordAction?: ReactNode;
+} = {}) {
   const format = useAppStore((s) => s.format);
   const setFormat = useAppStore((s) => s.setFormat);
   const resolution = useAppStore((s) => s.resolution);
@@ -304,6 +310,8 @@ export function ExportPanel() {
                 </Button>
               </div>
             </div>
+          ) : videoRecordAction ? (
+            videoRecordAction
           ) : (
             <p className="text-xs text-linen/40">
               No recorded clip yet — use Record to create a WebM clip.

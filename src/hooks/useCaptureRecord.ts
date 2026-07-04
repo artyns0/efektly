@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useAppStore } from "../store/useAppStore";
 import {
   drawFramed,
@@ -57,6 +56,11 @@ export interface CaptureRecordOptions {
   onResult?: () => void;
 }
 
+// Module-level so the recorder can be started from one component (top toolbar)
+// and stopped from another (Video Export card). Only one recording at a time.
+let activeRecorder: RecorderHandle | null = null;
+let activeRaf = 0;
+
 export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordApi {
   const setMode = useAppStore((s) => s.setMode);
   const setCapture = useAppStore((s) => s.setCapture);
@@ -65,9 +69,6 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
   const mode = useAppStore((s) => s.mode);
   const mediaImage = useAppStore((s) => s.mediaImage);
   const mediaVideo = useAppStore((s) => s.mediaVideo);
-
-  const recorderRef = useRef<RecorderHandle | null>(null);
-  const recordRafRef = useRef(0);
 
   const isShader = mode === "shader";
   const canCapture = mediaImage !== null || mediaVideo !== null || isShader;
@@ -92,7 +93,7 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
 
   const handleRecord = () => {
     if (isRecording) {
-      recorderRef.current?.stop();
+      activeRecorder?.stop();
       return;
     }
     const state = useAppStore.getState();
@@ -104,18 +105,18 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
       const canvas = getPreviewCanvas();
       if (!canvas) return;
       state.setRecording(true);
-      recorderRef.current = recordCanvas(canvas, {
+      activeRecorder = recordCanvas(canvas, {
         fps: state.fps,
         onTick: (ms) => useAppStore.getState().setRecordElapsed(ms),
         onComplete: (blob, durationMs) => {
-          recorderRef.current = null;
+          activeRecorder = null;
           const s = useAppStore.getState();
           s.setRecording(false);
           s.setRecordedClip({ blob, durationMs });
           reveal();
         },
         onError: () => {
-          recorderRef.current = null;
+          activeRecorder = null;
           useAppStore.getState().setRecording(false);
         },
       });
@@ -142,18 +143,18 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
         renderFrame(nativeCtx, media2, s.effects, sw, sh, time);
         drawFramed(recCtx, nativeCanvas, sw, sh, tw, th, { mode: s.videoFraming });
       }
-      recordRafRef.current = requestAnimationFrame(drawLoop);
+      activeRaf = requestAnimationFrame(drawLoop);
     };
     drawLoop(performance.now());
-    const stopLoop = () => cancelAnimationFrame(recordRafRef.current);
+    const stopLoop = () => cancelAnimationFrame(activeRaf);
 
     state.setRecording(true);
-    recorderRef.current = recordCanvas(recCanvas, {
+    activeRecorder = recordCanvas(recCanvas, {
       fps: state.fps,
       onTick: (ms) => useAppStore.getState().setRecordElapsed(ms),
       onComplete: (blob, durationMs) => {
         stopLoop();
-        recorderRef.current = null;
+        activeRecorder = null;
         const s = useAppStore.getState();
         s.setRecording(false);
         s.setRecordedClip({ blob, durationMs });
@@ -161,7 +162,7 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
       },
       onError: () => {
         stopLoop();
-        recorderRef.current = null;
+        activeRecorder = null;
         useAppStore.getState().setRecording(false);
       },
     });
