@@ -7,6 +7,8 @@ import { LineArtControls } from "./effects/LineArtControls";
 import { GrainControls } from "./effects/GrainControls";
 import { ReflectionGridControls } from "./effects/ReflectionGridControls";
 import { VerticalEchoControls } from "./effects/VerticalEchoControls";
+import { GenericEffectControls } from "./effects/GenericEffectControls";
+import { EFFECT_SCHEMAS } from "../../data/effectSchemas";
 
 /**
  * Settings for the currently selected effect. Renders the matching control
@@ -35,6 +37,7 @@ export function EffectSettings() {
       {effect.type === "verticalEcho" && (
         <VerticalEchoControls effect={effect} />
       )}
+      {EFFECT_SCHEMAS[effect.type] && <GenericEffectControls effect={effect} />}
     </Section>
   );
 }

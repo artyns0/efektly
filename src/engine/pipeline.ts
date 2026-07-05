@@ -7,6 +7,14 @@ import { renderGrain } from "./effects/grain";
 import { renderGlitch } from "./effects/glitch";
 import { renderReflectionGrid } from "./effects/reflectionGrid";
 import { renderVerticalEcho } from "./effects/verticalEcho";
+import { renderCrosshatch } from "./effects/crosshatch";
+import { renderScanStretch } from "./effects/scanStretch";
+import { renderPixelSort } from "./effects/pixelSort";
+import { renderLightTrails } from "./effects/lightTrails";
+import { renderCrtMonitor } from "./effects/crtMonitor";
+import { renderVhsBleed } from "./effects/vhsBleed";
+import { renderKaleidoscope } from "./effects/kaleidoscope";
+import { renderNeonEdge } from "./effects/neonEdge";
 
 /* ------------------------------------------------------------------ */
 /*  Effect Stack render pipeline (Canvas 2D).                          */
@@ -43,6 +51,9 @@ export function computeFit(el: MediaEl, area: RenderArea): FitRect | null {
 export function effectAnimates(fx: EffectInstance): boolean {
   if (fx.type === "grain") return fx.settings.speed > 0;
   if (fx.type === "glitch") return fx.settings.animation;
+  if (fx.type === "crtMonitor") return fx.settings.flicker > 0;
+  if (fx.type === "vhsBleed")
+    return fx.settings.timeDrift > 0 || fx.settings.trackingNoise > 0;
   return false;
 }
 
@@ -121,6 +132,30 @@ export function applyEffect(
       break;
     case "verticalEcho":
       renderVerticalEcho(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "crosshatch":
+      renderCrosshatch(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "scanStretch":
+      renderScanStretch(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "pixelSort":
+      renderPixelSort(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "lightTrails":
+      renderLightTrails(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "crtMonitor":
+      renderCrtMonitor(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, time);
+      break;
+    case "vhsBleed":
+      renderVhsBleed(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, time);
+      break;
+    case "kaleidoscope":
+      renderKaleidoscope(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "neonEdge":
+      renderNeonEdge(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
       break;
     default:
       break;

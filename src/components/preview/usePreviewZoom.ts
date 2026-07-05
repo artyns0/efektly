@@ -22,8 +22,8 @@ export interface PreviewZoomApi {
   zoom: number;
   /** Base (unzoomed) stage size in CSS px. */
   base: { w: number; h: number };
-  stageRef: React.RefObject<HTMLDivElement | null>;
-  scrollRef: React.RefObject<HTMLDivElement | null>;
+  stageRef: React.RefObject<HTMLDivElement>;
+  scrollRef: React.RefObject<HTMLDivElement>;
   /** Set zoom, keeping the anchor viewport point (default center) stable. */
   zoomTo: (next: number, anchor?: { x: number; y: number }) => void;
   /** Reset to 100% and recenter. */

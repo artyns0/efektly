@@ -1,0 +1,153 @@
+import type { EffectType } from "../types/effects";
+
+/* ------------------------------------------------------------------ */
+/*  Declarative control schemas for the v2 effect pack. Rendered by    */
+/*  GenericEffectControls — keeps 8 new effects from needing 8 files.  */
+/* ------------------------------------------------------------------ */
+
+export type FieldDef =
+  | { kind: "slider"; key: string; label: string; min: number; max: number; step?: number; unit?: string }
+  | { kind: "select"; key: string; label: string; options: { value: string; label: string }[]; patches?: Record<string, Record<string, number | string | boolean>> }
+  | { kind: "toggle"; key: string; label: string }
+  | { kind: "color"; key: string; label: string };
+
+const pct = (key: string, label: string): FieldDef => ({
+  kind: "slider", key, label, min: 0, max: 100, step: 1, unit: "%",
+});
+
+export const EFFECT_SCHEMAS: Partial<Record<EffectType, FieldDef[]>> = {
+  crosshatch: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "clean-hatch", label: "Clean Hatch" },
+        { value: "sketch", label: "Sketch" },
+        { value: "engrave", label: "Engrave" },
+        { value: "technical", label: "Technical" },
+        { value: "comic-ink", label: "Comic Ink" },
+      ],
+      patches: {
+        "clean-hatch": { lineDensity: 55, lineWidth: 1, roughness: 20, jitter: 10, threshold: 65 },
+        sketch: { lineDensity: 60, lineWidth: 1, roughness: 70, jitter: 45, threshold: 70 },
+        engrave: { lineDensity: 80, lineWidth: 1.5, roughness: 10, jitter: 5, threshold: 75 },
+        technical: { lineDensity: 45, lineWidth: 0.8, roughness: 0, jitter: 0, threshold: 55 },
+        "comic-ink": { lineDensity: 65, lineWidth: 2.2, roughness: 35, jitter: 20, threshold: 60 },
+      },
+    },
+    pct("lineDensity", "Line Density"),
+    { kind: "slider", key: "lineWidth", label: "Line Width", min: 0.5, max: 4, step: 0.1, unit: "px" },
+    { kind: "slider", key: "angle1", label: "Angle 1", min: 0, max: 180, step: 1, unit: "°" },
+    { kind: "slider", key: "angle2", label: "Angle 2", min: 0, max: 180, step: 1, unit: "°" },
+    pct("threshold", "Threshold"),
+    { kind: "slider", key: "contrast", label: "Contrast", min: -100, max: 100, step: 1 },
+    pct("roughness", "Roughness"),
+    pct("jitter", "Jitter"),
+    { kind: "color", key: "inkColor", label: "Ink Color" },
+    { kind: "color", key: "bgColor", label: "Background" },
+    { kind: "toggle", key: "invert", label: "Invert" },
+  ],
+  scanStretch: [
+    {
+      kind: "select", key: "direction", label: "Direction",
+      options: [
+        { value: "horizontal", label: "Horizontal" },
+        { value: "vertical", label: "Vertical" },
+      ],
+    },
+    { kind: "slider", key: "scanWidth", label: "Scan Width", min: 2, max: 80, step: 1, unit: "px" },
+    pct("stretchAmount", "Stretch Amount"),
+    pct("density", "Density"),
+    pct("fade", "Fade"),
+    pct("jitter", "Jitter"),
+    pct("threshold", "Threshold"),
+    { kind: "slider", key: "contrast", label: "Contrast", min: -100, max: 100, step: 1 },
+    {
+      kind: "select", key: "colorMode", label: "Color Mode",
+      options: [
+        { value: "original", label: "Original" },
+        { value: "mono", label: "Mono" },
+        { value: "brand", label: "Brand" },
+      ],
+    },
+    { kind: "toggle", key: "invert", label: "Invert" },
+  ],
+  pixelSort: [
+    {
+      kind: "select", key: "direction", label: "Direction",
+      options: [
+        { value: "horizontal", label: "Horizontal" },
+        { value: "vertical", label: "Vertical" },
+      ],
+    },
+    pct("threshold", "Threshold"),
+    pct("sortLength", "Sort Length"),
+    pct("chaos", "Chaos"),
+    pct("maskStrength", "Mask Strength"),
+    pct("colorPreserve", "Color Preserve"),
+    pct("blend", "Blend"),
+    { kind: "toggle", key: "invert", label: "Invert" },
+  ],
+  lightTrails: [
+    { kind: "slider", key: "angle", label: "Direction Angle", min: 0, max: 360, step: 1, unit: "°" },
+    pct("trailLength", "Trail Length"),
+    pct("threshold", "Threshold"),
+    pct("glow", "Glow"),
+    pct("decay", "Decay"),
+    pct("blur", "Blur"),
+    pct("intensity", "Intensity"),
+    { kind: "color", key: "color", label: "Color" },
+    {
+      kind: "select", key: "blendMode", label: "Blend Mode",
+      options: [
+        { value: "screen", label: "Screen" },
+        { value: "add", label: "Add" },
+        { value: "soft-light", label: "Soft Light" },
+      ],
+    },
+  ],
+  crtMonitor: [
+    pct("curvature", "Curvature"),
+    pct("scanlines", "Scanlines"),
+    pct("rgbMask", "RGB Mask"),
+    pct("phosphorGlow", "Phosphor Glow"),
+    pct("flicker", "Flicker"),
+    pct("noise", "Noise"),
+    pct("vignette", "Vignette"),
+    { kind: "slider", key: "brightness", label: "Brightness", min: -80, max: 100, step: 1 },
+    { kind: "slider", key: "contrast", label: "Contrast", min: -80, max: 100, step: 1 },
+  ],
+  vhsBleed: [
+    pct("colorBleed", "Color Bleed"),
+    pct("horizontalSmear", "Horizontal Smear"),
+    pct("trackingNoise", "Tracking Noise"),
+    pct("scanlines", "Scanlines"),
+    pct("jitter", "Jitter"),
+    pct("distortion", "Distortion"),
+    pct("noise", "Noise"),
+    { kind: "slider", key: "saturation", label: "Saturation", min: 0, max: 300, step: 5, unit: "%" },
+    pct("timeDrift", "Time Drift"),
+  ],
+  kaleidoscope: [
+    { kind: "slider", key: "segments", label: "Segments", min: 3, max: 24, step: 1 },
+    { kind: "slider", key: "rotation", label: "Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    { kind: "slider", key: "scale", label: "Scale", min: 0.25, max: 4, step: 0.05, unit: "x" },
+    pct("mirrorAmount", "Mirror Amount"),
+    { kind: "slider", key: "centerX", label: "Center X", min: 0, max: 1, step: 0.01 },
+    { kind: "slider", key: "centerY", label: "Center Y", min: 0, max: 1, step: 0.01 },
+    pct("softness", "Softness"),
+    pct("glow", "Glow"),
+    { kind: "slider", key: "colorShift", label: "Color Shift", min: 0, max: 360, step: 1, unit: "°" },
+    { kind: "color", key: "background", label: "Background" },
+  ],
+  neonEdge: [
+    pct("edgeThreshold", "Edge Threshold"),
+    pct("lineWidth", "Line Width"),
+    pct("glow", "Glow"),
+    pct("glowRadius", "Glow Radius"),
+    pct("intensity", "Intensity"),
+    { kind: "color", key: "colorA", label: "Color A" },
+    { kind: "color", key: "colorB", label: "Color B" },
+    pct("backgroundMix", "Background Mix"),
+    { kind: "toggle", key: "invert", label: "Invert" },
+  ],
+};

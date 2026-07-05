@@ -205,4 +205,56 @@ export function renderDither(
   ctx.clearRect(dx, dy, dw, dh);
   ctx.drawImage(oc, 0, 0, cols, rows, dx, dy, dw, dh);
   ctx.restore();
+
+  // 5 — optional bloom: glow the bright dither pixels (post-process,
+  // does not alter the crisp base result underneath).
+  if (s.bloom) applyDitherBloom(ctx, oc, cols, rows, rect, s);
+}
+
+let bloomC: HTMLCanvasElement | null = null;
+
+function applyDitherBloom(
+  ctx: CanvasRenderingContext2D,
+  oc: HTMLCanvasElement,
+  cols: number,
+  rows: number,
+  rect: { dx: number; dy: number; dw: number; dh: number },
+  s: DitherSettings,
+): void {
+  if (!bloomC) bloomC = document.createElement("canvas");
+  if (bloomC.width !== cols || bloomC.height !== rows) {
+    bloomC.width = cols;
+    bloomC.height = rows;
+  }
+  const bctx = bloomC.getContext("2d", { willReadFrequently: true })!;
+  bctx.clearRect(0, 0, cols, rows);
+  bctx.drawImage(oc, 0, 0);
+  // Bright pass on the low-res dither grid.
+  const img = bctx.getImageData(0, 0, cols, rows);
+  const d = img.data;
+  const thr = ((s.bloomThreshold ?? 50) / 100) * 255;
+  for (let i = 0; i < d.length; i += 4) {
+    const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    if (l < thr) d[i + 3] = 0;
+  }
+  bctx.putImageData(img, 0, 0);
+
+  const intensity = Math.min(1, (s.bloomIntensity ?? 50) / 100);
+  const radius = Math.max(1, s.bloomRadius ?? 8);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(rect.dx, rect.dy, rect.dw, rect.dh);
+  ctx.clip();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.imageSmoothingEnabled = true;
+  ctx.globalAlpha = intensity * 0.7;
+  ctx.filter = `blur(${radius}px)`;
+  ctx.drawImage(bloomC, 0, 0, cols, rows, rect.dx, rect.dy, rect.dw, rect.dh);
+  ctx.globalAlpha = intensity * 0.35;
+  ctx.filter = `blur(${radius * 2.5}px)`;
+  ctx.drawImage(bloomC, 0, 0, cols, rows, rect.dx, rect.dy, rect.dw, rect.dh);
+  ctx.filter = "none";
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.restore();
 }

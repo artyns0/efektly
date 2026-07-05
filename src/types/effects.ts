@@ -12,7 +12,15 @@ export type EffectType =
   | "lineArt"
   | "grain"
   | "reflectionGrid"
-  | "verticalEcho";
+  | "verticalEcho"
+  | "crosshatch"
+  | "scanStretch"
+  | "pixelSort"
+  | "lightTrails"
+  | "crtMonitor"
+  | "vhsBleed"
+  | "kaleidoscope"
+  | "neonEdge";
 
 /** Drives the small status chip shown on each stack item. */
 export type EffectStatus = "ui-ready" | "controls-ready" | "coming-next";
@@ -36,6 +44,9 @@ export interface DitherSettings {
   palette: string[];
   invert: boolean;
   bloom: boolean;
+  bloomIntensity: number; // 0–100
+  bloomRadius: number; // px
+  bloomThreshold: number; // 0–100
 }
 
 /* ----- ASCII ----- */
@@ -158,6 +169,110 @@ export interface VerticalEchoSettings {
   accentColor: string;
 }
 
+/* ----- Effect pack v2 (schema-driven controls) ----- */
+
+export type Axis = "horizontal" | "vertical";
+
+export interface CrosshatchSettings {
+  preset: string;
+  lineDensity: number;
+  lineWidth: number;
+  angle1: number;
+  angle2: number;
+  threshold: number;
+  contrast: number;
+  roughness: number;
+  jitter: number;
+  inkColor: string;
+  bgColor: string;
+  invert: boolean;
+}
+
+export interface ScanStretchSettings {
+  direction: Axis;
+  scanWidth: number;
+  stretchAmount: number;
+  density: number;
+  fade: number;
+  jitter: number;
+  threshold: number;
+  contrast: number;
+  colorMode: ColorMode;
+  invert: boolean;
+}
+
+export interface PixelSortSettings {
+  direction: Axis;
+  threshold: number;
+  sortLength: number;
+  chaos: number;
+  maskStrength: number;
+  colorPreserve: number;
+  blend: number;
+  invert: boolean;
+}
+
+export interface LightTrailsSettings {
+  angle: number;
+  trailLength: number;
+  threshold: number;
+  glow: number;
+  decay: number;
+  blur: number;
+  intensity: number;
+  color: string;
+  blendMode: "screen" | "add" | "soft-light";
+}
+
+export interface CrtMonitorSettings {
+  curvature: number;
+  scanlines: number;
+  rgbMask: number;
+  phosphorGlow: number;
+  flicker: number;
+  noise: number;
+  vignette: number;
+  brightness: number;
+  contrast: number;
+}
+
+export interface VhsBleedSettings {
+  colorBleed: number;
+  horizontalSmear: number;
+  trackingNoise: number;
+  scanlines: number;
+  jitter: number;
+  distortion: number;
+  noise: number;
+  saturation: number;
+  timeDrift: number;
+}
+
+export interface KaleidoscopeSettings {
+  segments: number;
+  rotation: number;
+  scale: number;
+  mirrorAmount: number;
+  centerX: number;
+  centerY: number;
+  softness: number;
+  glow: number;
+  colorShift: number;
+  background: string;
+}
+
+export interface NeonEdgeSettings {
+  edgeThreshold: number;
+  lineWidth: number;
+  glow: number;
+  glowRadius: number;
+  intensity: number;
+  colorA: string;
+  colorB: string;
+  backgroundMix: number;
+  invert: boolean;
+}
+
 /* ----- Instance model ----- */
 
 export interface EffectSettingsMap {
@@ -168,6 +283,14 @@ export interface EffectSettingsMap {
   grain: GrainSettings;
   reflectionGrid: ReflectionGridSettings;
   verticalEcho: VerticalEchoSettings;
+  crosshatch: CrosshatchSettings;
+  scanStretch: ScanStretchSettings;
+  pixelSort: PixelSortSettings;
+  lightTrails: LightTrailsSettings;
+  crtMonitor: CrtMonitorSettings;
+  vhsBleed: VhsBleedSettings;
+  kaleidoscope: KaleidoscopeSettings;
+  neonEdge: NeonEdgeSettings;
 }
 
 /** A patch carries a partial of exactly one effect's settings. */
@@ -178,7 +301,15 @@ export type EffectSettingsPatch =
   | Partial<LineArtSettings>
   | Partial<GrainSettings>
   | Partial<ReflectionGridSettings>
-  | Partial<VerticalEchoSettings>;
+  | Partial<VerticalEchoSettings>
+  | Partial<CrosshatchSettings>
+  | Partial<ScanStretchSettings>
+  | Partial<PixelSortSettings>
+  | Partial<LightTrailsSettings>
+  | Partial<CrtMonitorSettings>
+  | Partial<VhsBleedSettings>
+  | Partial<KaleidoscopeSettings>
+  | Partial<NeonEdgeSettings>;
 
 interface EffectBase<T extends EffectType> {
   id: string;
@@ -197,4 +328,12 @@ export type EffectInstance =
   | EffectBase<"lineArt">
   | EffectBase<"grain">
   | EffectBase<"reflectionGrid">
-  | EffectBase<"verticalEcho">;
+  | EffectBase<"verticalEcho">
+  | EffectBase<"crosshatch">
+  | EffectBase<"scanStretch">
+  | EffectBase<"pixelSort">
+  | EffectBase<"lightTrails">
+  | EffectBase<"crtMonitor">
+  | EffectBase<"vhsBleed">
+  | EffectBase<"kaleidoscope">
+  | EffectBase<"neonEdge">;

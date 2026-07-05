@@ -117,10 +117,41 @@ export function DitherControls({ effect }: { effect: DitherEffect }) {
       />
       <Toggle
         label="Bloom"
-        description="Coming next"
+        description="Glow bright dither pixels"
         checked={d.bloom}
         onChange={(v) => set({ bloom: v })}
       />
+      {d.bloom && (
+        <>
+          <SliderControl
+            label="Bloom Intensity"
+            value={d.bloomIntensity}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(v) => set({ bloomIntensity: v })}
+            format={(v) => `${v}%`}
+          />
+          <SliderControl
+            label="Bloom Radius"
+            value={d.bloomRadius}
+            min={1}
+            max={30}
+            step={1}
+            onChange={(v) => set({ bloomRadius: v })}
+            format={(v) => `${v}px`}
+          />
+          <SliderControl
+            label="Bloom Threshold"
+            value={d.bloomThreshold}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(v) => set({ bloomThreshold: v })}
+            format={(v) => `${v}%`}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -3,12 +3,20 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlignVerticalJustifyCenter,
   Aperture,
+  BarChart2,
   ChevronDown,
+  Flower,
   FlipHorizontal2,
   Grid2x2,
+  Hash,
+  Lightbulb,
+  Monitor,
   PenTool,
   Plus,
+  StretchHorizontal,
+  Tv,
   Type,
+  Wind,
   Zap,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
@@ -21,6 +29,7 @@ import { LineArtControls } from "../panels/effects/LineArtControls";
 import { GrainControls } from "../panels/effects/GrainControls";
 import { ReflectionGridControls } from "../panels/effects/ReflectionGridControls";
 import { VerticalEchoControls } from "../panels/effects/VerticalEchoControls";
+import { GenericEffectControls } from "../panels/effects/GenericEffectControls";
 
 const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   dither: Grid2x2,
@@ -30,6 +39,14 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   grain: Aperture,
   reflectionGrid: FlipHorizontal2,
   verticalEcho: AlignVerticalJustifyCenter,
+  crosshatch: Hash,
+  scanStretch: StretchHorizontal,
+  pixelSort: BarChart2,
+  lightTrails: Wind,
+  crtMonitor: Monitor,
+  vhsBleed: Tv,
+  kaleidoscope: Flower,
+  neonEdge: Lightbulb,
 };
 
 /** Renders the matching control set for an effect (reuses existing panels). */
@@ -50,7 +67,7 @@ function EffectControls({ effect }: { effect: EffectInstance }) {
     case "verticalEcho":
       return <VerticalEchoControls effect={effect} />;
     default:
-      return null;
+      return <GenericEffectControls effect={effect} />;
   }
 }
 

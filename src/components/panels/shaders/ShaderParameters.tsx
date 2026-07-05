@@ -1,13 +1,82 @@
 import { useAppStore } from "../../../store/useAppStore";
-import type { ShaderColorMode, ShaderSettingsPatch } from "../../../types/shaders";
+import type {
+  ShaderColorMode,
+  ShaderSettingsPatch,
+  ShaderTypeId,
+} from "../../../types/shaders";
 import { SliderControl } from "../../controls/SliderControl";
 import { SegmentedControl } from "../../controls/SegmentedControl";
+import { Toggle } from "../../controls/Toggle";
+import { ColorField } from "../../controls/ColorField";
 
 const COLOR_MODES: { value: ShaderColorMode; label: string }[] = [
   { value: "brand", label: "Brand" },
   { value: "mono", label: "Mono" },
   { value: "duo", label: "Duo" },
 ];
+
+/* Declarative param schemas for the v2 shader pack. Colors A/B/background
+   live in the panel's Colors section; extra colors appear here. */
+type SField =
+  | { kind: "slider"; key: string; label: string; min: number; max: number; step?: number; unit?: string }
+  | { kind: "toggle"; key: string; label: string }
+  | { kind: "color"; key: string; label: string };
+
+const pctS = (key: string, label: string): SField => ({
+  kind: "slider", key, label, min: 0, max: 100, step: 1, unit: "%",
+});
+const speedS = (key = "speed", label = "Speed"): SField => ({
+  kind: "slider", key, label, min: 0, max: 3, step: 0.05, unit: "x",
+});
+
+const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
+  liquidGlass: [
+    pctS("scale", "Scale"), speedS("flowSpeed", "Flow Speed"), pctS("distortion", "Distortion"),
+    pctS("smoothness", "Smoothness"), pctS("highlightIntensity", "Highlight Intensity"),
+    pctS("glassBlur", "Glass Blur"), pctS("warpAmount", "Warp Amount"), pctS("noise", "Noise"),
+    { kind: "color", key: "accentColor", label: "Accent Color" },
+  ],
+  liquidSilk: [
+    pctS("scale", "Scale"), pctS("flow", "Flow"), pctS("distortion", "Distortion"),
+    pctS("highlight", "Highlight"), pctS("smoothness", "Smoothness"), speedS(),
+  ],
+  fluidLines: [
+    { kind: "slider", key: "lineCount", label: "Line Count", min: 2, max: 60, step: 1 },
+    { kind: "slider", key: "lineWidth", label: "Line Width", min: 0.5, max: 6, step: 0.1, unit: "px" },
+    pctS("spacing", "Spacing"), pctS("amplitude", "Amplitude"), pctS("frequency", "Frequency"),
+    speedS("flowSpeed", "Flow Speed"), pctS("distortion", "Distortion"),
+  ],
+  inkFlow: [
+    pctS("spread", "Spread"), speedS("flowSpeed", "Flow Speed"), pctS("diffusion", "Diffusion"),
+    pctS("density", "Density"), pctS("softness", "Softness"), pctS("noise", "Noise"),
+  ],
+  plasmaGradient: [
+    pctS("scale", "Scale"), speedS(), pctS("intensity", "Intensity"),
+    pctS("contrast", "Contrast"), pctS("smoothness", "Smoothness"),
+    { kind: "color", key: "colorC", label: "Color C" },
+  ],
+  orbitParticles: [
+    { kind: "slider", key: "count", label: "Particle Count", min: 10, max: 400, step: 5 },
+    pctS("radius", "Radius"), speedS("orbitSpeed", "Orbit Speed"),
+    pctS("particleSize", "Particle Size"), pctS("glow", "Glow"), pctS("spread", "Spread"),
+    { kind: "slider", key: "centerX", label: "Center X", min: 0, max: 1, step: 0.01 },
+    { kind: "slider", key: "centerY", label: "Center Y", min: 0, max: 1, step: 0.01 },
+  ],
+  kineticStripes: [
+    { kind: "slider", key: "stripeCount", label: "Stripe Count", min: 2, max: 40, step: 1 },
+    pctS("stripeWidth", "Stripe Width"), speedS(),
+    { kind: "slider", key: "angle", label: "Angle", min: 0, max: 180, step: 1, unit: "°" },
+    pctS("offset", "Offset"), pctS("softness", "Softness"), pctS("contrast", "Contrast"),
+  ],
+  sparkBurst: [
+    { kind: "slider", key: "count", label: "Particle Count", min: 20, max: 400, step: 5 },
+    pctS("sparkSize", "Spark Size"), pctS("spread", "Spread"), pctS("gravity", "Gravity"),
+    pctS("glow", "Glow"), pctS("decay", "Decay"), speedS(),
+    pctS("burstStrength", "Burst Strength"), pctS("trailLength", "Trail Length"),
+    { kind: "toggle", key: "mouseFollow", label: "Mouse Follow" },
+    { kind: "toggle", key: "autoBurst", label: "Auto Burst" },
+  ],
+};
 
 /**
  * Parameter controls for the selected shader. The visible set changes per
@@ -31,6 +100,52 @@ export function ShaderParameters() {
       format={(v) => `${v.toFixed(2)}x`}
     />
   );
+
+  // Schema-driven params for the v2 shader pack.
+  const schema = SHADER_SCHEMAS[type];
+  if (schema) {
+    const sset = settings[type] as unknown as Record<string, unknown>;
+    return (
+      <div className="flex flex-col gap-5">
+        {schema.map((f) => {
+          if (f.kind === "slider") {
+            const fmtVal = (x: number) =>
+              `${f.step && f.step < 1 ? x.toFixed(2) : Math.round(x)}${f.unit ?? ""}`;
+            return (
+              <SliderControl
+                key={f.key}
+                label={f.label}
+                value={Number(sset[f.key] ?? f.min)}
+                min={f.min}
+                max={f.max}
+                step={f.step ?? 1}
+                onChange={(v) => set({ [f.key]: v } as ShaderSettingsPatch)}
+                format={fmtVal}
+              />
+            );
+          }
+          if (f.kind === "toggle") {
+            return (
+              <Toggle
+                key={f.key}
+                label={f.label}
+                checked={Boolean(sset[f.key])}
+                onChange={(v) => set({ [f.key]: v } as ShaderSettingsPatch)}
+              />
+            );
+          }
+          return (
+            <ColorField
+              key={f.key}
+              label={f.label}
+              value={String(sset[f.key] ?? "#131313")}
+              onChange={(v) => set({ [f.key]: v } as ShaderSettingsPatch)}
+            />
+          );
+        })}
+      </div>
+    );
+  }
 
   if (type === "dotGrid") {
     const s = settings.dotGrid;

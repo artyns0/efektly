@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "../../store/useAppStore";
 import { setPreviewCanvas } from "../../engine/preview/canvasRegistry";
 import { renderShader } from "../../engine/shaders";
+import { setSparkPointer } from "../../engine/shaders/sparkBurst";
 
 /* ------------------------------------------------------------------ */
 /*  Procedural shader output on the Live Preview canvas.               */
@@ -62,5 +63,15 @@ export function ShaderCanvas() {
     };
   }, [shaderType, shaderSettings, shaderAnimation]);
 
-  return <canvas ref={canvasRef} className="block size-full" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="block size-full"
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        setSparkPointer((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+      }}
+      onPointerLeave={() => setSparkPointer(null)}
+    />
+  );
 }

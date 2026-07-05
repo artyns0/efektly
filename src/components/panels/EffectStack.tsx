@@ -2,12 +2,20 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlignVerticalJustifyCenter,
   Aperture,
+  BarChart2,
   Eye,
   EyeOff,
+  Flower,
   FlipHorizontal2,
   Grid2x2,
+  Hash,
+  Lightbulb,
+  Monitor,
   PenTool,
+  StretchHorizontal,
+  Tv,
   Type,
+  Wind,
   Zap,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
@@ -23,6 +31,14 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   grain: Aperture,
   reflectionGrid: FlipHorizontal2,
   verticalEcho: AlignVerticalJustifyCenter,
+  crosshatch: Hash,
+  scanStretch: StretchHorizontal,
+  pixelSort: BarChart2,
+  lightTrails: Wind,
+  crtMonitor: Monitor,
+  vhsBleed: Tv,
+  kaleidoscope: Flower,
+  neonEdge: Lightbulb,
 };
 
 /**

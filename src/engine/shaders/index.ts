@@ -7,13 +7,31 @@ import { renderDotGrid } from "./dotGrid";
 import { renderMeshLiquid } from "./meshLiquid";
 import { renderVoronoi } from "./voronoi";
 import { renderParticles } from "./particles";
+import { renderLiquidGlass } from "./liquidGlass";
+import { renderLiquidSilk } from "./liquidSilk";
+import { renderFluidLines } from "./fluidLines";
+import { renderInkFlow } from "./inkFlow";
+import { renderPlasmaGradient } from "./plasmaGradient";
+import { renderOrbitParticles } from "./orbitParticles";
+import { renderKineticStripes } from "./kineticStripes";
+import { renderSparkBurst } from "./sparkBurst";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dispatcher — routes to the active procedural renderer.      */
 /* ------------------------------------------------------------------ */
 
 /** Which shaders are fully implemented (vs. simple v1 placeholders). */
-export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set(["dotGrid"]);
+export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set([
+  "dotGrid",
+  "liquidGlass",
+  "liquidSilk",
+  "fluidLines",
+  "inkFlow",
+  "plasmaGradient",
+  "orbitParticles",
+  "kineticStripes",
+  "sparkBurst",
+]);
 
 export function renderShader(
   ctx: CanvasRenderingContext2D,
@@ -40,6 +58,30 @@ export function renderShader(
       break;
     case "particles":
       renderParticles(ctx, w, h, settings.particles, timeSec, motion);
+      break;
+    case "liquidGlass":
+      renderLiquidGlass(ctx, w, h, settings.liquidGlass, timeSec);
+      break;
+    case "liquidSilk":
+      renderLiquidSilk(ctx, w, h, settings.liquidSilk, timeSec);
+      break;
+    case "fluidLines":
+      renderFluidLines(ctx, w, h, settings.fluidLines, timeSec);
+      break;
+    case "inkFlow":
+      renderInkFlow(ctx, w, h, settings.inkFlow, timeSec);
+      break;
+    case "plasmaGradient":
+      renderPlasmaGradient(ctx, w, h, settings.plasmaGradient, timeSec);
+      break;
+    case "orbitParticles":
+      renderOrbitParticles(ctx, w, h, settings.orbitParticles, timeSec);
+      break;
+    case "kineticStripes":
+      renderKineticStripes(ctx, w, h, settings.kineticStripes, timeSec);
+      break;
+    case "sparkBurst":
+      renderSparkBurst(ctx, w, h, settings.sparkBurst, timeSec);
       break;
   }
 }

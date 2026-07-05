@@ -1,5 +1,18 @@
 import type { LucideIcon } from "lucide-react";
-import { Grid2x2, Hexagon, Sparkles, Waves } from "lucide-react";
+import {
+  Activity,
+  AlignJustify,
+  CloudFog,
+  Droplets,
+  Grid2x2,
+  Hexagon,
+  Orbit,
+  Ribbon,
+  Sparkles,
+  Star,
+  Sun,
+  Waves,
+} from "lucide-react";
 import { cn } from "../../../lib/cn";
 import { useAppStore } from "../../../store/useAppStore";
 import { SHADER_TYPES } from "../../../data/shaders";
@@ -11,6 +24,14 @@ const ICONS: Record<ShaderTypeId, LucideIcon> = {
   dotGrid: Grid2x2,
   voronoi: Hexagon,
   particles: Sparkles,
+  liquidGlass: Droplets,
+  liquidSilk: Ribbon,
+  fluidLines: Activity,
+  inkFlow: CloudFog,
+  plasmaGradient: Sun,
+  orbitParticles: Orbit,
+  kineticStripes: AlignJustify,
+  sparkBurst: Star,
 };
 
 export function ShaderTypeSelector() {
