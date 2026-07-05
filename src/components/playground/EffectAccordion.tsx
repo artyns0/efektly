@@ -4,16 +4,18 @@ import {
   AlignVerticalJustifyCenter,
   Aperture,
   BarChart2,
-  ChevronDown,
   Flower,
   FlipHorizontal2,
+  GripVertical,
   Grid2x2,
   Hash,
+  Layers,
   Lightbulb,
   Monitor,
   PenTool,
   Plus,
   StretchHorizontal,
+  Trash2,
   Tv,
   Type,
   Wind,
@@ -21,15 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
-import type { EffectInstance, EffectType } from "../../types/effects";
-import { DitherControls } from "../panels/effects/DitherControls";
-import { AsciiControls } from "../panels/effects/AsciiControls";
-import { GlitchControls } from "../panels/effects/GlitchControls";
-import { LineArtControls } from "../panels/effects/LineArtControls";
-import { GrainControls } from "../panels/effects/GrainControls";
-import { ReflectionGridControls } from "../panels/effects/ReflectionGridControls";
-import { VerticalEchoControls } from "../panels/effects/VerticalEchoControls";
-import { GenericEffectControls } from "../panels/effects/GenericEffectControls";
+import type { EffectType } from "../../types/effects";
 
 const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   dither: Grid2x2,
@@ -48,28 +42,6 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
 };
-
-/** Renders the matching control set for an effect (reuses existing panels). */
-function EffectControls({ effect }: { effect: EffectInstance }) {
-  switch (effect.type) {
-    case "dither":
-      return <DitherControls effect={effect} />;
-    case "ascii":
-      return <AsciiControls effect={effect} />;
-    case "glitch":
-      return <GlitchControls effect={effect} />;
-    case "lineArt":
-      return <LineArtControls effect={effect} />;
-    case "grain":
-      return <GrainControls effect={effect} />;
-    case "reflectionGrid":
-      return <ReflectionGridControls effect={effect} />;
-    case "verticalEcho":
-      return <VerticalEchoControls effect={effect} />;
-    default:
-      return <GenericEffectControls effect={effect} />;
-  }
-}
 
 /** Compact pill switch for enable/disable. */
 function Switch({
@@ -106,123 +78,152 @@ function Switch({
   );
 }
 
+/**
+ * Compact "Active Effects" stack for the left panel. Rows show name +
+ * selection + enable toggle only — detailed controls live in the right
+ * Properties panel. "Add Effect" enables an effect from the available list.
+ */
 export function EffectAccordion() {
   const effects = useAppStore((s) => s.effects);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
   const selectEffect = useAppStore((s) => s.selectEffect);
   const toggleEffect = useAppStore((s) => s.toggleEffect);
-  const [expanded, setExpanded] = useState<string | null>(selectedEffectId);
+  const setRightTab = useAppStore((s) => s.setRightTab);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const enabledCount = effects.filter((fx) => fx.enabled).length;
+  const active = effects.filter((fx) => fx.enabled);
+  const available = effects.filter((fx) => !fx.enabled);
+
+  const pick = (id: string) => {
+    selectEffect(id);
+    setRightTab("properties");
+  };
+
+  const addEffect = (id: string) => {
+    toggleEffect(id);
+    pick(id);
+    setMenuOpen(false);
+  };
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between px-0.5">
+      <div className="relative flex items-center justify-between px-0.5">
         <div className="flex items-baseline gap-2">
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
-            Effects
+            Active Effects
           </span>
           <span className="font-mono text-[10px] text-linen/30">
-            {enabledCount}/{effects.length} on
+            {active.length}
           </span>
         </div>
         <button
           type="button"
-          disabled
-          title="All effects are in the stack"
-          className="inline-flex h-7 cursor-not-allowed items-center gap-1.5 rounded-lg border border-dashed border-white/[0.12] bg-white/[0.02] px-2.5 text-xs text-linen/45"
+          onClick={() => setMenuOpen((o) => !o)}
+          disabled={available.length === 0}
+          aria-expanded={menuOpen}
+          className={cn(
+            "inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors",
+            available.length === 0
+              ? "cursor-not-allowed border-white/[0.08] text-linen/30"
+              : "border-flame/40 bg-flame/10 text-flame hover:bg-flame/15",
+          )}
         >
           <Plus className="size-3.5" />
           Add Effect
         </button>
+
+        {/* Add menu */}
+        {menuOpen && available.length > 0 && (
+          <div className="scroll-thin absolute right-0 top-9 z-20 max-h-72 w-56 overflow-y-auto rounded-xl border border-white/[0.1] bg-onyx-100 p-1.5 shadow-2xl shadow-black/50">
+            {available.map((fx) => {
+              const Icon = EFFECT_ICONS[fx.type];
+              return (
+                <button
+                  key={fx.id}
+                  type="button"
+                  onClick={() => addEffect(fx.id)}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] text-linen/75 transition-colors hover:bg-white/[0.06] hover:text-linen"
+                >
+                  <Icon className="size-4 shrink-0 text-linen/50" strokeWidth={1.8} />
+                  {fx.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        {effects.map((fx) => {
-          const Icon = EFFECT_ICONS[fx.type];
-          const isOpen = expanded === fx.id;
-          const selected = fx.id === selectedEffectId;
-
-          return (
-            <div
-              key={fx.id}
-              className={cn(
-                "relative overflow-hidden rounded-xl border transition-colors",
-                selected
-                  ? "border-flame/45 bg-flame/[0.07]"
-                  : fx.enabled
-                    ? "border-white/[0.1] bg-linen/[0.03]"
-                    : "border-white/[0.05] bg-linen/[0.015]",
-              )}
-            >
-              {/* Enabled accent bar */}
-              {fx.enabled && (
-                <span className="absolute inset-y-0 left-0 w-[3px] bg-flame/80" />
-              )}
-
-              {/* Header row — expand button + enable switch as siblings */}
-              <div className="flex items-center gap-2 py-[7px] pl-2.5 pr-2">
+      {active.length === 0 ? (
+        <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-dashed border-white/[0.1] bg-linen/[0.015] px-4 py-10 text-center">
+          <Layers className="size-6 text-linen/25" strokeWidth={1.5} />
+          <p className="text-[13px] font-medium text-linen/70">
+            No effects added yet
+          </p>
+          <p className="text-xs text-linen/40">Use Add Effect to start stylizing.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {active.map((fx) => {
+            const Icon = EFFECT_ICONS[fx.type];
+            const selected = fx.id === selectedEffectId;
+            return (
+              <div
+                key={fx.id}
+                className={cn(
+                  "group relative flex items-center gap-2 rounded-xl border py-[7px] pl-1.5 pr-2 transition-colors",
+                  selected
+                    ? "border-flame/45 bg-flame/[0.07]"
+                    : "border-white/[0.08] bg-linen/[0.03] hover:border-white/[0.14]",
+                )}
+              >
+                <GripVertical
+                  className="size-4 shrink-0 cursor-grab text-linen/20"
+                  aria-hidden
+                />
                 <button
                   type="button"
-                  aria-expanded={isOpen}
-                  onClick={() => {
-                    selectEffect(fx.id);
-                    setExpanded(isOpen ? null : fx.id);
-                  }}
+                  onClick={() => pick(fx.id)}
                   className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none"
                 >
-                  <ChevronDown
-                    className={cn(
-                      "size-3.5 shrink-0 text-linen/35 transition-transform",
-                      isOpen && "rotate-180",
-                    )}
-                  />
                   <span
                     className={cn(
                       "grid size-[26px] shrink-0 place-items-center rounded-lg border transition-colors",
-                      fx.enabled
+                      selected
                         ? "border-flame/40 bg-flame/15 text-flame"
-                        : "border-white/[0.07] bg-black/20 text-linen/45",
+                        : "border-white/[0.07] bg-black/20 text-linen/55",
                     )}
                   >
                     <Icon className="size-[15px]" strokeWidth={1.85} />
                   </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span
-                      className={cn(
-                        "truncate text-[13px] font-medium leading-tight",
-                        fx.enabled ? "text-linen" : "text-linen/45",
-                      )}
-                    >
-                      {fx.name}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-[9px] leading-tight",
-                        fx.enabled ? "text-flame/70" : "text-linen/30",
-                      )}
-                    >
-                      {fx.enabled ? "Active" : "Off"}
-                    </span>
+                  <span className="truncate text-[13px] font-medium text-linen">
+                    {fx.name}
                   </span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${fx.name}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleEffect(fx.id);
+                  }}
+                  className="grid size-6 shrink-0 place-items-center rounded-md text-linen/30 opacity-0 transition hover:bg-white/[0.08] hover:text-linen/70 group-hover:opacity-100"
+                >
+                  <Trash2 className="size-3.5" />
                 </button>
                 <Switch
                   on={fx.enabled}
                   onClick={() => toggleEffect(fx.id)}
-                  label={fx.enabled ? `Disable ${fx.name}` : `Enable ${fx.name}`}
+                  label={`Disable ${fx.name}`}
                 />
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              {/* Expanded controls */}
-              {isOpen && (
-                <div className="border-t border-white/[0.06] px-3 py-3">
-                  <EffectControls effect={fx} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <p className="px-1 text-[10px] text-linen/25">
+        Select an effect to edit its settings in Properties.
+      </p>
     </div>
   );
 }

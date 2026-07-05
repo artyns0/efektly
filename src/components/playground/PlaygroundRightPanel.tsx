@@ -1,114 +1,121 @@
-import { Box, MoreHorizontal, Plus } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  AlignVerticalJustifyCenter,
+  Aperture,
+  BarChart2,
+  Flower,
+  FlipHorizontal2,
+  Grid2x2,
+  Hash,
+  Lightbulb,
+  MonitorPlay,
+  Monitor,
+  MousePointerSquareDashed,
+  PenTool,
+  StretchHorizontal,
+  Tv,
+  Type,
+  Wind,
+  Zap,
+} from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
+import type { EffectType } from "../../types/effects";
 import { ExportPanel } from "../panels/ExportPanel";
 import { VideoRecordButton } from "./VideoRecordButton";
+import { EffectControlsSwitch } from "./EffectControlsSwitch";
 import { SHADER_TYPES } from "../../data/shaders";
 
-/* Playground v2 right panel: Properties / Export tabs. Export reuses the
-   existing ExportPanel; Properties is a summary (transform = placeholder,
-   effects toggles = functional). */
+/* Playground v2 right panel: Properties / Export tabs. Properties shows the
+   settings for the single selected item (effect / shader / source) — no
+   duplicated effects list. Export reuses the existing ExportPanel. */
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
+  dither: Grid2x2,
+  ascii: Type,
+  glitch: Zap,
+  lineArt: PenTool,
+  grain: Aperture,
+  reflectionGrid: FlipHorizontal2,
+  verticalEcho: AlignVerticalJustifyCenter,
+  crosshatch: Hash,
+  scanStretch: StretchHorizontal,
+  pixelSort: BarChart2,
+  lightTrails: Wind,
+  crtMonitor: Monitor,
+  vhsBleed: Tv,
+  kaleidoscope: Flower,
+  neonEdge: Lightbulb,
+};
+
+function PropertyHeader({
+  icon: Icon,
+  title,
+  subtitle,
+}: {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+}) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-white/[0.05] bg-linen/[0.02] px-3 py-2 text-sm">
-      <span className="text-linen/55">{label}</span>
-      <span className="font-mono text-xs text-linen/60">{value}</span>
+    <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.06] bg-linen/[0.02] px-3 py-2.5">
+      <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-flame/30 bg-flame/10 text-flame">
+        <Icon className="size-4" strokeWidth={1.8} />
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate text-sm font-medium text-linen">{title}</span>
+        <span className="text-[10px] uppercase tracking-wide text-linen/40">
+          {subtitle}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function EmptyProperties() {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-white/[0.1] bg-linen/[0.015] px-4 py-12 text-center">
+      <MousePointerSquareDashed className="size-6 text-linen/25" strokeWidth={1.5} />
+      <p className="text-[13px] font-medium text-linen/70">No selection</p>
+      <p className="text-xs text-linen/40">
+        Select a layer, effect, or shader to edit properties.
+      </p>
     </div>
   );
 }
 
 function PropertiesTab() {
   const mode = useAppStore((s) => s.mode);
-  const source = useAppStore((s) => s.source);
-  const mediaUrl = useAppStore((s) => s.mediaUrl);
   const shaderType = useAppStore((s) => s.shaderType);
   const effects = useAppStore((s) => s.effects);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
-  const toggleEffect = useAppStore((s) => s.toggleEffect);
-  const selectEffect = useAppStore((s) => s.selectEffect);
 
-  const isShader = mode === "shader";
-  const selectedName = isShader
-    ? SHADER_TYPES.find((t) => t.id === shaderType)?.label ?? "Shader"
-    : mediaUrl
-      ? source.name
-      : "No source";
-  const enabled = effects.filter((fx) => fx.enabled);
+  // Shader mode → show the active shader as the selected item.
+  if (mode === "shader") {
+    const label = SHADER_TYPES.find((t) => t.id === shaderType)?.label ?? "Shader";
+    return (
+      <div className="flex flex-col gap-3">
+        <PropertyHeader icon={MonitorPlay} title={label} subtitle="Shader" />
+        <p className="rounded-xl border border-white/[0.05] bg-linen/[0.02] px-3 py-2.5 text-xs text-linen/50">
+          Adjust shader parameters in the Shader panel on the left.
+        </p>
+      </div>
+    );
+  }
 
+  // Media mode → show the selected effect's controls, if it is active.
+  const selected = effects.find(
+    (fx) => fx.id === selectedEffectId && fx.enabled,
+  );
+  if (!selected) return <EmptyProperties />;
+
+  const Icon = EFFECT_ICONS[selected.type];
   return (
-    <div className="flex flex-col gap-4">
-      {/* Selected item */}
-      <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.06] bg-linen/[0.02] px-3 py-2.5">
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/[0.08] bg-black/30 text-linen/60">
-          <Box className="size-4" strokeWidth={1.8} />
-        </span>
-        <span className="min-w-0 flex-1 truncate text-sm font-medium text-linen">
-          {selectedName}
-        </span>
-        <MoreHorizontal className="size-4 shrink-0 text-linen/35" />
+    <div className="flex flex-col gap-3">
+      <PropertyHeader icon={Icon} title={selected.name} subtitle="Effect" />
+      <div className="rounded-2xl border border-white/[0.06] bg-linen/[0.015] p-3">
+        <EffectControlsSwitch effect={selected} />
       </div>
-
-      {/* Transform — placeholder */}
-      <div className="flex flex-col gap-1.5">
-        <span className="px-1 text-xs font-medium text-linen/50">Transform</span>
-        <Row label="Position" value="X 0 · Y 0" />
-        <Row label="Scale" value="X 100% · Y 100%" />
-        <Row label="Rotation" value="0°" />
-        <Row label="Anchor" value="X 0 · Y 0" />
-        <p className="px-1 text-[10px] text-linen/30">Transform arrives later.</p>
-      </div>
-
-      {/* Effects summary — functional toggles */}
-      {!isShader && (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-medium text-linen/50">
-              Effects ({enabled.length})
-            </span>
-            <Plus className="size-3.5 text-linen/30" />
-          </div>
-          {effects.map((fx) => (
-            <div
-              key={fx.id}
-              className={cn(
-                "flex items-center gap-2.5 rounded-xl border px-3 py-2",
-                fx.id === selectedEffectId
-                  ? "border-white/[0.14] bg-white/[0.04]"
-                  : "border-white/[0.05] bg-linen/[0.015]",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => selectEffect(fx.id)}
-                className="min-w-0 flex-1 truncate text-left text-[13px] text-linen/80 focus-visible:outline-none"
-              >
-                {fx.name}
-              </button>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={fx.enabled}
-                aria-label={fx.enabled ? `Disable ${fx.name}` : `Enable ${fx.name}`}
-                onClick={() => toggleEffect(fx.id)}
-                className={cn(
-                  "relative h-[16px] w-7 shrink-0 rounded-full transition-colors",
-                  fx.enabled ? "bg-flame" : "bg-white/[0.14]",
-                )}
-              >
-                <span
-                  className={cn(
-                    "absolute top-0.5 size-3 rounded-full bg-linen shadow transition-all",
-                    fx.enabled ? "left-[13px]" : "left-0.5",
-                  )}
-                />
-              </button>
-            </div>
-          ))}
-          <Row label="Blend Mode" value="Normal" />
-          <Row label="Opacity" value="100%" />
-        </div>
-      )}
     </div>
   );
 }
