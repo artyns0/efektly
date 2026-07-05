@@ -24,6 +24,7 @@ import type { EffectType } from "../../types/effects";
 import { ExportPanel } from "../panels/ExportPanel";
 import { VideoRecordButton } from "./VideoRecordButton";
 import { EffectControlsSwitch } from "./EffectControlsSwitch";
+import { ThreePropertiesPanel } from "../panels/ThreePropertiesPanel";
 import { SHADER_TYPES } from "../../data/shaders";
 
 /* Playground v2 right panel: Properties / Export tabs. Properties shows the
@@ -90,6 +91,9 @@ function PropertiesTab() {
   const effects = useAppStore((s) => s.effects);
   const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
+
+  // 3D mode → Particle Forms 3D controls.
+  if (mode === "three") return <ThreePropertiesPanel />;
 
   // Shader mode → show the active shader as the selected item.
   if (mode === "shader") {

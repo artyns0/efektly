@@ -29,6 +29,11 @@ import type {
   SourceMedia,
   ThemePreference,
 } from "../types/app";
+import type {
+  ParticleForms3DSettings,
+  ThreeToolId,
+} from "../types/three";
+import { createInitialParticleForms3D } from "../data/three";
 
 /* ------------------------------------------------------------------ */
 /*  Single source of truth for UI state.                               */
@@ -120,6 +125,11 @@ interface AppState {
   applyShaderPreset: (type: ShaderTypeId, presetName: string) => void;
   shaderAnimation: ShaderAnimation;
   setShaderAnimation: (patch: Partial<ShaderAnimation>) => void;
+
+  /* 3D workspace — real-time generative 3D, separate from shader mode */
+  three3DTool: ThreeToolId;
+  particleForms3D: ParticleForms3DSettings;
+  updateParticleForms3D: (patch: Partial<ParticleForms3DSettings>) => void;
 
   /* export panel */
   format: ExportFormat;
@@ -412,6 +422,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   shaderAnimation: { ...DEFAULT_SHADER_ANIMATION },
   setShaderAnimation: (patch) =>
     set((state) => ({ shaderAnimation: { ...state.shaderAnimation, ...patch } })),
+
+  /* 3D workspace */
+  three3DTool: "particleForms3D",
+  particleForms3D: createInitialParticleForms3D(),
+  updateParticleForms3D: (patch) =>
+    set((state) => ({ particleForms3D: { ...state.particleForms3D, ...patch } })),
 
   /* export */
   format: "png",

@@ -1,5 +1,6 @@
 import {
   Box,
+  Boxes,
   Camera,
   ChevronDown,
   Circle,
@@ -30,11 +31,12 @@ const ASPECTS: { value: Orientation; label: string }[] = [
   { value: "square", label: "1:1" },
 ];
 
-type NavKey = "source" | "effects" | "shader";
+type NavKey = "source" | "effects" | "shader" | "three";
 const NAV: { key: NavKey; label: string; icon: typeof Sparkles }[] = [
   { key: "source", label: "Source", icon: Sparkles },
   { key: "effects", label: "Effects", icon: Grid2x2 },
   { key: "shader", label: "Shader", icon: Box },
+  { key: "three", label: "3D", icon: Boxes },
 ];
 
 function IconButton({
@@ -86,11 +88,13 @@ export function PlaygroundToolbar() {
   const active: NavKey | null =
     mode === "shader"
       ? "shader"
-      : railSection === "source"
-        ? "source"
-        : railSection === "effects"
-          ? "effects"
-          : null;
+      : mode === "three"
+        ? "three"
+        : railSection === "source"
+          ? "source"
+          : railSection === "effects"
+            ? "effects"
+            : null;
 
   const openSettings = () => {
     setMode("media");
@@ -100,6 +104,8 @@ export function PlaygroundToolbar() {
   const navigate = (key: NavKey) => {
     if (key === "shader") {
       setMode("shader");
+    } else if (key === "three") {
+      setMode("three");
     } else {
       setMode("media");
       setRailSection(key);

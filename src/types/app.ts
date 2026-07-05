@@ -3,7 +3,7 @@
 /* ------------------------------------------------------------------ */
 
 /** Which left-panel view is showing. Driven by the side nav + Export CTA. */
-export type AppMode = "media" | "shader" | "export" | "settings";
+export type AppMode = "media" | "shader" | "export" | "settings" | "three";
 
 /**
  * Playground-layout rail section (Phase 3+). Selects the left panel content

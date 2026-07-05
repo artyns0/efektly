@@ -4,6 +4,7 @@ import { MediaSource } from "../media/MediaSource";
 import { SettingsPanel } from "../panels/SettingsPanel";
 import { EffectAccordion } from "./EffectAccordion";
 import { ShaderControls } from "./ShaderControls";
+import { ThreePanel } from "../panels/ThreePanel";
 import { SHADER_TYPES } from "../../data/shaders";
 
 function SectionHeader({
@@ -39,6 +40,9 @@ export function PlaygroundPanel() {
       </div>
     );
   }
+
+  // 3D tab → 3D objects list only.
+  if (mode === "three") return <ThreePanel />;
 
   // Shader tab → shader controls only.
   if (mode === "shader") return <ShaderControls />;

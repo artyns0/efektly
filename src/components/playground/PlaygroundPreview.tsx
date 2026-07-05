@@ -1,23 +1,28 @@
-import { ChevronDown, Maximize2, Play } from "lucide-react";
+import { useRef } from "react";
+import { Maximize2, Move3d, Play } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { usePreviewZoom } from "../preview/usePreviewZoom";
 import { PreviewStage } from "../preview/PreviewStage";
 import { PreviewZoomControls } from "../preview/PreviewZoomControls";
 import { MediaVideoControls } from "../media/MediaVideoControls";
+import { ThreeViewport } from "../three/ThreeViewport";
 
-/* Playground v2 preview host: "Live" label, Fit dropdown placeholder,
-   zoom cluster + fullscreen top-right, stage, video transport below. */
+/* Playground v2 preview host: "Live" label, zoom cluster + fullscreen
+   top-right, stage, video transport below. In 3D mode the stage becomes a
+   real-time Three.js viewport with orbit controls. */
 
 export function PlaygroundPreview() {
   const mode = useAppStore((s) => s.mode);
   const mediaVideo = useAppStore((s) => s.mediaVideo);
   const isVideo = mediaVideo !== null;
-  const showRealtime = mode === "shader";
+  const is3D = mode === "three";
+  const showRealtime = mode === "shader" || is3D;
 
   const zoomApi = usePreviewZoom();
+  const threeStageRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = () => {
-    const el = zoomApi.stageRef.current;
+    const el = is3D ? threeStageRef.current : zoomApi.stageRef.current;
     if (!el) return;
     if (document.fullscreenElement) {
       document.exitFullscreen?.();
@@ -39,24 +44,23 @@ export function PlaygroundPreview() {
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-flame/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-flame" />
               </span>
-              Realtime
+              {is3D ? "3D" : "Realtime"}
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            disabled
-            className="inline-flex h-7 cursor-not-allowed items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 text-[11px] font-medium text-linen/45"
-          >
-            Fit
-            <ChevronDown className="size-3.5" />
-          </button>
-          <PreviewZoomControls
-            zoom={zoomApi.zoom}
-            onZoom={zoomApi.zoomTo}
-            onFit={zoomApi.fit}
-          />
+          {is3D ? (
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 text-[11px] font-medium text-linen/45">
+              <Move3d className="size-3.5" />
+              Drag to orbit · scroll to zoom
+            </span>
+          ) : (
+            <PreviewZoomControls
+              zoom={zoomApi.zoom}
+              onZoom={zoomApi.zoomTo}
+              onFit={zoomApi.fit}
+            />
+          )}
           <button
             aria-label="Fullscreen preview"
             onClick={toggleFullscreen}
@@ -68,10 +72,19 @@ export function PlaygroundPreview() {
       </div>
 
       {/* Stage */}
-      <PreviewStage zoomApi={zoomApi} />
+      {is3D ? (
+        <div
+          ref={threeStageRef}
+          className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] border border-white/[0.05] bg-black"
+        >
+          <ThreeViewport />
+        </div>
+      ) : (
+        <PreviewStage zoomApi={zoomApi} />
+      )}
 
       {/* Video transport */}
-      {isVideo && (
+      {!is3D && isVideo && (
         <div className="mt-3 shrink-0">
           <MediaVideoControls />
         </div>
