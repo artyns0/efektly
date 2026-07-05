@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useAppStore } from "../../store/useAppStore";
 import { setPreviewCanvas } from "../../engine/preview/canvasRegistry";
 import { ParticleForms } from "../../engine/three/particleForms";
+import { ElasticBubble } from "../../engine/three/elasticBubble";
 
 /* ------------------------------------------------------------------ */
 /*  Real-time 3D viewport (Three.js). Perspective camera + orbit        */
@@ -56,11 +57,14 @@ export function ThreeViewport() {
     scene.add(grid);
 
     const forms = new ParticleForms();
+    const bubble = new ElasticBubble();
+    let currentTool = "particleForms3D";
     scene.add(forms.points);
 
     let raf = 0;
     let last = performance.now();
     let lastFov = -1;
+    let lastCamDist = -1;
     const bg = new THREE.Color();
 
     const resize = () => {
@@ -74,20 +78,50 @@ export function ThreeViewport() {
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      const s = useAppStore.getState().particleForms3D;
+      const state = useAppStore.getState();
+      const tool = state.three3DTool;
 
-      bg.set(s.background);
-      scene.background = bg;
-
-      const fov = 25 + (s.perspective / 100) * 55;
-      if (fov !== lastFov) {
-        lastFov = fov;
-        camera.fov = fov;
-        camera.updateProjectionMatrix();
+      // Swap the active object when the tool changes.
+      if (tool !== currentTool) {
+        if (currentTool === "particleForms3D") scene.remove(forms.points);
+        else scene.remove(bubble.mesh);
+        currentTool = tool;
+        if (tool === "particleForms3D") scene.add(forms.points);
+        else scene.add(bubble.mesh);
+        lastFov = -1;
+        lastCamDist = -1;
       }
 
-      forms.sync(s);
-      forms.tick(now / 1000, dt, s);
+      if (tool === "particleForms3D") {
+        const s = state.particleForms3D;
+        bg.set(s.background);
+        scene.background = bg;
+        const fov = 25 + (s.perspective / 100) * 55;
+        if (fov !== lastFov) {
+          lastFov = fov;
+          camera.fov = fov;
+          camera.updateProjectionMatrix();
+        }
+        forms.sync(s);
+        forms.tick(now / 1000, dt, s);
+      } else {
+        const s = state.elasticBubble3D;
+        bg.set(s.background);
+        scene.background = bg;
+        if (lastFov !== 45) {
+          lastFov = 45;
+          camera.fov = 45;
+          camera.updateProjectionMatrix();
+        }
+        // Camera distance only re-dollies when the slider changes.
+        if (s.cameraDistance !== lastCamDist) {
+          lastCamDist = s.cameraDistance;
+          const dist = 2.5 + (s.cameraDistance / 100) * 9;
+          camera.position.setLength(dist);
+        }
+        bubble.sync(s);
+        bubble.tick(now / 1000, dt, s);
+      }
 
       controls.update();
       renderer.render(scene, camera);
@@ -105,6 +139,7 @@ export function ThreeViewport() {
       ro.disconnect();
       controls.dispose();
       forms.dispose();
+      bubble.dispose();
       renderer.dispose();
       setPreviewCanvas(null);
       if (renderer.domElement.parentNode === host) {

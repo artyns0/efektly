@@ -6,6 +6,7 @@ import { THREE_TOOLS } from "../../data/three";
 
 export function ThreePanel() {
   const tool = useAppStore((s) => s.three3DTool);
+  const setTool = useAppStore((s) => s.setThree3DTool);
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -20,11 +21,12 @@ export function ThreePanel() {
               key={t.id}
               type="button"
               aria-pressed={active}
+              onClick={() => setTool(t.id)}
               className={
                 "flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors " +
                 (active
                   ? "border-flame/50 bg-flame/12 text-flame"
-                  : "border-transparent bg-[#141414] text-linen/70")
+                  : "border-transparent bg-[#141414] text-linen/70 hover:bg-[#1a1a1a] hover:text-linen")
               }
             >
               <Boxes className="size-4 shrink-0" strokeWidth={1.85} />

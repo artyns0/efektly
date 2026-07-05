@@ -25,6 +25,7 @@ import { ExportPanel } from "../panels/ExportPanel";
 import { VideoRecordButton } from "./VideoRecordButton";
 import { EffectControlsSwitch } from "./EffectControlsSwitch";
 import { ThreePropertiesPanel } from "../panels/ThreePropertiesPanel";
+import { ThreeBubblePropertiesPanel } from "../panels/ThreeBubblePropertiesPanel";
 import { SHADER_TYPES } from "../../data/shaders";
 
 /* Playground v2 right panel: Properties / Export tabs. Properties shows the
@@ -87,13 +88,20 @@ function EmptyProperties() {
 
 function PropertiesTab() {
   const mode = useAppStore((s) => s.mode);
+  const three3DTool = useAppStore((s) => s.three3DTool);
   const shaderType = useAppStore((s) => s.shaderType);
   const effects = useAppStore((s) => s.effects);
   const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
 
-  // 3D mode → Particle Forms 3D controls.
-  if (mode === "three") return <ThreePropertiesPanel />;
+  // 3D mode → tool-specific controls.
+  if (mode === "three") {
+    return three3DTool === "elasticBubble3D" ? (
+      <ThreeBubblePropertiesPanel />
+    ) : (
+      <ThreePropertiesPanel />
+    );
+  }
 
   // Shader mode → show the active shader as the selected item.
   if (mode === "shader") {
