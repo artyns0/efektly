@@ -21,21 +21,21 @@ export function PlaygroundShell() {
   useTimeline();
 
   return (
-    <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-onyx text-linen">
-      <div className="flex h-full min-w-[1240px] flex-col">
+    <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-[#0a0a0a] text-linen">
+      <div className="flex h-full min-w-[1300px] flex-col">
         <PlaygroundToolbar />
 
-        <div className="flex min-h-0 flex-1 gap-2.5 p-2.5">
+        <div className="flex min-h-0 flex-1 gap-3 p-3">
           {/* Left rail */}
           <PlaygroundRail />
 
           {/* Left panel */}
-          <aside className="scroll-thin w-[320px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.06] bg-linen/[0.02] p-3">
+          <aside className="scroll-thin w-[328px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.025] to-white/[0.01] p-4 shadow-xl shadow-black/30">
             <PlaygroundPanel />
           </aside>
 
           {/* Center: preview + timeline */}
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="flex min-h-0 flex-[3]">
               <PlaygroundPreview />
             </div>
@@ -46,7 +46,7 @@ export function PlaygroundShell() {
 
           {/* Right panel — collapsible */}
           {rightOpen ? (
-            <aside className="scroll-thin relative w-[300px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.06] bg-linen/[0.02] p-3">
+            <aside className="scroll-thin relative w-[320px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.025] to-white/[0.01] p-4 shadow-xl shadow-black/30">
               <button
                 type="button"
                 aria-label="Collapse export panel"

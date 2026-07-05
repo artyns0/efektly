@@ -16,7 +16,7 @@ import {
 /*  to reflect the uploaded media; videos add playback controls below. */
 /* ------------------------------------------------------------------ */
 
-export function MediaSource() {
+export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
   const source = useAppStore((s) => s.source);
   const mediaType = useAppStore((s) => s.mediaType);
   const mediaUrl = useAppStore((s) => s.mediaUrl);
@@ -56,29 +56,79 @@ export function MediaSource() {
     }
   };
 
+  const dropHandlers = {
+    onClick: () => inputRef.current?.click(),
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        inputRef.current?.click();
+      }
+    },
+    onDragOver: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(true);
+    },
+    onDragLeave: () => setDragging(false),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(false);
+      handleFiles(e.dataTransfer.files);
+    },
+  };
+
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept={ACCEPT_ATTR}
+      className="hidden"
+      onChange={(e) => {
+        handleFiles(e.target.files);
+        e.target.value = ""; // allow re-selecting the same file
+      }}
+    />
+  );
+
+  /* Hero variant — large centered dropzone for the playground Source tab. */
+  if (variant === "hero" && !hasMedia) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload media"
+          {...dropHandlers}
+          className={cn(
+            "group flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-6 py-9 text-center",
+            "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/50",
+            dragging
+              ? "border-flame/60 bg-flame/[0.06]"
+              : "border-white/[0.12] bg-black/20 hover:border-white/25 hover:bg-linen/[0.02]",
+          )}
+        >
+          <span className="mb-1 grid size-12 place-items-center rounded-2xl border border-white/[0.08] bg-white/[0.03] text-flame shadow-inner">
+            <ImagePlus className="size-6" strokeWidth={1.7} />
+          </span>
+          <p className="text-[15px] font-semibold text-linen">Add Media</p>
+          <p className="text-xs text-linen/50">
+            Drag &amp; drop or{" "}
+            <span className="font-medium text-flame">browse</span>
+          </p>
+          <p className="text-[10px] text-linen/30">PNG · JPG · WebP · MP4 · WebM</p>
+        </div>
+        {error && <p className="px-1 text-xs text-flame">{error}</p>}
+        {fileInput}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div
         role="button"
         tabIndex={0}
         aria-label={hasMedia ? "Replace media" : "Upload media"}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            inputRef.current?.click();
-          }
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          handleFiles(e.dataTransfer.files);
-        }}
+        {...dropHandlers}
         className={cn(
           "group flex items-center gap-3.5 rounded-2xl border border-dashed p-2.5 text-left",
           "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/50",
@@ -160,16 +210,7 @@ export function MediaSource() {
 
       {error && <p className="px-1 text-xs text-flame">{error}</p>}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPT_ATTR}
-        className="hidden"
-        onChange={(e) => {
-          handleFiles(e.target.files);
-          e.target.value = ""; // allow re-selecting the same file
-        }}
-      />
+      {fileInput}
     </div>
   );
 }

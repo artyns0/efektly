@@ -96,6 +96,11 @@ interface AppState {
   selectedEffectId: string;
   selectEffect: (id: string) => void;
   toggleEffect: (id: string) => void;
+  /* playground: which effects are placed in the active stack (separate from
+     enabled — a stacked effect can be toggled off without leaving the stack) */
+  stackedEffectIds: string[];
+  addToStack: (id: string) => void;
+  removeFromStack: (id: string) => void;
   updateEffectSettings: (id: string, patch: EffectSettingsPatch) => void;
   speed: number; // 0.25x – 3x
   setSpeed: (speed: number) => void;
@@ -337,6 +342,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       effects: state.effects.map((fx) =>
         fx.id === id ? { ...fx, enabled: !fx.enabled } : fx,
+      ),
+    })),
+  stackedEffectIds: initialEffects.filter((fx) => fx.enabled).map((fx) => fx.id),
+  addToStack: (id) =>
+    set((state) => ({
+      stackedEffectIds: state.stackedEffectIds.includes(id)
+        ? state.stackedEffectIds
+        : [...state.stackedEffectIds, id],
+      effects: state.effects.map((fx) =>
+        fx.id === id ? { ...fx, enabled: true } : fx,
+      ),
+    })),
+  removeFromStack: (id) =>
+    set((state) => ({
+      stackedEffectIds: state.stackedEffectIds.filter((x) => x !== id),
+      effects: state.effects.map((fx) =>
+        fx.id === id ? { ...fx, enabled: false } : fx,
       ),
     })),
   updateEffectSettings: (id, patch) =>

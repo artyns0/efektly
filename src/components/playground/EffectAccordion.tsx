@@ -85,14 +85,19 @@ function Switch({
  */
 export function EffectAccordion() {
   const effects = useAppStore((s) => s.effects);
+  const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
   const selectEffect = useAppStore((s) => s.selectEffect);
   const toggleEffect = useAppStore((s) => s.toggleEffect);
+  const addToStack = useAppStore((s) => s.addToStack);
+  const removeFromStack = useAppStore((s) => s.removeFromStack);
   const setRightTab = useAppStore((s) => s.setRightTab);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const active = effects.filter((fx) => fx.enabled);
-  const available = effects.filter((fx) => !fx.enabled);
+  // Stack membership is independent of enabled: a stacked effect stays in the
+  // list even when toggled off.
+  const active = effects.filter((fx) => stackedEffectIds.includes(fx.id));
+  const available = effects.filter((fx) => !stackedEffectIds.includes(fx.id));
 
   const pick = (id: string) => {
     selectEffect(id);
@@ -100,7 +105,7 @@ export function EffectAccordion() {
   };
 
   const addEffect = (id: string) => {
-    toggleEffect(id);
+    addToStack(id);
     pick(id);
     setMenuOpen(false);
   };
@@ -170,10 +175,12 @@ export function EffectAccordion() {
               <div
                 key={fx.id}
                 className={cn(
-                  "group relative flex items-center gap-2 rounded-xl border py-[7px] pl-1.5 pr-2 transition-colors",
+                  "group relative flex items-center gap-1.5 rounded-xl border py-2 pl-1.5 pr-1.5 shadow-sm transition-colors",
                   selected
-                    ? "border-flame/45 bg-flame/[0.07]"
-                    : "border-white/[0.08] bg-linen/[0.03] hover:border-white/[0.14]",
+                    ? "border-flame/50 bg-flame/[0.08] shadow-flame/5"
+                    : fx.enabled
+                      ? "border-white/[0.1] bg-white/[0.035] hover:border-white/[0.18]"
+                      : "border-white/[0.06] bg-white/[0.01] hover:border-white/[0.12]",
                 )}
               >
                 <GripVertical
@@ -183,20 +190,37 @@ export function EffectAccordion() {
                 <button
                   type="button"
                   onClick={() => pick(fx.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none"
+                  className="flex min-w-0 flex-1 items-center gap-2.5 text-left focus-visible:outline-none"
                 >
                   <span
                     className={cn(
-                      "grid size-[26px] shrink-0 place-items-center rounded-lg border transition-colors",
+                      "grid size-8 shrink-0 place-items-center rounded-lg border transition-colors",
                       selected
                         ? "border-flame/40 bg-flame/15 text-flame"
-                        : "border-white/[0.07] bg-black/20 text-linen/55",
+                        : fx.enabled
+                          ? "border-white/[0.09] bg-black/25 text-linen/70"
+                          : "border-white/[0.06] bg-black/20 text-linen/35",
                     )}
                   >
-                    <Icon className="size-[15px]" strokeWidth={1.85} />
+                    <Icon className="size-[16px]" strokeWidth={1.85} />
                   </span>
-                  <span className="truncate text-[13px] font-medium text-linen">
-                    {fx.name}
+                  <span className="flex min-w-0 flex-col">
+                    <span
+                      className={cn(
+                        "truncate text-[13px] font-medium leading-tight",
+                        fx.enabled ? "text-linen" : "text-linen/50",
+                      )}
+                    >
+                      {fx.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[9px] font-medium uppercase tracking-wide leading-tight",
+                        fx.enabled ? "text-flame/70" : "text-linen/30",
+                      )}
+                    >
+                      {fx.enabled ? "On" : "Off"}
+                    </span>
                   </span>
                 </button>
                 <button
@@ -204,16 +228,16 @@ export function EffectAccordion() {
                   aria-label={`Remove ${fx.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleEffect(fx.id);
+                    removeFromStack(fx.id);
                   }}
-                  className="grid size-6 shrink-0 place-items-center rounded-md text-linen/30 opacity-0 transition hover:bg-white/[0.08] hover:text-linen/70 group-hover:opacity-100"
+                  className="grid size-6 shrink-0 place-items-center rounded-md text-linen/30 opacity-0 transition hover:bg-white/[0.08] hover:text-linen/70 focus-visible:opacity-100 group-hover:opacity-100"
                 >
                   <Trash2 className="size-3.5" />
                 </button>
                 <Switch
                   on={fx.enabled}
                   onClick={() => toggleEffect(fx.id)}
-                  label={`Disable ${fx.name}`}
+                  label={fx.enabled ? `Disable ${fx.name}` : `Enable ${fx.name}`}
                 />
               </div>
             );

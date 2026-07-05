@@ -88,6 +88,7 @@ function PropertiesTab() {
   const mode = useAppStore((s) => s.mode);
   const shaderType = useAppStore((s) => s.shaderType);
   const effects = useAppStore((s) => s.effects);
+  const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
 
   // Shader mode → show the active shader as the selected item.
@@ -103,16 +104,21 @@ function PropertiesTab() {
     );
   }
 
-  // Media mode → show the selected effect's controls, if it is active.
+  // Media mode → show the selected effect's controls if it is in the stack
+  // (independent of enabled, so its settings stay editable while toggled off).
   const selected = effects.find(
-    (fx) => fx.id === selectedEffectId && fx.enabled,
+    (fx) => fx.id === selectedEffectId && stackedEffectIds.includes(fx.id),
   );
   if (!selected) return <EmptyProperties />;
 
   const Icon = EFFECT_ICONS[selected.type];
   return (
     <div className="flex flex-col gap-3">
-      <PropertyHeader icon={Icon} title={selected.name} subtitle="Effect" />
+      <PropertyHeader
+        icon={Icon}
+        title={selected.name}
+        subtitle={selected.enabled ? "Effect" : "Effect · Off"}
+      />
       <div className="rounded-2xl border border-white/[0.06] bg-linen/[0.015] p-3">
         <EffectControlsSwitch effect={selected} />
       </div>

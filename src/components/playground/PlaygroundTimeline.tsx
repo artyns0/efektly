@@ -55,6 +55,7 @@ function Diamonds({ positions, color }: { positions: number[]; color: string }) 
 
 export function PlaygroundTimeline() {
   const effects = useAppStore((s) => s.effects);
+  const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const tlTime = useAppStore((s) => s.tlTime);
   const tlDuration = useAppStore((s) => s.tlDuration);
   const tlPlaying = useAppStore((s) => s.tlPlaying);
@@ -66,12 +67,12 @@ export function PlaygroundTimeline() {
   const laneRef = useRef<HTMLDivElement>(null);
   const [scrubbing, setScrubbing] = useState(false);
 
-  const enabled = effects.filter((fx) => fx.enabled);
+  const stacked = effects.filter((fx) => stackedEffectIds.includes(fx.id));
   const tracks = [
     { name: "Source", accent: "rgba(243,240,232,0.6)", params: [] as string[] },
-    ...enabled.map((fx) => ({
+    ...stacked.map((fx) => ({
       name: fx.name,
-      accent: "#FF5A1F",
+      accent: fx.enabled ? "#FF5A1F" : "rgba(243,240,232,0.35)",
       params: PARAM_ROWS,
     })),
   ];
@@ -88,7 +89,7 @@ export function PlaygroundTimeline() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-linen/[0.02]">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.025] to-white/[0.01] shadow-xl shadow-black/30">
       {/* Toolbar */}
       <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.06] px-3 py-2">
         <button
