@@ -1,10 +1,37 @@
 import type { MotionStyle, ParticlesSettings } from "../../types/shaders";
-import { hexToRgb, rand, rgba } from "./shaderUtils";
+import { hexToRgb, mixRgb, rgba } from "./shaderUtils";
 
 /* ------------------------------------------------------------------ */
-/*  Particles — simple animated glowing particles (v1).                */
-/*  Deterministic positions drift over time; radial-gradient glow.     */
+/*  Particles — stateful glowing particle field.                       */
+/*  Each particle has position, velocity, life, size and an opacity     */
+/*  fade; dead particles respawn so the field stays populated. Radial   */
+/*  gradient glow, additive blending, smooth motion.                   */
 /* ------------------------------------------------------------------ */
+
+interface Particle {
+  x: number; y: number; vx: number; vy: number;
+  life: number; maxLife: number; size: number; mix: number;
+}
+
+let pool: Particle[] = [];
+let lastTime = -1;
+
+function spawn(w: number, h: number, s: ParticlesSettings): Particle {
+  const dim = Math.min(w, h);
+  const ang = Math.random() * Math.PI * 2;
+  const v = (0.2 + (s.spread / 100)) * dim * 0.06 * (0.4 + Math.random());
+  const maxLife = 2 + Math.random() * 4;
+  return {
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: Math.cos(ang) * v,
+    vy: Math.sin(ang) * v,
+    life: Math.random() * maxLife, // stagger initial fades
+    maxLife,
+    size: (1 + (s.size / 100) * 9) * (0.5 + Math.random()),
+    mix: Math.random(),
+  };
+}
 
 export function renderParticles(
   ctx: CanvasRenderingContext2D,
@@ -15,45 +42,49 @@ export function renderParticles(
   _motion: MotionStyle,
 ): void {
   void _motion;
+  const time = timeSec * s.speed;
+  const dt = lastTime < 0 ? 0.016 : Math.min(0.05, Math.max(0.001, time - lastTime));
+  lastTime = time;
+
   ctx.fillStyle = s.background;
   ctx.fillRect(0, 0, w, h);
 
   const count = Math.max(1, Math.round(s.count));
-  const t = timeSec * s.speed;
-  const maxR = 1 + (s.size / 100) * 9;
-  const spread = 0.2 + (s.spread / 100) * 0.8;
-  const glow = s.glow / 100;
+  // Grow / shrink the pool toward the requested count.
+  while (pool.length < count) pool.push(spawn(w, h, s));
+  if (pool.length > count) pool.length = count;
 
   const a = hexToRgb(s.colorA);
   const b = hexToRgb(s.colorB);
+  const glow = s.glow / 100;
 
   ctx.globalCompositeOperation = "lighter";
 
-  for (let i = 0; i < count; i++) {
-    const seedX = rand(i * 2 + 1);
-    const seedY = rand(i * 2 + 2);
-    const speed = 0.2 + rand(i + 5) * 0.8;
-    const dir = rand(i + 9) * Math.PI * 2;
+  for (const p of pool) {
+    p.life -= dt;
+    if (p.life <= 0) {
+      Object.assign(p, spawn(w, h, s));
+      p.life = p.maxLife;
+    }
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    // Wrap around edges for a continuous field.
+    if (p.x < 0) p.x += w; else if (p.x > w) p.x -= w;
+    if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
 
-    // Drift with wrap-around.
-    let x = (seedX + Math.cos(dir) * t * 0.03 * speed * spread) % 1;
-    let y = (seedY + Math.sin(dir) * t * 0.03 * speed * spread) % 1;
-    if (x < 0) x += 1;
-    if (y < 0) y += 1;
-    const px = x * w;
-    const py = y * h;
+    // Fade in/out across life (triangular envelope).
+    const lf = p.life / p.maxLife;
+    const fade = Math.sin(Math.min(1, lf) * Math.PI);
+    const col = mixRgb(a, b, p.mix);
+    const r = p.size * (1.6 + glow * 3.5);
 
-    const r = maxR * (0.5 + 0.5 * rand(i + 3));
-    const flick = 0.6 + 0.4 * Math.sin(t * 2 + i);
-    const col = rand(i + 11) > 0.5 ? a : b;
-
-    const grad = ctx.createRadialGradient(px, py, 0, px, py, r * (2 + glow * 3));
-    grad.addColorStop(0, rgba(col, 0.9 * flick));
-    grad.addColorStop(0.4, rgba(col, 0.35 * flick * (0.4 + glow)));
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+    grad.addColorStop(0, rgba(col, 0.9 * fade));
+    grad.addColorStop(0.4, rgba(col, 0.35 * fade * (0.4 + glow)));
     grad.addColorStop(1, rgba(col, 0));
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(px, py, r * (2 + glow * 3), 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
   }
 

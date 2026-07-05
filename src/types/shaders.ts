@@ -163,17 +163,19 @@ export interface KineticStripesSettings {
 }
 
 export interface SparkBurstSettings {
-  count: number;
+  count: number; // max live particles
+  emitRate: number; // 0–100 particles emitted per frame while moving
   sparkSize: number;
   spread: number;
   gravity: number;
+  drag: number; // 0–100 velocity damping
   glow: number;
   decay: number;
   speed: number;
-  burstStrength: number;
+  burstStrength: number; // initial velocity magnitude
   trailLength: number;
   mouseFollow: boolean;
-  autoBurst: boolean;
+  autoBurst: boolean; // auto-emit from center when idle
   colorA: string;
   colorB: string;
   background: string;
@@ -197,6 +199,8 @@ export interface KineticLinesSettings {
   lineCount: number;
   lineWidth: number;
   scale: number; // 0–100 overall size
+  centerX: number; // 0–1 pattern center
+  centerY: number; // 0–1 pattern center
   rotation: number; // degrees, static base rotation
   morph: number; // 0–100 shape morph amount
   noise: number; // 0–100 positional jitter

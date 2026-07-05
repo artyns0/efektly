@@ -33,9 +33,12 @@ export function renderKineticLines(
   const phase = (((timeSec * (s.speed || 1)) / loop) % 1 + 1) % 1;
   const t = phase * TAU;
 
-  const cx = w / 2;
-  const cy = h / 2;
-  const R = Math.min(w, h) * 0.5 * (0.28 + (s.scale / 100) * 0.68);
+  const cx = (s.centerX ?? 0.5) * w;
+  const cy = (s.centerY ?? 0.5) * h;
+  // Base radius on the half-diagonal so patterns fill the whole canvas
+  // (including corners) at any aspect ratio — no accidental inner box.
+  const cover = Math.hypot(w, h) * 0.5;
+  const R = cover * (0.34 + (s.scale / 100) * 0.78);
   const morph = s.morph / 100;
   const noise = s.noise / 100;
   const alpha = clamp(s.opacity / 100, 0, 1);
