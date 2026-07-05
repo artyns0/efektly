@@ -1,11 +1,11 @@
 import { PanelRightClose, Upload } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
-import { PreviewWorkspace } from "../layout/PreviewWorkspace";
 import { PlaygroundToolbar } from "./PlaygroundToolbar";
 import { PlaygroundRail } from "./PlaygroundRail";
 import { PlaygroundPanel } from "./PlaygroundPanel";
+import { PlaygroundPreview } from "./PlaygroundPreview";
 import { PlaygroundTimeline } from "./PlaygroundTimeline";
-import { PlaygroundExportProject } from "./PlaygroundExportProject";
+import { PlaygroundRightPanel } from "./PlaygroundRightPanel";
 import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 import { useTimeline } from "./useTimeline";
 
@@ -37,7 +37,7 @@ export function PlaygroundShell() {
           {/* Center: preview + timeline */}
           <div className="flex min-w-0 flex-1 flex-col gap-2.5">
             <div className="flex min-h-0 flex-[3]">
-              <PreviewWorkspace />
+              <PlaygroundPreview />
             </div>
             <div className="h-52 shrink-0">
               <PlaygroundTimeline />
@@ -55,7 +55,7 @@ export function PlaygroundShell() {
               >
                 <PanelRightClose className="size-4" strokeWidth={1.8} />
               </button>
-              <PlaygroundExportProject />
+              <PlaygroundRightPanel />
             </aside>
           ) : (
             <button

@@ -18,7 +18,8 @@ export type RailSection =
   | "shapes"
   | "audio"
   | "presets"
-  | "settings";
+  | "settings"
+  | "help";
 
 /** The input the canvas is built from. */
 export type InputSource = "media" | "shader";

@@ -45,6 +45,9 @@ interface AppState {
   /** Playground right (Export) panel open/collapsed. */
   exportPanelOpen: boolean;
   setExportPanelOpen: (open: boolean) => void;
+  /** Playground right panel tab. */
+  rightTab: "properties" | "export";
+  setRightTab: (tab: "properties" | "export") => void;
   /** Editable project name (persisted to localStorage). */
   projectName: string;
   setProjectName: (name: string) => void;
@@ -188,6 +191,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setRailSection: (railSection) => set({ railSection }),
   exportPanelOpen: true,
   setExportPanelOpen: (exportPanelOpen) => set({ exportPanelOpen }),
+  rightTab: "properties",
+  setRightTab: (rightTab) => set({ rightTab }),
   projectName:
     (typeof localStorage !== "undefined" &&
       localStorage.getItem("efektly.projectName")) ||

@@ -8,13 +8,8 @@ import { useAppStore } from "../../store/useAppStore";
 /*  loop). Tracks + keyframe diamonds remain visual placeholders.      */
 /* ------------------------------------------------------------------ */
 
-const PARAM_HINTS: Record<string, string[]> = {
-  dither: ["Threshold", "Point Size"],
-  ascii: ["Cell Size", "Contrast"],
-  glitch: ["RGB Shift", "Distortion"],
-  lineArt: ["Threshold", "Thickness"],
-  grain: ["Amount", "Size"],
-};
+/** Placeholder parameter rows under the first effect track (UI shell). */
+const PARAM_ROWS = ["Position", "Turbulence", "Displace", "Brightness"];
 
 const fmt = (s: number) => {
   const m = Math.floor(s / 60);
@@ -77,7 +72,7 @@ export function PlaygroundTimeline() {
     ...enabled.map((fx) => ({
       name: fx.name,
       accent: "#FF5A1F",
-      params: PARAM_HINTS[fx.type] ?? [],
+      params: PARAM_ROWS,
     })),
   ];
 
@@ -214,10 +209,25 @@ export function PlaygroundTimeline() {
                   </div>
                 </div>
                 {t.params.map((p, i) => (
-                  <div key={p} className="h-6 px-2 py-1">
+                  <div key={p} className="relative h-6 px-2 py-1">
+                    {p === "Turbulence" && (
+                      <svg
+                        className="pointer-events-none absolute inset-x-2 inset-y-0"
+                        viewBox="0 0 100 10"
+                        preserveAspectRatio="none"
+                      >
+                        <path
+                          d="M0,7 C15,7 20,3 32,3 S55,8 68,6 S90,2 100,4"
+                          fill="none"
+                          stroke="#FF5A1F"
+                          strokeOpacity="0.7"
+                          strokeWidth="0.7"
+                        />
+                      </svg>
+                    )}
                     <Diamonds
                       positions={i === 0 ? [20, 50, 74] : [30, 62, 88]}
-                      color="rgba(179,90,60,0.85)"
+                      color={p === "Turbulence" ? "#FF5A1F" : "rgba(243,240,232,0.65)"}
                     />
                   </div>
                 ))}
