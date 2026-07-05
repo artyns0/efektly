@@ -27,7 +27,7 @@ export function PlaygroundPreview() {
   };
 
   return (
-    <div className="flex size-full min-w-0 flex-col rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.02] to-transparent p-3 shadow-xl shadow-black/30">
+    <div className="flex size-full min-w-0 flex-col rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-3">
       {/* Header */}
       <div className="mb-3 flex shrink-0 items-center justify-between px-1">
         <div className="flex items-center gap-2">

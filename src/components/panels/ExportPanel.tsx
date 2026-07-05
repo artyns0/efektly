@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 import { Download, ImageDown, Trash2 } from "lucide-react";
-import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { FPS_OPTIONS, RESOLUTION_OPTIONS } from "../../data/mockData";
 import type { ExportFraming, ResolutionId } from "../../types/app";
@@ -17,6 +16,7 @@ import { downloadBlob, downloadUrl } from "../../utils/download";
 import { fileTimestamp, formatBytes, formatClock } from "../../utils/time";
 import { Section } from "../controls/Section";
 import { SliderControl } from "../controls/SliderControl";
+import { SelectControl } from "../controls/SelectControl";
 import { Button } from "../controls/Button";
 
 const IMAGE_FORMATS: { value: ExportImageFormat; label: string }[] = [
@@ -25,97 +25,15 @@ const IMAGE_FORMATS: { value: ExportImageFormat; label: string }[] = [
   { value: "webp", label: "WebP" },
 ];
 
-function Choice({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "h-9 rounded-xl border text-sm font-medium transition-all duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/50",
-        active
-          ? "border-flame/55 bg-flame/12 text-flame shadow-[0_8px_22px_-14px_rgba(255,90,31,0.85)]"
-          : "border-white/[0.06] bg-linen/[0.025] text-linen/60 hover:border-white/[0.12] hover:bg-linen/[0.05] hover:text-linen",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
+const FRAMING_OPTIONS = [
+  { value: "fit", label: "Fit" },
+  { value: "crop", label: "Crop" },
+];
 
-/** Fit / Crop framing picker. */
-function FramingPicker({
-  value,
-  onChange,
-}: {
-  value: ExportFraming;
-  onChange: (f: ExportFraming) => void;
-}) {
-  return (
-    <div>
-      <p className="mb-2 text-sm text-linen/70">Framing</p>
-      <div className="grid grid-cols-2 gap-2">
-        <Choice active={value === "fit"} onClick={() => onChange("fit")}>
-          Fit
-        </Choice>
-        <Choice active={value === "crop"} onClick={() => onChange("crop")}>
-          Crop
-        </Choice>
-      </div>
-    </div>
-  );
-}
-
-/** Two-column resolution picker, shared by both export cards. */
-function ResolutionGrid({
-  value,
-  onChange,
-}: {
-  value: ResolutionId;
-  onChange: (id: ResolutionId) => void;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {RESOLUTION_OPTIONS.map((opt) => {
-        const active = value === opt.id;
-        return (
-          <button
-            key={opt.id}
-            onClick={() => onChange(opt.id)}
-            aria-pressed={active}
-            className={cn(
-              "flex flex-col gap-0.5 rounded-xl border px-3 py-2 text-left transition-all duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/50",
-              active
-                ? "border-flame/55 bg-flame/12 shadow-[0_8px_22px_-14px_rgba(255,90,31,0.85)]"
-                : "border-white/[0.06] bg-linen/[0.025] hover:border-white/[0.12] hover:bg-linen/[0.05]",
-            )}
-          >
-            <span
-              className={cn(
-                "text-sm font-medium",
-                active ? "text-flame" : "text-linen/80",
-              )}
-            >
-              {opt.label}
-            </span>
-            <span className="font-mono text-[11px] text-linen/45">
-              {opt.dimensions}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+const RESOLUTION_SELECT = RESOLUTION_OPTIONS.map((opt) => ({
+  value: opt.id,
+  label: `${opt.label} · ${opt.dimensions}`,
+}));
 
 export function ExportPanel({
   videoRecordAction,
@@ -222,28 +140,25 @@ export function ExportPanel({
           </p>
         )}
 
-        <div className="flex flex-col gap-4">
-          <div>
-            <p className="mb-2 text-sm text-linen/70">Format</p>
-            <div className="grid grid-cols-3 gap-2">
-              {IMAGE_FORMATS.map((opt) => (
-                <Choice
-                  key={opt.value}
-                  active={imageFormat === opt.value}
-                  onClick={() => setFormat(opt.value)}
-                >
-                  {opt.label}
-                </Choice>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-sm text-linen/70">Resolution</p>
-            <ResolutionGrid value={resolution} onChange={setResolution} />
-          </div>
-
-          <FramingPicker value={imageFraming} onChange={setImageFraming} />
+        <div className="flex flex-col gap-3.5">
+          <SelectControl
+            label="Format"
+            value={imageFormat}
+            options={IMAGE_FORMATS}
+            onChange={(v) => setFormat(v as ExportImageFormat)}
+          />
+          <SelectControl
+            label="Resolution"
+            value={resolution}
+            options={RESOLUTION_SELECT}
+            onChange={(v) => setResolution(v as ResolutionId)}
+          />
+          <SelectControl
+            label="Framing"
+            value={imageFraming}
+            options={FRAMING_OPTIONS}
+            onChange={(v) => setImageFraming(v as ExportFraming)}
+          />
 
           {showQuality && (
             <SliderControl
@@ -318,26 +233,24 @@ export function ExportPanel({
             </p>
           )}
 
-          <div>
-            <p className="mb-2 text-sm text-linen/70">Resolution</p>
-            <ResolutionGrid
-              value={videoResolution}
-              onChange={setVideoResolution}
-            />
-          </div>
-
-          <FramingPicker value={videoFraming} onChange={setVideoFraming} />
-
-          <div>
-            <p className="mb-2 text-sm text-linen/70">Recording FPS</p>
-            <div className="grid grid-cols-3 gap-2">
-              {FPS_OPTIONS.map((opt) => (
-                <Choice key={opt} active={fps === opt} onClick={() => setFps(opt)}>
-                  {opt} fps
-                </Choice>
-              ))}
-            </div>
-          </div>
+          <SelectControl
+            label="Resolution"
+            value={videoResolution}
+            options={RESOLUTION_SELECT}
+            onChange={(v) => setVideoResolution(v as ResolutionId)}
+          />
+          <SelectControl
+            label="Framing"
+            value={videoFraming}
+            options={FRAMING_OPTIONS}
+            onChange={(v) => setVideoFraming(v as ExportFraming)}
+          />
+          <SelectControl
+            label="FPS"
+            value={String(fps)}
+            options={FPS_OPTIONS.map((o) => ({ value: String(o), label: `${o} fps` }))}
+            onChange={(v) => setFps(Number(v) as typeof fps)}
+          />
 
           <p className="text-xs text-linen/35">
             Recording is WebM and capped at 20 seconds.

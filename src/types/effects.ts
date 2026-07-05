@@ -36,8 +36,12 @@ export type DitherPreset =
   | "bayer"
   | "atkinson";
 
+/** Whether an effect recolors to its palette or keeps the source's colors. */
+export type EffectColorMode = "custom" | "original";
+
 export interface DitherSettings {
   preset: DitherPreset;
+  colorMode: EffectColorMode;
   pointSize: number;
   threshold: number;
   contrast: number;

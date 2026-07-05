@@ -192,7 +192,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   /* navigation */
   mode: "media",
   setMode: (mode) => set({ mode }),
-  railSection: "effects",
+  railSection: "source",
   setRailSection: (railSection) => set({ railSection }),
   exportPanelOpen: true,
   setExportPanelOpen: (exportPanelOpen) => set({ exportPanelOpen }),

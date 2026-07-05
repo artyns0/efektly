@@ -130,7 +130,16 @@ export function renderDither(
     alpha[i] = src[j + 3] / 255;
   }
 
-  const levels = buildPalette(s.palette);
+  // "original" mode keeps the source colors: dithering only decides whether
+  // each cell is on (paint the source pixel) or off (transparent). A neutral
+  // black/white 2-level palette drives that on/off decision.
+  const original = s.colorMode === "original";
+  const levels = original
+    ? [
+        { r: 0, g: 0, b: 0, lum: 0 },
+        { r: 255, g: 255, b: 255, lum: 1 },
+      ]
+    : buildPalette(s.palette);
   const gap =
     levels.length > 1
       ? (levels[levels.length - 1].lum - levels[0].lum) / (levels.length - 1)
@@ -143,6 +152,18 @@ export function renderDither(
 
   const putCell = (i: number, lvl: PaletteLevel) => {
     const j = i * 4;
+    if (original) {
+      // On cells take the source pixel's real color; off cells stay clear.
+      if (lvl.lum >= 0.5) {
+        od[j] = src[j];
+        od[j + 1] = src[j + 1];
+        od[j + 2] = src[j + 2];
+        od[j + 3] = 255;
+      } else {
+        od[j + 3] = 0;
+      }
+      return;
+    }
     od[j] = lvl.r;
     od[j + 1] = lvl.g;
     od[j + 2] = lvl.b;

@@ -1,7 +1,6 @@
 import { PanelRightClose, Upload } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { PlaygroundToolbar } from "./PlaygroundToolbar";
-import { PlaygroundRail } from "./PlaygroundRail";
 import { PlaygroundPanel } from "./PlaygroundPanel";
 import { PlaygroundPreview } from "./PlaygroundPreview";
 import { PlaygroundTimeline } from "./PlaygroundTimeline";
@@ -21,16 +20,13 @@ export function PlaygroundShell() {
   useTimeline();
 
   return (
-    <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-[#0a0a0a] text-linen">
-      <div className="flex h-full min-w-[1300px] flex-col">
+    <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-[#070707] text-linen">
+      <div className="flex h-full min-w-[1200px] flex-col">
         <PlaygroundToolbar />
 
         <div className="flex min-h-0 flex-1 gap-3 p-3">
-          {/* Left rail */}
-          <PlaygroundRail />
-
           {/* Left panel */}
-          <aside className="scroll-thin w-[328px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.025] to-white/[0.01] p-4 shadow-xl shadow-black/30">
+          <aside className="scroll-thin w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
             <PlaygroundPanel />
           </aside>
 
@@ -46,7 +42,7 @@ export function PlaygroundShell() {
 
           {/* Right panel — collapsible */}
           {rightOpen ? (
-            <aside className="scroll-thin relative w-[320px] shrink-0 overflow-y-auto rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.025] to-white/[0.01] p-4 shadow-xl shadow-black/30">
+            <aside className="scroll-thin relative w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
               <button
                 type="button"
                 aria-label="Collapse export panel"
@@ -62,7 +58,7 @@ export function PlaygroundShell() {
               type="button"
               aria-label="Expand export panel"
               onClick={() => setRightOpen(true)}
-              className="flex w-10 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-white/[0.06] bg-linen/[0.02] py-4 text-linen/55 transition-colors hover:border-flame/30 hover:text-flame"
+              className="flex w-10 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-[#0e0e0e] py-4 text-linen/55 transition-colors hover:border-flame/30 hover:text-flame"
             >
               <Upload className="size-4" strokeWidth={1.9} />
               <span

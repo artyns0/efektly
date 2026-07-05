@@ -12,12 +12,10 @@ import { useEffect, useRef } from "react";
 const COLS = 22; // vertical mesh lines
 const ROWS = 14; // horizontal mesh lines
 
-// Mix flame (#FF5A1F warmed) -> cream (#F3F0E8) by t in [0,1].
+// Monochrome idle animation: soft grey -> white by t in [0,1].
 function meshColor(t: number, alpha: number): string {
-  const r = Math.round(255 + (243 - 255) * t);
-  const g = Math.round(120 + (240 - 120) * t);
-  const b = Math.round(70 + (232 - 70) * t);
-  return `rgba(${r},${g},${b},${alpha})`;
+  const v = Math.round(150 + 105 * t); // 150..255 grey
+  return `rgba(${v},${v},${v},${alpha})`;
 }
 
 function makeSprite(kind: "flame" | "cream"): HTMLCanvasElement {
@@ -28,13 +26,13 @@ function makeSprite(kind: "flame" | "cream"): HTMLCanvasElement {
   const g = c.getContext("2d")!;
   const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   if (kind === "flame") {
-    grad.addColorStop(0, "rgba(255,228,200,1)");
-    grad.addColorStop(0.32, "rgba(255,90,31,0.6)");
-    grad.addColorStop(1, "rgba(255,90,31,0)");
+    grad.addColorStop(0, "rgba(230,230,230,1)");
+    grad.addColorStop(0.32, "rgba(200,200,200,0.55)");
+    grad.addColorStop(1, "rgba(200,200,200,0)");
   } else {
-    grad.addColorStop(0, "rgba(255,253,247,1)");
-    grad.addColorStop(0.4, "rgba(243,240,232,0.5)");
-    grad.addColorStop(1, "rgba(243,240,232,0)");
+    grad.addColorStop(0, "rgba(255,255,255,1)");
+    grad.addColorStop(0.4, "rgba(243,243,243,0.5)");
+    grad.addColorStop(1, "rgba(243,243,243,0)");
   }
   g.fillStyle = grad;
   g.fillRect(0, 0, size, size);
@@ -97,9 +95,9 @@ export function PreviewPlaceholder() {
         width * 0.68, height * 0.32, 0,
         width * 0.68, height * 0.32, Math.max(width, height) * 0.8,
       );
-      warm.addColorStop(0, "rgba(255,90,31,0.16)");
-      warm.addColorStop(0.5, "rgba(255,90,31,0.05)");
-      warm.addColorStop(1, "rgba(255,90,31,0)");
+      warm.addColorStop(0, "rgba(255,255,255,0.10)");
+      warm.addColorStop(0.5, "rgba(255,255,255,0.03)");
+      warm.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = warm;
       ctx.fillRect(0, 0, width, height);
 

@@ -44,6 +44,7 @@ export function createInitialEffects(): EffectInstance[] {
       status: "ui-ready",
       settings: {
         preset: "floyd-steinberg",
+        colorMode: "custom",
         pointSize: 2,
         threshold: 50,
         contrast: 0,

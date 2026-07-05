@@ -72,6 +72,17 @@ export function DitherControls({ effect }: { effect: DitherEffect }) {
         format={(v) => (v > 0 ? `+${v}` : `${v}`)}
       />
 
+      <SelectControl
+        label="Colors"
+        value={d.colorMode ?? "custom"}
+        options={[
+          { value: "original", label: "Original colors" },
+          { value: "custom", label: "Custom palette" },
+        ]}
+        onChange={(v) => set({ colorMode: v as DitherSettings["colorMode"] })}
+      />
+
+      {(d.colorMode ?? "custom") === "custom" && (
       <div className="flex flex-col gap-3">
         <span className="text-sm text-linen/70">Color Palette</span>
         {d.palette.map((color, i) => (
@@ -109,6 +120,7 @@ export function DitherControls({ effect }: { effect: DitherEffect }) {
           Add Color
         </button>
       </div>
+      )}
 
       <Toggle
         label="Invert"

@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
   Redo2,
+  Settings,
   Sparkles,
   Square,
   Undo2,
@@ -82,8 +83,19 @@ export function PlaygroundToolbar() {
       },
     });
 
-  const active: NavKey =
-    mode === "shader" ? "shader" : railSection === "source" ? "source" : "effects";
+  const active: NavKey | null =
+    mode === "shader"
+      ? "shader"
+      : railSection === "source"
+        ? "source"
+        : railSection === "effects"
+          ? "effects"
+          : null;
+
+  const openSettings = () => {
+    setMode("media");
+    setRailSection("settings");
+  };
 
   const navigate = (key: NavKey) => {
     if (key === "shader") {
@@ -96,11 +108,16 @@ export function PlaygroundToolbar() {
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.06] px-4">
-      {/* Brand + project name */}
+      {/* Brand + slogan + project name */}
       <div className="flex min-w-0 items-center gap-3">
         <Logo />
-        <span className="text-[19px] font-semibold leading-none tracking-tight text-linen">
-          Efektly
+        <span className="flex flex-col leading-none">
+          <span className="text-[18px] font-semibold tracking-tight text-linen">
+            Efektly
+          </span>
+          <span className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-linen/40">
+            Upload. Stylize. Export.
+          </span>
         </span>
         <span className="mx-1 h-6 w-px bg-white/[0.08]" />
         <input
@@ -147,6 +164,9 @@ export function PlaygroundToolbar() {
         </IconButton>
         <IconButton label="Redo" disabled>
           <Redo2 className="size-4" strokeWidth={1.8} />
+        </IconButton>
+        <IconButton label="Settings" onClick={openSettings}>
+          <Settings className="size-4" strokeWidth={1.8} />
         </IconButton>
 
         <label className="relative ml-1">
