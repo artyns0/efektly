@@ -15,6 +15,7 @@ import { renderPlasmaGradient } from "./plasmaGradient";
 import { renderOrbitParticles } from "./orbitParticles";
 import { renderKineticStripes } from "./kineticStripes";
 import { renderSparkBurst } from "./sparkBurst";
+import { renderKineticLines } from "./kineticLines";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dispatcher — routes to the active procedural renderer.      */
@@ -31,6 +32,7 @@ export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set([
   "orbitParticles",
   "kineticStripes",
   "sparkBurst",
+  "kineticLines",
 ]);
 
 export function renderShader(
@@ -82,6 +84,9 @@ export function renderShader(
       break;
     case "sparkBurst":
       renderSparkBurst(ctx, w, h, settings.sparkBurst, timeSec);
+      break;
+    case "kineticLines":
+      renderKineticLines(ctx, w, h, settings.kineticLines, timeSec);
       break;
   }
 }

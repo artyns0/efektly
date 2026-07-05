@@ -7,6 +7,7 @@ import {
   Grid2x2,
   Hexagon,
   Orbit,
+  Radar,
   Ribbon,
   Sparkles,
   Star,
@@ -32,6 +33,7 @@ const ICONS: Record<ShaderTypeId, LucideIcon> = {
   orbitParticles: Orbit,
   kineticStripes: AlignJustify,
   sparkBurst: Star,
+  kineticLines: Radar,
 };
 
 export function ShaderTypeSelector() {

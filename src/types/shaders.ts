@@ -14,7 +14,8 @@ export type ShaderTypeId =
   | "plasmaGradient"
   | "orbitParticles"
   | "kineticStripes"
-  | "sparkBurst";
+  | "sparkBurst"
+  | "kineticLines";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
 
@@ -178,6 +179,37 @@ export interface SparkBurstSettings {
   background: string;
 }
 
+/** Kinetic Lines — procedural seamless-loop line/dot patterns. `mode`
+ *  selects the pattern family (set by presets). */
+export type KineticLinesMode =
+  | "orbit"
+  | "waveSmear"
+  | "contour"
+  | "dotMatrix"
+  | "spiral"
+  | "radialMesh"
+  | "pulseBlob"
+  | "morphStar"
+  | "particleGrid";
+
+export interface KineticLinesSettings {
+  mode: KineticLinesMode;
+  lineCount: number;
+  lineWidth: number;
+  scale: number; // 0–100 overall size
+  rotation: number; // degrees, static base rotation
+  morph: number; // 0–100 shape morph amount
+  noise: number; // 0–100 positional jitter
+  glow: number; // 0–100 shadow blur
+  opacity: number; // 0–100
+  speed: number; // 0–3 local time multiplier
+  loopDuration: number; // seconds per seamless loop
+  colorA: string; // lines / dots
+  colorB: string; // accent
+  background: string;
+  invert: boolean; // swap foreground / background
+}
+
 export interface ShaderSettingsMap {
   dotGrid: DotGridSettings;
   meshLiquid: MeshLiquidSettings;
@@ -191,6 +223,7 @@ export interface ShaderSettingsMap {
   orbitParticles: OrbitParticlesSettings;
   kineticStripes: KineticStripesSettings;
   sparkBurst: SparkBurstSettings;
+  kineticLines: KineticLinesSettings;
 }
 
 /** A partial of any one shader's settings (for updates + presets). */
@@ -206,7 +239,8 @@ export type ShaderSettingsPatch = Partial<
     PlasmaGradientSettings &
     OrbitParticlesSettings &
     KineticStripesSettings &
-    SparkBurstSettings
+    SparkBurstSettings &
+    KineticLinesSettings
 >;
 
 export interface ShaderAnimation {

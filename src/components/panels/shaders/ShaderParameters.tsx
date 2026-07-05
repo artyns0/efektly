@@ -76,6 +76,16 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     { kind: "toggle", key: "mouseFollow", label: "Mouse Follow" },
     { kind: "toggle", key: "autoBurst", label: "Auto Burst" },
   ],
+  kineticLines: [
+    { kind: "slider", key: "lineCount", label: "Line Count", min: 2, max: 120, step: 1 },
+    { kind: "slider", key: "lineWidth", label: "Line Width", min: 0.3, max: 6, step: 0.1, unit: "px" },
+    pctS("scale", "Scale"),
+    { kind: "slider", key: "rotation", label: "Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    pctS("morph", "Morph"), pctS("noise", "Noise"), pctS("glow", "Glow"),
+    pctS("opacity", "Opacity"), speedS(),
+    { kind: "slider", key: "loopDuration", label: "Loop Duration", min: 1, max: 20, step: 0.5, unit: "s" },
+    { kind: "toggle", key: "invert", label: "Invert" },
+  ],
 };
 
 /**

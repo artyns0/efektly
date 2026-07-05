@@ -26,6 +26,7 @@ export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "orbitParticles", label: "Orbit Particles" },
   { id: "kineticStripes", label: "Kinetic Stripes" },
   { id: "sparkBurst", label: "Spark Burst" },
+  { id: "kineticLines", label: "Kinetic Lines" },
 ];
 
 export function createInitialShaderSettings(): ShaderSettingsMap {
@@ -106,6 +107,11 @@ export function createInitialShaderSettings(): ShaderSettingsMap {
       count: 220, sparkSize: 40, spread: 55, gravity: 30, glow: 60, decay: 45,
       speed: 1, burstStrength: 60, trailLength: 35, mouseFollow: true,
       autoBurst: true, colorA: FLAME, colorB: "#FFD8A8", background: ONYX,
+    },
+    kineticLines: {
+      mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, rotation: 0,
+      morph: 45, noise: 10, glow: 20, opacity: 90, speed: 1, loopDuration: 6,
+      colorA: LINEN, colorB: FLAME, background: ONYX, invert: false,
     },
   };
 }
@@ -189,6 +195,17 @@ export const SHADER_PRESETS: Record<ShaderTypeId, ShaderPreset[]> = {
     { name: "Cold Fire", settings: { colorA: "#7DE3FF", colorB: "#DDE3EA", background: "#05080C", glow: 75 } },
     { name: "Festival", settings: { colorA: "#F35C9E", colorB: "#FFD34D", background: "#0E0A12", burstStrength: 80, count: 320 } },
   ],
+  kineticLines: [
+    { name: "Orbit Lines", settings: { mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, morph: 45, glow: 20, loopDuration: 6, colorA: LINEN, background: ONYX } },
+    { name: "Wave Smear", settings: { mode: "waveSmear", lineCount: 48, lineWidth: 2, scale: 70, morph: 55, glow: 12, loopDuration: 7, colorA: LINEN, background: "#050505" } },
+    { name: "Contour Field", settings: { mode: "contour", lineCount: 34, lineWidth: 1, scale: 62, morph: 40, glow: 8, loopDuration: 8, colorA: LINEN, background: ONYX } },
+    { name: "Dot Matrix Glow", settings: { mode: "dotMatrix", lineCount: 34, lineWidth: 3, scale: 66, morph: 40, glow: 30, loopDuration: 6, colorA: LINEN, background: "#060606" } },
+    { name: "Spiral Core", settings: { mode: "spiral", lineCount: 48, lineWidth: 1, scale: 60, morph: 30, glow: 16, loopDuration: 9, colorA: LINEN, background: ONYX } },
+    { name: "Radial Mesh", settings: { mode: "radialMesh", lineCount: 72, lineWidth: 0.9, scale: 60, morph: 45, glow: 14, loopDuration: 8, colorA: LINEN, background: ONYX } },
+    { name: "Pulse Blob", settings: { mode: "pulseBlob", scale: 70, glow: 40, opacity: 85, loopDuration: 5, colorA: LINEN, background: "#050505" } },
+    { name: "Morph Star", settings: { mode: "morphStar", lineCount: 30, lineWidth: 1.4, scale: 64, morph: 55, glow: 18, loopDuration: 7, colorA: LINEN, background: ONYX } },
+    { name: "Particle Grid", settings: { mode: "particleGrid", lineCount: 30, lineWidth: 3, scale: 70, glow: 22, loopDuration: 6, colorA: LINEN, background: "#060606" } },
+  ],
 };
 
 /** Default preset name shown as selected per shader type. */
@@ -205,4 +222,5 @@ export const DEFAULT_PRESET: Record<ShaderTypeId, string> = {
   orbitParticles: "Halo",
   kineticStripes: "Brand Bands",
   sparkBurst: "Tiger Sparks",
+  kineticLines: "Orbit Lines",
 };
