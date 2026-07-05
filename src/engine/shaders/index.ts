@@ -16,6 +16,7 @@ import { renderOrbitParticles } from "./orbitParticles";
 import { renderKineticStripes } from "./kineticStripes";
 import { renderSparkBurst } from "./sparkBurst";
 import { renderKineticLines } from "./kineticLines";
+import { renderAuraOrb } from "./auraOrb";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dispatcher — routes to the active procedural renderer.      */
@@ -33,6 +34,7 @@ export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set([
   "kineticStripes",
   "sparkBurst",
   "kineticLines",
+  "auraOrb",
 ]);
 
 export function renderShader(
@@ -87,6 +89,9 @@ export function renderShader(
       break;
     case "kineticLines":
       renderKineticLines(ctx, w, h, settings.kineticLines, timeSec);
+      break;
+    case "auraOrb":
+      renderAuraOrb(ctx, w, h, settings.auraOrb, timeSec);
       break;
   }
 }

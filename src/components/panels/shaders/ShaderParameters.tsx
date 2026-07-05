@@ -89,6 +89,25 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     { kind: "slider", key: "loopDuration", label: "Loop Duration", min: 1, max: 20, step: 0.5, unit: "s" },
     { kind: "toggle", key: "invert", label: "Invert" },
   ],
+  auraOrb: [
+    pctS("radius", "Radius"), pctS("edgeSoftness", "Edge Softness"),
+    pctS("rimWidth", "Rim Width"), pctS("roundness", "Roundness"),
+    { kind: "slider", key: "centerX", label: "Center X", min: 0, max: 1, step: 0.01 },
+    { kind: "slider", key: "centerY", label: "Center Y", min: 0, max: 1, step: 0.01 },
+    pctS("glowIntensity", "Glow Intensity"), pctS("glowRadius", "Glow Radius"),
+    pctS("auraFalloff", "Aura Falloff"), pctS("bloomAmount", "Bloom Amount"),
+    pctS("bloomRadius", "Bloom Radius"),
+    speedS("flowSpeed", "Flow Speed"), pctS("flowScale", "Flow Scale"),
+    pctS("flowDistortion", "Flow Distortion"), pctS("innerBand", "Inner Band Strength"),
+    pctS("plasma", "Plasma Amount"), pctS("noise", "Noise Amount"),
+    { kind: "slider", key: "rotation", label: "Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    { kind: "color", key: "highlightColor", label: "Highlight Color" },
+    { kind: "color", key: "rimColor", label: "Rim Color" },
+    pctS("colorShift", "Color Shift"),
+    speedS(), pctS("pulseAmount", "Pulse Amount"),
+    speedS("pulseSpeed", "Pulse Speed"),
+    { kind: "slider", key: "loopDuration", label: "Loop Duration", min: 1, max: 20, step: 0.5, unit: "s" },
+  ],
 };
 
 /**

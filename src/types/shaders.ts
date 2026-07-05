@@ -15,7 +15,8 @@ export type ShaderTypeId =
   | "orbitParticles"
   | "kineticStripes"
   | "sparkBurst"
-  | "kineticLines";
+  | "kineticLines"
+  | "auraOrb";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
 
@@ -214,6 +215,43 @@ export interface KineticLinesSettings {
   invert: boolean; // swap foreground / background
 }
 
+/** Aura Orb — a glowing procedural energy orb with inner flow + bloom. */
+export interface AuraOrbSettings {
+  /* orb / shape */
+  radius: number; // 0–100
+  edgeSoftness: number; // 0–100
+  rimWidth: number; // 0–100
+  roundness: number; // 0–100 (100 = perfect circle)
+  centerX: number; // 0–1
+  centerY: number; // 0–1
+  /* glow / aura */
+  glowIntensity: number; // 0–100
+  glowRadius: number; // 0–100
+  auraFalloff: number; // 0–100
+  bloomAmount: number; // 0–100
+  bloomRadius: number; // 0–100
+  /* internal flow */
+  flowSpeed: number; // 0–3
+  flowScale: number; // 0–100
+  flowDistortion: number; // 0–100
+  innerBand: number; // 0–100
+  plasma: number; // 0–100
+  noise: number; // 0–100
+  rotation: number; // degrees
+  /* color */
+  colorA: string;
+  colorB: string;
+  highlightColor: string;
+  rimColor: string;
+  background: string;
+  colorShift: number; // 0–100
+  /* motion */
+  speed: number; // 0–3
+  pulseAmount: number; // 0–100
+  pulseSpeed: number; // 0–3
+  loopDuration: number; // seconds
+}
+
 export interface ShaderSettingsMap {
   dotGrid: DotGridSettings;
   meshLiquid: MeshLiquidSettings;
@@ -228,6 +266,7 @@ export interface ShaderSettingsMap {
   kineticStripes: KineticStripesSettings;
   sparkBurst: SparkBurstSettings;
   kineticLines: KineticLinesSettings;
+  auraOrb: AuraOrbSettings;
 }
 
 /** A partial of any one shader's settings (for updates + presets). */
@@ -244,7 +283,8 @@ export type ShaderSettingsPatch = Partial<
     OrbitParticlesSettings &
     KineticStripesSettings &
     SparkBurstSettings &
-    KineticLinesSettings
+    KineticLinesSettings &
+    AuraOrbSettings
 >;
 
 export interface ShaderAnimation {

@@ -27,6 +27,7 @@ export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "kineticStripes", label: "Kinetic Stripes" },
   { id: "sparkBurst", label: "Spark Burst" },
   { id: "kineticLines", label: "Kinetic Lines" },
+  { id: "auraOrb", label: "Aura Orb" },
 ];
 
 export function createInitialShaderSettings(): ShaderSettingsMap {
@@ -115,6 +116,16 @@ export function createInitialShaderSettings(): ShaderSettingsMap {
       morph: 45, noise: 10, glow: 20, opacity: 90, speed: 1, loopDuration: 6,
       colorA: LINEN, colorB: FLAME, background: ONYX, invert: false,
     },
+    auraOrb: {
+      radius: 55, edgeSoftness: 45, rimWidth: 30, roundness: 100,
+      centerX: 0.5, centerY: 0.5,
+      glowIntensity: 65, glowRadius: 50, auraFalloff: 45, bloomAmount: 55, bloomRadius: 45,
+      flowSpeed: 1, flowScale: 45, flowDistortion: 40, innerBand: 40, plasma: 45,
+      noise: 8, rotation: 0,
+      colorA: "#5B7CFF", colorB: "#F35C9E", highlightColor: "#EAF0FF",
+      rimColor: "#BFE0FF", background: "#040309", colorShift: 50,
+      speed: 1, pulseAmount: 30, pulseSpeed: 0.6, loopDuration: 10,
+    },
   };
 }
 
@@ -197,6 +208,13 @@ export const SHADER_PRESETS: Record<ShaderTypeId, ShaderPreset[]> = {
     { name: "Cold Fire", settings: { colorA: "#7DE3FF", colorB: "#DDE3EA", background: "#05080C", glow: 75 } },
     { name: "Festival", settings: { colorA: "#F35C9E", colorB: "#FFD34D", background: "#0E0A12", burstStrength: 80, count: 320 } },
   ],
+  auraOrb: [
+    { name: "Soft Aura", settings: { colorA: "#7C9CFF", colorB: "#C9B8FF", highlightColor: "#F2F5FF", rimColor: "#DDE9FF", background: "#050510", glowIntensity: 70, bloomAmount: 60, edgeSoftness: 60, plasma: 35, flowDistortion: 30 } },
+    { name: "Neon Core", settings: { colorA: "#FF3DAE", colorB: "#7A2BFF", highlightColor: "#FFFFFF", rimColor: "#FF9AE0", background: "#0A0410", glowIntensity: 80, bloomAmount: 70, bloomRadius: 55, innerBand: 55, plasma: 60 } },
+    { name: "Blue Pink", settings: { colorA: "#3B6BFF", colorB: "#FF5CA8", highlightColor: "#EAF0FF", rimColor: "#BFE0FF", background: "#040309", glowIntensity: 65, bloomAmount: 55 } },
+    { name: "Cosmic Rim", settings: { colorA: "#2A1E6B", colorB: "#8A5CF6", highlightColor: "#CFC0FF", rimColor: "#B9F0FF", background: "#02030A", rimWidth: 45, glowIntensity: 55, bloomAmount: 50, flowScale: 60, flowDistortion: 55 } },
+    { name: "Dream Orb", settings: { colorA: "#FF9A7A", colorB: "#F35C9E", highlightColor: "#FFF3E6", rimColor: "#FFD8C0", background: "#0A0508", glowIntensity: 70, bloomAmount: 65, pulseAmount: 45, plasma: 40 } },
+  ],
   kineticLines: [
     { name: "Orbit Lines", settings: { mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, morph: 45, glow: 20, loopDuration: 6, colorA: LINEN, background: ONYX } },
     { name: "Wave Smear", settings: { mode: "waveSmear", lineCount: 48, lineWidth: 2, scale: 70, morph: 55, glow: 12, loopDuration: 7, colorA: LINEN, background: "#050505" } },
@@ -225,4 +243,5 @@ export const DEFAULT_PRESET: Record<ShaderTypeId, string> = {
   kineticStripes: "Brand Bands",
   sparkBurst: "Tiger Sparks",
   kineticLines: "Orbit Lines",
+  auraOrb: "Blue Pink",
 };

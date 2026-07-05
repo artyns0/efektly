@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   AlignJustify,
+  CircleDot,
   CloudFog,
   Droplets,
   Grid2x2,
@@ -33,6 +34,7 @@ const ICONS: Record<ShaderTypeId, LucideIcon> = {
   kineticStripes: AlignJustify,
   sparkBurst: Star,
   kineticLines: Radar,
+  auraOrb: CircleDot,
 };
 
 export function ShaderTypeSelector() {
