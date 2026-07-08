@@ -15,6 +15,7 @@ import { renderCrtMonitor } from "./effects/crtMonitor";
 import { renderVhsBleed } from "./effects/vhsBleed";
 import { renderKaleidoscope } from "./effects/kaleidoscope";
 import { renderNeonEdge } from "./effects/neonEdge";
+import { renderVisionTracker } from "./effects/visionTracker";
 
 /* ------------------------------------------------------------------ */
 /*  Effect Stack render pipeline (Canvas 2D).                          */
@@ -156,6 +157,9 @@ export function applyEffect(
       break;
     case "neonEdge":
       renderNeonEdge(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "visionTracker":
+      renderVisionTracker(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
       break;
     default:
       break;

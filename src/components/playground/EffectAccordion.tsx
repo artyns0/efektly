@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Monitor,
   PenTool,
+  ScanEye,
   Plus,
   StretchHorizontal,
   Trash2,
@@ -41,6 +42,7 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   vhsBleed: Tv,
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
+  visionTracker: ScanEye,
 };
 
 /** Compact pill switch for enable/disable. */

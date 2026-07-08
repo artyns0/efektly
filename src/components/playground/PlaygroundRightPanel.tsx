@@ -12,6 +12,7 @@ import {
   Monitor,
   MousePointerSquareDashed,
   PenTool,
+  ScanEye,
   StretchHorizontal,
   Tv,
   Type,
@@ -48,6 +49,7 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   vhsBleed: Tv,
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
+  visionTracker: ScanEye,
 };
 
 function PropertyHeader({

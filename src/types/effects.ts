@@ -20,7 +20,8 @@ export type EffectType =
   | "crtMonitor"
   | "vhsBleed"
   | "kaleidoscope"
-  | "neonEdge";
+  | "neonEdge"
+  | "visionTracker";
 
 /** Drives the small status chip shown on each stack item. */
 export type EffectStatus = "ui-ready" | "controls-ready" | "coming-next";
@@ -277,6 +278,73 @@ export interface NeonEdgeSettings {
   invert: boolean;
 }
 
+/* ----- Vision Tracker ----- */
+
+export type VisionShapeMode =
+  | "boxes"
+  | "lines"
+  | "boxesLines"
+  | "dots"
+  | "crosshair"
+  | "cube"
+  | "hud"
+  | "network"
+  | "dataLabels";
+
+export type VisionBackground =
+  | "original"
+  | "grayscale"
+  | "threshold"
+  | "black"
+  | "difference";
+
+export type ProcessingScale = "low" | "medium" | "high";
+
+export interface VisionTrackerSettings {
+  /* detection */
+  threshold: number; // 0–100
+  blur: number; // 0–100
+  contrast: number; // 0–100
+  minArea: number; // 0–100
+  maxArea: number; // 0–100
+  mergeDistance: number; // 0–100
+  sensitivity: number; // 0–100
+  invert: boolean;
+  backgroundDiff: boolean;
+  motionDiff: boolean;
+  processingScale: ProcessingScale;
+  /* tracking */
+  maxBlobs: number; // 1–120
+  matchDistance: number; // 0–100
+  persistence: number; // 0–100 (frames kept when missing)
+  smoothing: number; // 0–100
+  idStability: number; // 0–100
+  velocitySmoothing: number; // 0–100
+  /* overlay */
+  shapeMode: VisionShapeMode;
+  showBoxes: boolean;
+  showCenters: boolean;
+  showIds: boolean;
+  showArea: boolean;
+  showLines: boolean;
+  showTrails: boolean;
+  showNetwork: boolean;
+  lineDistance: number; // 0–100
+  trailLength: number; // 0–100
+  /* style */
+  boxColor: string;
+  lineColor: string;
+  centerColor: string;
+  textColor: string;
+  boxThickness: number; // 0–100
+  lineThickness: number; // 0–100
+  textSize: number; // 0–100
+  opacity: number; // 0–100
+  glow: number; // 0–100
+  /* background */
+  background: VisionBackground;
+}
+
 /* ----- Instance model ----- */
 
 export interface EffectSettingsMap {
@@ -295,6 +363,7 @@ export interface EffectSettingsMap {
   vhsBleed: VhsBleedSettings;
   kaleidoscope: KaleidoscopeSettings;
   neonEdge: NeonEdgeSettings;
+  visionTracker: VisionTrackerSettings;
 }
 
 /** A patch carries a partial of exactly one effect's settings. */
@@ -313,7 +382,8 @@ export type EffectSettingsPatch =
   | Partial<CrtMonitorSettings>
   | Partial<VhsBleedSettings>
   | Partial<KaleidoscopeSettings>
-  | Partial<NeonEdgeSettings>;
+  | Partial<NeonEdgeSettings>
+  | Partial<VisionTrackerSettings>;
 
 interface EffectBase<T extends EffectType> {
   id: string;
@@ -340,4 +410,5 @@ export type EffectInstance =
   | EffectBase<"crtMonitor">
   | EffectBase<"vhsBleed">
   | EffectBase<"kaleidoscope">
-  | EffectBase<"neonEdge">;
+  | EffectBase<"neonEdge">
+  | EffectBase<"visionTracker">;
