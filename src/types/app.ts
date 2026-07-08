@@ -117,6 +117,15 @@ export type ResolutionId = "original" | "1080p" | "vertical" | "square";
 export type ExportFraming = "fit" | "crop";
 export type Fps = 24 | 30 | 60;
 
+/** Video export container for the frame-accurate media video encoder. */
+export type VideoContainer = "mp4" | "webm";
+
+/** Video export quality tier (maps to an encoder bitrate). */
+export type VideoQuality = "recommended" | "high" | "veryHigh" | "custom";
+
+/** Video export resolution — adds 720p/4K on top of the image set. */
+export type VideoResolutionId = "original" | "720p" | "1080p" | "4k";
+
 /* ----- Shader (placeholder for a later step) ----- */
 
 export type ShaderType = "waves" | "noise" | "voronoi" | "gradient-mesh";

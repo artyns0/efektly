@@ -215,7 +215,14 @@ export function PlaygroundToolbar() {
           aria-label={isRecording ? "Stop recording" : "Record"}
           aria-pressed={isRecording}
           onClick={handleRecord}
-          disabled={!canCapture}
+          disabled={!canCapture || (mode !== "shader" && !isRecording)}
+          title={
+            mode !== "shader"
+              ? "Recording is available in Shader mode. Use Export MP4 for media video."
+              : isRecording
+                ? "Stop recording"
+                : "Record shader as WebM"
+          }
           className={cn(
             "inline-flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-35",
             isRecording

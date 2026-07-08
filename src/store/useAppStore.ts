@@ -28,6 +28,9 @@ import type {
   ResolutionId,
   SourceMedia,
   ThemePreference,
+  VideoContainer,
+  VideoQuality,
+  VideoResolutionId,
 } from "../types/app";
 import type {
   ElasticBubble3DSettings,
@@ -152,6 +155,19 @@ interface AppState {
   /** Video export / recording resolution — separate from image `resolution`. */
   videoResolution: ResolutionId;
   setVideoResolution: (resolution: ResolutionId) => void;
+  /* professional media video (MP4) export settings */
+  videoExportResolution: VideoResolutionId;
+  setVideoExportResolution: (r: VideoResolutionId) => void;
+  videoContainer: VideoContainer;
+  setVideoContainer: (c: VideoContainer) => void;
+  videoQuality: VideoQuality;
+  setVideoQuality: (q: VideoQuality) => void;
+  customBitrateMbps: number;
+  setCustomBitrateMbps: (mbps: number) => void;
+  videoFileName: string;
+  setVideoFileName: (name: string) => void;
+  imageFileName: string;
+  setImageFileName: (name: string) => void;
   /** Export framing (fit = letterbox, crop = center-fill). */
   imageFraming: ExportFraming;
   setImageFraming: (framing: ExportFraming) => void;
@@ -453,6 +469,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   setQuality: (quality) => set({ quality }),
   videoResolution: "original",
   setVideoResolution: (videoResolution) => set({ videoResolution }),
+  videoExportResolution: "1080p",
+  setVideoExportResolution: (videoExportResolution) => set({ videoExportResolution }),
+  videoContainer: "mp4",
+  setVideoContainer: (videoContainer) => set({ videoContainer }),
+  videoQuality: "recommended",
+  setVideoQuality: (videoQuality) => set({ videoQuality }),
+  customBitrateMbps: 12,
+  setCustomBitrateMbps: (customBitrateMbps) => set({ customBitrateMbps }),
+  videoFileName: "",
+  setVideoFileName: (videoFileName) => set({ videoFileName }),
+  imageFileName: "",
+  setImageFileName: (imageFileName) => set({ imageFileName }),
   imageFraming: "fit",
   setImageFraming: (imageFraming) => set({ imageFraming }),
   videoFraming: "fit",
