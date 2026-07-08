@@ -20,8 +20,7 @@ import { NameField } from "./NameField";
 
 const IMAGE_FORMATS = [
   { value: "png", label: "PNG" },
-  { value: "jpg", label: "JPG" },
-  { value: "webp", label: "WebP" },
+  { value: "jpg", label: "JPEG" },
 ];
 const FRAMING = [
   { value: "fit", label: "Fit" },
@@ -31,7 +30,7 @@ const RESOLUTION_SELECT = RESOLUTION_OPTIONS.map((o) => ({
   value: o.id,
   label: `${o.label} · ${o.dimensions}`,
 }));
-const EXT: Record<ExportImageFormat, string> = { png: "png", jpg: "jpg", webp: "webp" };
+const EXT: Record<ExportImageFormat, string> = { png: "png", jpg: "jpg" };
 
 export function ImageExportPanel() {
   const format = useAppStore((s) => s.format);
@@ -50,8 +49,7 @@ export function ImageExportPanel() {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
-  const imageFormat: ExportImageFormat =
-    format === "jpg" || format === "webp" ? format : "png";
+  const imageFormat: ExportImageFormat = format === "jpg" ? "jpg" : "png";
   const showQuality = imageFormat !== "png";
   const baseName =
     imageFileName.trim() || projectName.trim() || `efektly-${fileTimestamp()}`;

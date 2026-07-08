@@ -3,7 +3,6 @@ import { useAppStore } from "../../store/useAppStore";
 import { PlaygroundToolbar } from "./PlaygroundToolbar";
 import { PlaygroundPanel } from "./PlaygroundPanel";
 import { PlaygroundPreview } from "./PlaygroundPreview";
-import { PlaygroundTimeline } from "./PlaygroundTimeline";
 import { PlaygroundRightPanel } from "./PlaygroundRightPanel";
 import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 import { useTimeline } from "./useTimeline";
@@ -30,14 +29,9 @@ export function PlaygroundShell() {
             <PlaygroundPanel />
           </aside>
 
-          {/* Center: preview + timeline */}
-          <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="flex min-h-0 flex-[3]">
-              <PlaygroundPreview />
-            </div>
-            <div className="h-52 shrink-0">
-              <PlaygroundTimeline />
-            </div>
+          {/* Center: preview (video transport lives inside the preview) */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <PlaygroundPreview />
           </div>
 
           {/* Right panel — collapsible */}

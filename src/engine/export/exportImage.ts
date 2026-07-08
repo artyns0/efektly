@@ -3,17 +3,16 @@
 /*  renderToExportCanvas; this module only encodes the finished canvas. */
 /* ------------------------------------------------------------------ */
 
-export type ExportImageFormat = "png" | "jpg" | "webp";
+export type ExportImageFormat = "png" | "jpg";
 
 const MIME: Record<ExportImageFormat, string> = {
   png: "image/png",
   jpg: "image/jpeg",
-  webp: "image/webp",
 };
 
-const EXT: Record<ExportImageFormat, string> = { png: "png", jpg: "jpg", webp: "webp" };
+const EXT: Record<ExportImageFormat, string> = { png: "png", jpg: "jpg" };
 
-/** Encode a canvas to a Blob. Quality (0–100) applies to JPG/WebP only. */
+/** Encode a canvas to a Blob. Quality (0–100) applies to JPG only. */
 export function encodeCanvas(
   canvas: HTMLCanvasElement,
   format: ExportImageFormat,

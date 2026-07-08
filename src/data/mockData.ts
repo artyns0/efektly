@@ -40,11 +40,9 @@ export const DEFAULT_PALETTE: string[] = [
 
 /* ----- Export options ----- */
 
-export const FORMAT_OPTIONS: Option<"png" | "jpg" | "webp" | "webm">[] = [
+export const FORMAT_OPTIONS: Option<"png" | "jpg">[] = [
   { value: "png", label: "PNG" },
-  { value: "jpg", label: "JPG" },
-  { value: "webp", label: "WebP" },
-  { value: "webm", label: "WebM" },
+  { value: "jpg", label: "JPEG" },
 ];
 
 export const ORIENTATION_OPTIONS: Option<Orientation>[] = [

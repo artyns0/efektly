@@ -101,12 +101,20 @@ export function PlaygroundToolbar() {
     <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.06] px-4">
       {/* Brand + slogan + project name */}
       <div className="flex min-w-0 items-center gap-3">
-        <img
-          src="/efektly_logo_beyaz.png"
-          alt="Efektly"
-          className="h-7 w-auto select-none"
-          draggable={false}
-        />
+        <a
+          href="https://efektly.com/"
+          aria-label="Efektly home"
+          onContextMenu={(e) => e.preventDefault()}
+          className="flex shrink-0 select-none items-center"
+        >
+          <img
+            src="/efektly_logo_beyaz.png"
+            alt="Efektly"
+            className="pointer-events-none h-7 w-auto select-none"
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+          />
+        </a>
         <span className="rounded bg-flame/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-flame">
           Beta
         </span>
@@ -184,7 +192,7 @@ export function PlaygroundToolbar() {
               ? "Recording is available in Shader mode. Use Export MP4 for media video."
               : isRecording
                 ? "Stop recording"
-                : "Record shader as WebM"
+                : "Record shader preview"
           }
           className={cn(
             "inline-flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-35",

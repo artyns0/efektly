@@ -16,7 +16,6 @@ const FLAME = "#FF5A1F";
 export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "meshLiquid", label: "Mesh / Liquid" },
   { id: "dotGrid", label: "Dot Grid" },
-  { id: "voronoi", label: "Voronoi" },
   { id: "particles", label: "Particles" },
   { id: "liquidGlass", label: "Liquid Glass" },
   { id: "liquidSilk", label: "Liquid Silk" },

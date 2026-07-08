@@ -40,7 +40,7 @@ export function VideoRecordButton() {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-linen/40">
-        No recorded clip yet — record the live preview as WebM (max 20s).
+        No recording yet — record the live shader preview (max 20s).
       </p>
       <Button
         variant="primary"
@@ -49,7 +49,7 @@ export function VideoRecordButton() {
         className="h-10 w-full justify-center"
         icon={<Circle className="size-4 fill-onyx text-onyx" />}
       >
-        Record WebM
+        Record
       </Button>
     </div>
   );

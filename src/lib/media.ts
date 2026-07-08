@@ -6,18 +6,17 @@ import type { MediaType, SourceMedia } from "../types/app";
 /*  nothing is ever uploaded to a server.                              */
 /* ------------------------------------------------------------------ */
 
-/** MIME types we accept for upload. */
-export const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/webp"];
-export const ACCEPTED_VIDEO_MIME = ["video/mp4", "video/webm", "video/quicktime"];
+/** MIME types we accept for upload (PNG, JPEG, SVG images; MP4 video). */
+export const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/svg+xml"];
+export const ACCEPTED_VIDEO_MIME = ["video/mp4"];
 
 /** Extensions accepted as a fallback when a File reports no/odd MIME type. */
-export const ACCEPTED_EXT = [".png", ".jpg", ".jpeg", ".webp"];
-export const ACCEPTED_VIDEO_EXT = [".mp4", ".webm", ".mov"];
+export const ACCEPTED_EXT = [".png", ".jpg", ".jpeg", ".svg"];
+export const ACCEPTED_VIDEO_EXT = [".mp4"];
 
 /** Value for an <input type="file"> accept attribute. */
 export const ACCEPT_ATTR =
-  "image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime," +
-  ".png,.jpg,.jpeg,.webp,.mp4,.webm,.mov";
+  "image/png,image/jpeg,image/svg+xml,video/mp4,.png,.jpg,.jpeg,.svg,.mp4";
 
 export function isAcceptedImage(file: File): boolean {
   if (ACCEPTED_MIME.includes(file.type)) return true;
@@ -49,21 +48,15 @@ export function formatFileSize(bytes: number): string {
 
 function detectFormat(file: File): SourceMedia["format"] {
   if (file.type === "image/png") return "PNG";
-  if (file.type === "image/webp") return "WEBP";
+  if (file.type === "image/svg+xml") return "SVG";
   if (file.type === "image/jpeg") return "JPG";
   const name = file.name.toLowerCase();
   if (name.endsWith(".png")) return "PNG";
-  if (name.endsWith(".webp")) return "WEBP";
+  if (name.endsWith(".svg")) return "SVG";
   return "JPG"; // .jpg / .jpeg
 }
 
-function detectVideoFormat(file: File): SourceMedia["format"] {
-  if (file.type === "video/mp4") return "MP4";
-  if (file.type === "video/webm") return "WEBM";
-  if (file.type === "video/quicktime") return "MOV";
-  const name = file.name.toLowerCase();
-  if (name.endsWith(".webm")) return "WEBM";
-  if (name.endsWith(".mov")) return "MOV";
+function detectVideoFormat(_file: File): SourceMedia["format"] {
   return "MP4";
 }
 

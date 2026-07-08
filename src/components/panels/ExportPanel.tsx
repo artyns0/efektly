@@ -25,7 +25,7 @@ function ShaderRecordSection({ recordAction }: { recordAction?: ReactNode }) {
     return (
       recordAction ?? (
         <p className="text-xs text-linen/40">
-          Use Record to capture the shader as a WebM clip.
+          Use Record to capture the shader preview.
         </p>
       )
     );
@@ -52,7 +52,7 @@ function ShaderRecordSection({ recordAction }: { recordAction?: ReactNode }) {
             downloadUrl(recordedUrl, `efektly-shader-${fileTimestamp()}.webm`)
           }
         >
-          Download WebM
+          Download Recording
         </Button>
         <Button icon={<Trash2 className="size-4" />} className="h-10" onClick={clearRecording}>
           Clear

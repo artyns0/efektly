@@ -37,7 +37,7 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
     if (!file) return;
     const kind = detectMediaKind(file);
     if (!kind) {
-      setError("Unsupported file. Use PNG, JPG, WebP, MP4, or WebM.");
+      setError("Unsupported file. Use PNG, JPG, SVG, or MP4.");
       return;
     }
     try {
@@ -114,7 +114,7 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
             Drag &amp; drop or{" "}
             <span className="font-medium text-flame">browse</span>
           </p>
-          <p className="text-[10px] text-linen/30">PNG · JPG · WebP · MP4 · WebM</p>
+          <p className="text-[10px] text-linen/30">PNG · JPG · SVG · MP4</p>
         </div>
         {error && <p className="px-1 text-xs text-flame">{error}</p>}
         {fileInput}
@@ -185,7 +185,7 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
                 Drag &amp; drop, or click to browse
               </p>
               <p className="text-xs text-linen/35">
-                PNG · JPG · WebP · MP4 · WebM
+                PNG · JPG · SVG · MP4
               </p>
             </>
           )}

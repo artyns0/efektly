@@ -109,7 +109,7 @@ export type EffectInstance =
 
 /* ----- Export configuration ----- */
 
-export type ExportFormat = "png" | "jpg" | "webp" | "webm";
+export type ExportFormat = "png" | "jpg";
 export type Orientation = "horizontal" | "vertical" | "square";
 export type ResolutionId = "original" | "1080p" | "vertical" | "square";
 
@@ -118,7 +118,7 @@ export type ExportFraming = "fit" | "crop";
 export type Fps = 24 | 30 | 60;
 
 /** Video export container for the frame-accurate media video encoder. */
-export type VideoContainer = "mp4" | "webm";
+export type VideoContainer = "mp4";
 
 /** Video export quality tier (maps to an encoder bitrate). */
 export type VideoQuality = "recommended" | "high" | "veryHigh" | "custom";
@@ -143,7 +143,7 @@ export interface SourceMedia {
   name: string;
   width: number;
   height: number;
-  format: "JPG" | "PNG" | "WEBP" | "MP4" | "WEBM" | "MOV";
+  format: "JPG" | "PNG" | "SVG" | "MP4";
   sizeLabel: string;
   /** Videos only — formatted like "0:12". */
   durationLabel?: string;

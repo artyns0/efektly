@@ -433,7 +433,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }),
 
   /* shader mode */
-  shaderType: "dotGrid",
+  shaderType: "meshLiquid",
   setShaderType: (shaderType) => set({ shaderType }),
   shaderSettings: createInitialShaderSettings(),
   updateShaderSettings: (type, patch) =>

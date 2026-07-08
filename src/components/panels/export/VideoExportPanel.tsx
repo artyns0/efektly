@@ -3,7 +3,6 @@ import { Film, X } from "lucide-react";
 import { useAppStore } from "../../../store/useAppStore";
 import type {
   ExportFraming,
-  VideoContainer,
   VideoQuality,
   VideoResolutionId,
 } from "../../../types/app";
@@ -37,10 +36,6 @@ const FRAMING = [
   { value: "fit", label: "Fit (letterbox)" },
   { value: "crop", label: "Crop (fill)" },
 ];
-const CONTAINERS = [
-  { value: "mp4", label: "MP4 (H.264)" },
-  { value: "webm", label: "WebM (VP9)" },
-];
 const FPS_OPTS = [
   { value: "24", label: "24 fps" },
   { value: "30", label: "30 fps" },
@@ -53,7 +48,6 @@ export function VideoExportPanel() {
   const res = useAppStore((s) => s.videoExportResolution);
   const setRes = useAppStore((s) => s.setVideoExportResolution);
   const container = useAppStore((s) => s.videoContainer);
-  const setContainer = useAppStore((s) => s.setVideoContainer);
   const quality = useAppStore((s) => s.videoQuality);
   const setQuality = useAppStore((s) => s.setVideoQuality);
   const customBitrate = useAppStore((s) => s.customBitrateMbps);
@@ -189,12 +183,10 @@ export function VideoExportPanel() {
         options={FPS_OPTS}
         onChange={(v) => setFps(Number(v) as 24 | 30 | 60)}
       />
-      <SelectControl
-        label="Format"
-        value={container}
-        options={CONTAINERS}
-        onChange={(v) => setContainer(v as VideoContainer)}
-      />
+      <div className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm">
+        <span className="text-linen/70">Format</span>
+        <span className="font-medium text-linen">MP4 (H.264)</span>
+      </div>
       <SelectControl
         label="Framing"
         value={framing}

@@ -68,9 +68,7 @@ export function SettingsPanel() {
           onChange={() => {}}
           options={[
             { value: "png", label: "PNG" },
-            { value: "jpg", label: "JPG" },
-            { value: "webp", label: "WebP" },
-            { value: "webm", label: "WebM" },
+            { value: "jpg", label: "JPEG" },
           ]}
         />
         <div className="mt-4">

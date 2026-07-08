@@ -1,4 +1,4 @@
-import { Keyboard, MessageSquare, RefreshCw } from "lucide-react";
+import { Instagram, MessageSquare, RefreshCw } from "lucide-react";
 
 /* Playground v2 status strip: GPU/local · saved indicator · shortcuts/feedback. */
 
@@ -30,14 +30,22 @@ export function PlaygroundStatusBar() {
         Project saved locally
       </span>
       <span className="ml-auto flex items-center gap-4 sm:ml-0">
-        <span className="flex items-center gap-1.5">
-          <Keyboard className="size-3.5" />
-          <span className="hidden md:inline">Shortcuts</span>
-        </span>
-        <span className="flex items-center gap-1.5">
+        <a
+          href="https://www.instagram.com/efektlystudio/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 transition-colors hover:text-flame"
+        >
+          <Instagram className="size-3.5" />
+          <span className="hidden md:inline">Instagram</span>
+        </a>
+        <a
+          href="mailto:iletisim@artyns.com"
+          className="flex items-center gap-1.5 transition-colors hover:text-flame"
+        >
           <MessageSquare className="size-3.5" />
           <span className="hidden md:inline">Feedback</span>
-        </span>
+        </a>
       </span>
     </footer>
   );

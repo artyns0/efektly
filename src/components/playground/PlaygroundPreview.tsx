@@ -83,8 +83,8 @@ export function PlaygroundPreview() {
         <PreviewStage zoomApi={zoomApi} />
       )}
 
-      {/* Video transport */}
-      {!is3D && isVideo && (
+      {/* Video transport — only in media mode with a video loaded */}
+      {mode === "media" && isVideo && (
         <div className="mt-3 shrink-0">
           <MediaVideoControls />
         </div>
