@@ -12,12 +12,15 @@ import { hexToRgb, mixRgb } from "./shaderUtils";
 /* ------------------------------------------------------------------ */
 
 const TAU = Math.PI * 2;
-// Per-frame pixel budget for the procedural field (kept smooth at ~60fps
-// while still resolving fine bands on 4K / retina previews).
-const MAX_PIXELS = 720_000;
+// Per-frame pixel budget for the procedural field. Capped so the CPU
+// ImageData loop stays smooth; the result is upscaled with high-quality
+// smoothing to fill the canvas (crisp enough, never blocky).
+const MAX_PIXELS = 150_000;
+const RENDER_SCALE = 0.9;
 
 let buf: HTMLCanvasElement | null = null;
 let bctx: CanvasRenderingContext2D | null = null;
+let cachedImg: ImageData | null = null;
 
 function getBuf(w: number, h: number): CanvasRenderingContext2D {
   if (!buf) {
@@ -27,29 +30,16 @@ function getBuf(w: number, h: number): CanvasRenderingContext2D {
   if (buf.width !== w || buf.height !== h) {
     buf.width = w;
     buf.height = h;
+    cachedImg = null; // size changed → reallocate the reused ImageData
   }
   return bctx!;
 }
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
-// Cheap value noise (smooth) from a hashed lattice.
-function hash2(x: number, y: number): number {
-  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-  return s - Math.floor(s);
-}
-function vnoise(x: number, y: number): number {
-  const xi = Math.floor(x);
-  const yi = Math.floor(y);
-  const xf = x - xi;
-  const yf = y - yi;
-  const u = xf * xf * (3 - 2 * xf);
-  const v = yf * yf * (3 - 2 * yf);
-  const a = hash2(xi, yi);
-  const b = hash2(xi + 1, yi);
-  const c = hash2(xi, yi + 1);
-  const d = hash2(xi + 1, yi + 1);
-  return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
+// Cheap smooth trig noise in ~[-1,1] — a single sin, resolution-independent.
+function snoise(x: number, y: number): number {
+  return Math.sin(x * 1.7 + y * 2.3);
 }
 
 export function renderHoloyudu(
@@ -61,13 +51,17 @@ export function renderHoloyudu(
 ): void {
   // Match the real device-pixel resolution of the canvas (respects DPR),
   // scaled down only if it exceeds the per-frame pixel budget.
-  const devW = Math.max(1, ctx.canvas.width);
-  const devH = Math.max(1, ctx.canvas.height);
+  const devW = Math.max(1, ctx.canvas.width) * RENDER_SCALE;
+  const devH = Math.max(1, ctx.canvas.height) * RENDER_SCALE;
   const k = Math.min(1, Math.sqrt(MAX_PIXELS / (devW * devH)));
   const bw = Math.max(2, Math.round(devW * k));
   const bh = Math.max(2, Math.round(devH * k));
   const b = getBuf(bw, bh);
-  const img = b.createImageData(bw, bh);
+  // Reuse one ImageData for this size — no per-frame allocation.
+  if (!cachedImg || cachedImg.width !== bw || cachedImg.height !== bh) {
+    cachedImg = b.createImageData(bw, bh);
+  }
+  const img = cachedImg;
   const d = img.data;
 
   const a = hexToRgb(s.colorA);
@@ -88,6 +82,8 @@ export function renderHoloyudu(
   const bandDens = 4 + (s.bandDensity / 100) * 40;
   const interfScale = 0.5 + (s.interferenceScale / 100) * 4;
   const bandSoft = 0.15 + (s.bandSoftness / 100) * 0.85;
+  const bandExp = 1 / bandSoft; // precomputed (hoisted out of the loop)
+  const bandFreq = TAU * (bandDens / 6);
   const hueShift = s.hueShift / 100;
   const sat = s.saturation / 100;
   const blend = s.blendAmount / 100;
@@ -102,6 +98,12 @@ export function renderHoloyudu(
   const edgeInf = s.edgeInfluence / 100;
   const texInf = s.textureInfluence / 100;
   const opacity = clamp(s.opacity / 100, 0, 1);
+  const noiseOn = noiseAmt > 0;
+  const edgeOn = edgeInf > 0;
+  const texOn = texInf > 0;
+  const hiOn = hiStr > 0;
+  const hiSharp = 1 + hiSoft * 3; // highlight falloff exponent (approximated below)
+  const tSin05 = Math.sin(t * 0.5) * 0.3; // hoisted (constant per frame)
 
   // Spectral palette across the chosen colour count.
   const palette = (p: number) => {
@@ -123,8 +125,8 @@ export function renderHoloyudu(
       const warp =
         Math.sin((u * flowDens + t * 0.3) * TAU) * fluid +
         Math.cos((v * flowDens - t * 0.24) * TAU) * fluid;
-      const nz = noiseAmt > 0 ? (vnoise(u * 6 + t, v * 6 - t) - 0.5) * 2 : 0;
-      const fx = u + (fdx * flowStr + warp * dist + nz * noiseAmt) * 0.35;
+      const nz = noiseOn ? snoise(u * 6 + t, v * 6 - t) * noiseAmt : 0;
+      const fx = u + (fdx * flowStr + warp * dist + nz) * 0.35;
       const fy = v + (fdy * flowStr - warp * dist * 0.7) * 0.35;
 
       // Interference phase → spectral band position.
@@ -133,38 +135,39 @@ export function renderHoloyudu(
         0.5;
       phase = phase + fx * bandDens * 0.02 + fy * bandDens * 0.013;
       // Band shaping (soft repeating stripes).
-      const band = Math.pow(
-        0.5 + 0.5 * Math.cos(phase * TAU * (bandDens / 6)),
-        1 / bandSoft,
-      );
+      const band = Math.pow(0.5 + 0.5 * Math.cos(phase * bandFreq), bandExp);
 
-      // Edge influence from the flow-field gradient.
-      const edge =
-        Math.abs(Math.sin((fx - fy) * bandDens * 0.5 + t)) * edgeInf;
+      // Edge influence — reuse the warp value (no extra trig).
+      const edge = edgeOn ? Math.abs(warp) * edgeInf * 0.5 : 0;
 
-      let col = palette(phase * 1.2 + hueShift + edge * 0.3);
+      const col = palette(phase * 1.2 + hueShift + edge * 0.3);
       // Saturation control (mix toward its own luminance).
-      const l = (col.r * 0.299 + col.g * 0.587 + col.b * 0.114);
-      col = {
-        r: l + (col.r - l) * (0.3 + sat),
-        g: l + (col.g - l) * (0.3 + sat),
-        b: l + (col.b - l) * (0.3 + sat),
-      };
+      const l = col.r * 0.299 + col.g * 0.587 + col.b * 0.114;
+      const satK = 0.3 + sat;
+      const cr = l + (col.r - l) * satK;
+      const cg = l + (col.g - l) * satK;
+      const cb = l + (col.b - l) * satK;
 
-      // Moving specular highlight band.
-      const proj = fx * hiDX + fy * hiDY + Math.sin(t * 0.5) * 0.3;
-      const hb = ((proj % 1) + 1) % 1;
-      const hd = Math.min(Math.abs(hb - 0.5), 1 - Math.abs(hb - 0.5));
-      const highlight =
-        hiStr * Math.pow(clamp(1 - hd / hiW, 0, 1), 1 + hiSoft * 3) * (0.6 + gloss);
+      // Moving specular highlight band (squared/cubic falloff — no Math.pow).
+      let highlight = 0;
+      if (hiOn) {
+        const proj = fx * hiDX + fy * hiDY + tSin05;
+        const hb = ((proj % 1) + 1) % 1;
+        const hd = Math.min(Math.abs(hb - 0.5), 1 - Math.abs(hb - 0.5));
+        let f = clamp(1 - hd / hiW, 0, 1);
+        f = f * f; // sharp core
+        if (hiSharp > 2.5) f *= f; // extra falloff for softer settings
+        highlight = hiStr * f * (0.6 + gloss);
+      }
 
-      // Luminance / texture modulation.
-      const tex = texInf > 0 ? (vnoise(u * 40, v * 40) - 0.5) * texInf * 40 : 0;
+      // Luminance / texture modulation — reuse the warp value (no extra trig).
+      const tex = texOn ? warp * texInf * 12 : 0;
       const lumMod = 1 - lumInf * 0.4 + lumInf * band * 0.8;
 
-      let r = col.r * band * lumMod + highlight * 255 + tex;
-      let g = col.g * band * lumMod + highlight * 255 + tex;
-      let bl = col.b * band * lumMod + highlight * 255 + tex;
+      const hi255 = highlight * 255;
+      let r = cr * band * lumMod + hi255 + tex;
+      let g = cg * band * lumMod + hi255 + tex;
+      let bl = cb * band * lumMod + hi255 + tex;
 
       // Blend over the background; preserve dark keeps low-energy areas dark.
       const energy = clamp(band * (0.5 + lumMod * 0.5), 0, 1);

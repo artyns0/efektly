@@ -36,8 +36,14 @@ export function ShaderCanvas() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = canvas.clientWidth;
       h = canvas.clientHeight;
-      canvas.width = Math.max(1, Math.floor(w * dpr));
-      canvas.height = Math.max(1, Math.floor(h * dpr));
+      const bw = Math.max(1, Math.floor(w * dpr));
+      const bh = Math.max(1, Math.floor(h * dpr));
+      // Only touch the backing store when the size actually changed —
+      // avoids reallocating/clearing the canvas on every control tweak.
+      if (canvas.width !== bw || canvas.height !== bh) {
+        canvas.width = bw;
+        canvas.height = bh;
+      }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
