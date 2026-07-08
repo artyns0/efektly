@@ -21,8 +21,7 @@ export type EffectType =
   | "vhsBleed"
   | "kaleidoscope"
   | "neonEdge"
-  | "visionTracker"
-  | "fluxMelt";
+  | "visionTracker";
 
 /** Drives the small status chip shown on each stack item. */
 export type EffectStatus = "ui-ready" | "controls-ready" | "coming-next";
@@ -346,46 +345,6 @@ export interface VisionTrackerSettings {
   background: VisionBackground;
 }
 
-/* ----- Flux Melt ----- */
-
-export type FluxMeltPreset =
-  | "soft-drift"
-  | "wind-pull"
-  | "liquid-smear"
-  | "center-melt"
-  | "turbulent-flow";
-
-export interface FluxMeltSettings {
-  preset: FluxMeltPreset;
-  /* core */
-  centerX: number; // 0–100
-  centerY: number; // 0–100
-  size: number; // 0–100 influence radius
-  aspect: number; // 20–200 (100 = square)
-  rotation: number; // degrees
-  falloff: number; // 0–100
-  /* flow */
-  flowAmount: number; // 0–100
-  direction: number; // degrees
-  windDirection: number; // degrees
-  windStrength: number; // 0–100
-  scatter: number; // 0–100
-  stretch: number; // 0–100
-  inward: boolean;
-  preserve: boolean;
-  /* texture / motion */
-  turbulenceAmount: number; // 0–100
-  turbulenceScale: number; // 0–100
-  diffusion: number; // 0–100
-  grain: number; // 0–100
-  smoothness: number; // 0–100 (internal quality)
-  edgeSoftness: number; // 0–100
-  /* output */
-  opacity: number; // 0–100
-  blendOriginal: number; // 0–100
-  preserveHighlights: boolean;
-}
-
 /* ----- Instance model ----- */
 
 export interface EffectSettingsMap {
@@ -405,7 +364,6 @@ export interface EffectSettingsMap {
   kaleidoscope: KaleidoscopeSettings;
   neonEdge: NeonEdgeSettings;
   visionTracker: VisionTrackerSettings;
-  fluxMelt: FluxMeltSettings;
 }
 
 /** A patch carries a partial of exactly one effect's settings. */
@@ -425,8 +383,7 @@ export type EffectSettingsPatch =
   | Partial<VhsBleedSettings>
   | Partial<KaleidoscopeSettings>
   | Partial<NeonEdgeSettings>
-  | Partial<VisionTrackerSettings>
-  | Partial<FluxMeltSettings>;
+  | Partial<VisionTrackerSettings>;
 
 interface EffectBase<T extends EffectType> {
   id: string;
@@ -454,5 +411,4 @@ export type EffectInstance =
   | EffectBase<"vhsBleed">
   | EffectBase<"kaleidoscope">
   | EffectBase<"neonEdge">
-  | EffectBase<"visionTracker">
-  | EffectBase<"fluxMelt">;
+  | EffectBase<"visionTracker">;

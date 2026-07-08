@@ -14,7 +14,6 @@ import {
   Monitor,
   PenTool,
   ScanEye,
-  Waves,
   Plus,
   StretchHorizontal,
   Trash2,
@@ -44,7 +43,6 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
   visionTracker: ScanEye,
-  fluxMelt: Waves,
 };
 
 /** Compact pill switch for enable/disable. */

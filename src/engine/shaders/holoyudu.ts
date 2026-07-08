@@ -5,12 +5,16 @@ import { hexToRgb, mixRgb } from "./shaderUtils";
 /*  Holoyudu — procedural holographic / iridescent interference.       */
 /*  A domain-warped flow field drives thin-film interference bands      */
 /*  coloured by a spectral A/B/C palette, with a moving specular        */
-/*  highlight and grain. Rendered on a reduced internal buffer and      */
-/*  scaled up smoothly, so it stays crisp and cheap at any preview size.*/
+/*  highlight and grain. The internal buffer resolution tracks the       */
+/*  canvas' real device-pixel size (capped for performance) so it stays  */
+/*  crisp on large / high-DPI previews instead of being upscaled from a  */
+/*  tiny fixed buffer.                                                   */
 /* ------------------------------------------------------------------ */
 
 const TAU = Math.PI * 2;
-const N = 200; // internal buffer width; height follows canvas aspect
+// Per-frame pixel budget for the procedural field (kept smooth at ~60fps
+// while still resolving fine bands on 4K / retina previews).
+const MAX_PIXELS = 720_000;
 
 let buf: HTMLCanvasElement | null = null;
 let bctx: CanvasRenderingContext2D | null = null;
@@ -55,8 +59,13 @@ export function renderHoloyudu(
   s: HoloyuduSettings,
   timeSec: number,
 ): void {
-  const bw = N;
-  const bh = Math.max(8, Math.round((N * h) / w));
+  // Match the real device-pixel resolution of the canvas (respects DPR),
+  // scaled down only if it exceeds the per-frame pixel budget.
+  const devW = Math.max(1, ctx.canvas.width);
+  const devH = Math.max(1, ctx.canvas.height);
+  const k = Math.min(1, Math.sqrt(MAX_PIXELS / (devW * devH)));
+  const bw = Math.max(2, Math.round(devW * k));
+  const bh = Math.max(2, Math.round(devH * k));
   const b = getBuf(bw, bh);
   const img = b.createImageData(bw, bh);
   const d = img.data;

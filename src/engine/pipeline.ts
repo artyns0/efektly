@@ -16,7 +16,6 @@ import { renderVhsBleed } from "./effects/vhsBleed";
 import { renderKaleidoscope } from "./effects/kaleidoscope";
 import { renderNeonEdge } from "./effects/neonEdge";
 import { renderVisionTracker } from "./effects/visionTracker";
-import { renderFluxMelt } from "./effects/fluxMelt";
 
 /* ------------------------------------------------------------------ */
 /*  Effect Stack render pipeline (Canvas 2D).                          */
@@ -56,7 +55,6 @@ export function effectAnimates(fx: EffectInstance): boolean {
   if (fx.type === "crtMonitor") return fx.settings.flicker > 0;
   if (fx.type === "vhsBleed")
     return fx.settings.timeDrift > 0 || fx.settings.trackingNoise > 0;
-  if (fx.type === "fluxMelt") return fx.settings.turbulenceAmount > 0;
   return false;
 }
 
@@ -162,9 +160,6 @@ export function applyEffect(
       break;
     case "visionTracker":
       renderVisionTracker(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
-      break;
-    case "fluxMelt":
-      renderFluxMelt(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, time);
       break;
     default:
       break;
