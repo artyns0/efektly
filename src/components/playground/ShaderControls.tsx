@@ -8,6 +8,7 @@ import { ColorField } from "../controls/ColorField";
 import { ShaderTypeSelector } from "../panels/shaders/ShaderTypeSelector";
 import { ShaderPresets } from "../panels/shaders/ShaderPresets";
 import { ShaderParameters } from "../panels/shaders/ShaderParameters";
+import { ResetButton } from "../controls/ResetButton";
 
 /* ------------------------------------------------------------------ */
 /*  Shader controls body (no input-source toggle — that lives in the   */
@@ -25,6 +26,7 @@ export function ShaderControls() {
   const type = useAppStore((s) => s.shaderType);
   const settings = useAppStore((s) => s.shaderSettings[type]);
   const updateShaderSettings = useAppStore((s) => s.updateShaderSettings);
+  const resetShader = useAppStore((s) => s.resetShader);
   const anim = useAppStore((s) => s.shaderAnimation);
   const setAnim = useAppStore((s) => s.setShaderAnimation);
 
@@ -36,9 +38,12 @@ export function ShaderControls() {
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="px-1 text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
-        Shader
-      </span>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
+          Shader
+        </span>
+        <ResetButton onClick={() => resetShader(type)} />
+      </div>
 
       <Section title="Shader Type">
         <ShaderTypeSelector />

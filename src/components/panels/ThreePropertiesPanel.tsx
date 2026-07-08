@@ -5,6 +5,7 @@ import { SliderControl } from "../controls/SliderControl";
 import { SelectControl } from "../controls/SelectControl";
 import { Toggle } from "../controls/Toggle";
 import { ColorField } from "../controls/ColorField";
+import { ResetButton } from "../controls/ResetButton";
 
 /* Right Properties panel for Particle Forms 3D. */
 
@@ -71,6 +72,7 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
 export function ThreePropertiesPanel() {
   const s = useAppStore((st) => st.particleForms3D);
   const update = useAppStore((st) => st.updateParticleForms3D);
+  const resetThreeTool = useAppStore((st) => st.resetThreeTool);
   const fmt = (v: number, unit?: string, step?: number) =>
     `${step && step < 1 ? v.toFixed(2) : Math.round(v)}${unit ?? ""}`;
 
@@ -81,7 +83,7 @@ export function ThreePropertiesPanel() {
         <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-flame/30 bg-flame/10 text-flame">
           <Boxes className="size-4" strokeWidth={1.8} />
         </span>
-        <span className="flex min-w-0 flex-col">
+        <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm font-medium text-linen">
             Particle Forms 3D
           </span>
@@ -89,6 +91,7 @@ export function ThreePropertiesPanel() {
             3D Object
           </span>
         </span>
+        <ResetButton onClick={resetThreeTool} />
       </div>
 
       {/* Shape */}

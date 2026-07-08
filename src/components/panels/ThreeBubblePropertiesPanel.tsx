@@ -4,6 +4,7 @@ import type { ElasticBubble3DSettings } from "../../types/three";
 import { SliderControl } from "../controls/SliderControl";
 import { Toggle } from "../controls/Toggle";
 import { ColorField } from "../controls/ColorField";
+import { ResetButton } from "../controls/ResetButton";
 
 /* Right Properties panel for Elastic Bubble 3D. */
 
@@ -97,6 +98,7 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
 export function ThreeBubblePropertiesPanel() {
   const s = useAppStore((st) => st.elasticBubble3D);
   const update = useAppStore((st) => st.updateElasticBubble3D);
+  const resetThreeTool = useAppStore((st) => st.resetThreeTool);
   const fmt = (v: number, unit?: string, step?: number) =>
     `${step && step < 1 ? v.toFixed(2) : Math.round(v)}${unit ?? ""}`;
 
@@ -107,7 +109,7 @@ export function ThreeBubblePropertiesPanel() {
         <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-flame/30 bg-flame/10 text-flame">
           <Droplet className="size-4" strokeWidth={1.8} />
         </span>
-        <span className="flex min-w-0 flex-col">
+        <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm font-medium text-linen">
             Elastic Bubble 3D
           </span>
@@ -115,6 +117,7 @@ export function ThreeBubblePropertiesPanel() {
             3D Object
           </span>
         </span>
+        <ResetButton onClick={resetThreeTool} />
       </div>
 
       {GROUPS.map((g) => (

@@ -2,11 +2,8 @@ import {
   Box,
   Boxes,
   Camera,
-  ChevronDown,
   Circle,
   Grid2x2,
-  Pause,
-  Play,
   Redo2,
   Settings,
   Sparkles,
@@ -16,20 +13,12 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { Button } from "../controls/Button";
-import { Logo } from "../layout/Logo";
 import { useAppStore } from "../../store/useAppStore";
 import { useCaptureRecord } from "../../hooks/useCaptureRecord";
 import { formatClock } from "../../utils/time";
-import type { Orientation } from "../../types/app";
 
-/* Playground v2 toolbar: logo · project name · Source/Effects/Shader nav ·
-   undo/redo · aspect · play · capture · record · Export. */
-
-const ASPECTS: { value: Orientation; label: string }[] = [
-  { value: "horizontal", label: "16:9" },
-  { value: "vertical", label: "9:16" },
-  { value: "square", label: "1:1" },
-];
+/* Playground toolbar: logo · project name · Source/Effects/Shader/3D nav ·
+   undo/redo · settings · capture · record (shader) · Export. */
 
 type NavKey = "source" | "effects" | "shader" | "three";
 const NAV: { key: NavKey; label: string; icon: typeof Sparkles }[] = [
@@ -70,12 +59,8 @@ export function PlaygroundToolbar() {
   const setRailSection = useAppStore((s) => s.setRailSection);
   const setExportPanelOpen = useAppStore((s) => s.setExportPanelOpen);
   const setRightTab = useAppStore((s) => s.setRightTab);
-  const orientation = useAppStore((s) => s.orientation);
-  const setOrientation = useAppStore((s) => s.setOrientation);
   const projectName = useAppStore((s) => s.projectName);
   const setProjectName = useAppStore((s) => s.setProjectName);
-  const tlPlaying = useAppStore((s) => s.tlPlaying);
-  const setTlPlaying = useAppStore((s) => s.setTlPlaying);
 
   const { canCapture, isRecording, recordElapsedMs, handleCapture, handleRecord } =
     useCaptureRecord({
@@ -116,14 +101,14 @@ export function PlaygroundToolbar() {
     <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.06] px-4">
       {/* Brand + slogan + project name */}
       <div className="flex min-w-0 items-center gap-3">
-        <Logo />
-        <span className="flex flex-col leading-none">
-          <span className="text-[18px] font-semibold tracking-tight text-linen">
-            Efektly
-          </span>
-          <span className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-linen/40">
-            Upload. Stylize. Export.
-          </span>
+        <img
+          src="/efektly_logo_beyaz.png"
+          alt="Efektly"
+          className="h-7 w-auto select-none"
+          draggable={false}
+        />
+        <span className="hidden text-[10px] font-medium uppercase tracking-[0.14em] text-linen/40 lg:inline">
+          Upload. Stylize. Export.
         </span>
         <span className="mx-1 h-6 w-px bg-white/[0.08]" />
         <input
@@ -175,32 +160,7 @@ export function PlaygroundToolbar() {
           <Settings className="size-4" strokeWidth={1.8} />
         </IconButton>
 
-        <label className="relative ml-1">
-          <select
-            value={orientation}
-            onChange={(e) => setOrientation(e.target.value as Orientation)}
-            aria-label="Aspect ratio"
-            className="h-9 appearance-none rounded-xl border border-white/[0.06] bg-white/[0.02] pl-3 pr-8 text-sm text-linen/80 transition-colors hover:bg-white/[0.06] focus:outline-none"
-          >
-            {ASPECTS.map((a) => (
-              <option key={a.value} value={a.value} className="bg-onyx-100">
-                {a.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-linen/45" />
-        </label>
-
-        <IconButton
-          label={tlPlaying ? "Pause" : "Play"}
-          onClick={() => setTlPlaying(!tlPlaying)}
-        >
-          {tlPlaying ? (
-            <Pause className="size-4 text-flame" strokeWidth={2} />
-          ) : (
-            <Play className="size-4 translate-x-px" strokeWidth={2} />
-          )}
-        </IconButton>
+        <span className="mx-0.5 h-6 w-px bg-white/[0.08]" />
 
         <IconButton
           label="Capture"

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Maximize2, Move3d, Play } from "lucide-react";
+import { Maximize2, Move3d } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { usePreviewZoom } from "../preview/usePreviewZoom";
 import { PreviewStage } from "../preview/PreviewStage";
@@ -36,16 +36,16 @@ export function PlaygroundPreview() {
       {/* Header */}
       <div className="mb-3 flex shrink-0 items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Play className="size-3.5 fill-flame text-flame" />
-          <span className="text-[13px] font-medium text-linen">Live</span>
-          {showRealtime && (
-            <span className="flex items-center gap-1.5 text-xs text-linen/55">
+          {showRealtime ? (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-linen/70">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-flame/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-flame" />
               </span>
-              {is3D ? "3D" : "Realtime"}
+              {is3D ? "3D · Live" : "Shader · Live"}
             </span>
+          ) : (
+            <span className="text-[13px] font-medium text-linen/50">Preview</span>
           )}
         </div>
         <div className="flex items-center gap-1.5">

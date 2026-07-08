@@ -324,3 +324,12 @@ export function createInitialEffects(): EffectInstance[] {
     },
   ];
 }
+
+/** Default settings for a given effect type (fresh copy, safe to mutate). */
+export function defaultEffectSettings(
+  type: EffectType,
+): EffectInstance["settings"] {
+  const match = createInitialEffects().find((e) => e.type === type);
+  // Deep clone so palette arrays etc. are never shared with the live instance.
+  return structuredClone(match!.settings);
+}

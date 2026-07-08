@@ -19,11 +19,11 @@ export function PreviewStage({ zoomApi }: { zoomApi: PreviewZoomApi }) {
   const mediaVideo = useAppStore((s) => s.mediaVideo);
   const activeSource = mediaImage ?? mediaVideo;
 
-  const { stageRef, scrollRef, base, zoom } = zoomApi;
+  const { setStageEl, setScrollEl, base, zoom } = zoomApi;
 
   return (
     <div
-      ref={stageRef}
+      ref={setStageEl}
       className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] border border-white/[0.05] bg-onyx-50 shadow-[0_40px_90px_-50px_rgba(0,0,0,0.95),inset_0_1px_0_0_rgba(243,240,232,0.05)]"
     >
       {/* Subtle grid background */}
@@ -46,7 +46,7 @@ export function PreviewStage({ zoomApi }: { zoomApi: PreviewZoomApi }) {
           size; zoom is a CSS transform (inspection only — never affects
           export resolution). Content scrolls to pan when zoomed in. */}
       <div
-        ref={scrollRef}
+        ref={setScrollEl}
         className="scroll-thin absolute inset-0 grid overflow-auto"
         style={{ placeContent: "safe center" }}
       >

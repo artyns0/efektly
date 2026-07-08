@@ -1,4 +1,13 @@
-import { Pause, Play, Repeat, Volume2, VolumeX } from "lucide-react";
+import {
+  Pause,
+  Play,
+  Repeat,
+  SkipBack,
+  SkipForward,
+  Square,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { formatDuration } from "../../lib/media";
@@ -18,11 +27,35 @@ export function MediaVideoControls() {
   const setLoop = useAppStore((s) => s.setLoop);
   const toggleMute = useAppStore((s) => s.toggleMute);
   const seek = useAppStore((s) => s.seek);
+  const mediaVideo = useAppStore((s) => s.mediaVideo);
 
   const fill = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Go to beginning and play.
+  const restart = () => {
+    seek(0);
+    if (mediaVideo?.paused) void mediaVideo.play();
+  };
+  // Pause and reset to the start.
+  const stop = () => {
+    mediaVideo?.pause();
+    seek(0);
+  };
+  // Pause on the last frame.
+  const goToEnd = () => {
+    mediaVideo?.pause();
+    seek(Math.max(0, (duration || 0) - 0.05));
+  };
+
+  const transportBtn =
+    "grid size-8 shrink-0 place-items-center rounded-lg text-linen/55 transition-colors hover:bg-linen/[0.06] hover:text-linen disabled:opacity-30 disabled:hover:bg-transparent";
+
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5">
+    <div className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5">
+      <button type="button" onClick={restart} aria-label="Restart" title="Restart" className={transportBtn}>
+        <SkipBack className="size-4" strokeWidth={2} />
+      </button>
+
       <button
         type="button"
         onClick={togglePlay}
@@ -34,6 +67,14 @@ export function MediaVideoControls() {
         ) : (
           <Play className="size-4 translate-x-px" strokeWidth={2} />
         )}
+      </button>
+
+      <button type="button" onClick={stop} aria-label="Stop" title="Stop" className={transportBtn}>
+        <Square className="size-3.5" strokeWidth={2} fill="currentColor" />
+      </button>
+
+      <button type="button" onClick={goToEnd} aria-label="Go to end" title="Go to end" className={transportBtn}>
+        <SkipForward className="size-4" strokeWidth={2} />
       </button>
 
       <input

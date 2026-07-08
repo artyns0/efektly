@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { DEFAULT_PALETTE, SAMPLE_SOURCE } from "../data/mockData";
-import { createInitialEffects } from "../data/effects";
+import { createInitialEffects, defaultEffectSettings } from "../data/effects";
 import {
   createInitialShaderSettings,
   DEFAULT_PRESET,
@@ -114,6 +114,8 @@ interface AppState {
   addToStack: (id: string) => void;
   removeFromStack: (id: string) => void;
   updateEffectSettings: (id: string, patch: EffectSettingsPatch) => void;
+  /** Restore one effect's settings to its type defaults (keeps it in the stack). */
+  resetEffect: (id: string) => void;
   speed: number; // 0.25x – 3x
   setSpeed: (speed: number) => void;
   direction: AnimationDirection;
@@ -130,6 +132,8 @@ interface AppState {
   updateShaderSettings: (type: ShaderTypeId, patch: ShaderSettingsPatch) => void;
   shaderPresetByType: Record<ShaderTypeId, string>;
   applyShaderPreset: (type: ShaderTypeId, presetName: string) => void;
+  /** Restore one shader type's settings to its defaults. */
+  resetShader: (type: ShaderTypeId) => void;
   shaderAnimation: ShaderAnimation;
   setShaderAnimation: (patch: Partial<ShaderAnimation>) => void;
 
@@ -140,6 +144,8 @@ interface AppState {
   updateParticleForms3D: (patch: Partial<ParticleForms3DSettings>) => void;
   elasticBubble3D: ElasticBubble3DSettings;
   updateElasticBubble3D: (patch: Partial<ElasticBubble3DSettings>) => void;
+  /** Restore the active 3D tool's settings to its defaults. */
+  resetThreeTool: () => void;
 
   /* export panel */
   format: ExportFormat;
@@ -405,6 +411,14 @@ export const useAppStore = create<AppState>((set, get) => ({
           : fx,
       ),
     })),
+  resetEffect: (id) =>
+    set((state) => ({
+      effects: state.effects.map((fx) =>
+        fx.id === id
+          ? ({ ...fx, settings: defaultEffectSettings(fx.type) } as EffectInstance)
+          : fx,
+      ),
+    })),
   speed: 1.25,
   setSpeed: (speed) => set({ speed }),
   direction: "loop",
@@ -442,6 +456,17 @@ export const useAppStore = create<AppState>((set, get) => ({
         },
       };
     }),
+  resetShader: (type) =>
+    set((state) => ({
+      shaderSettings: {
+        ...state.shaderSettings,
+        [type]: createInitialShaderSettings()[type],
+      },
+      shaderPresetByType: {
+        ...state.shaderPresetByType,
+        [type]: DEFAULT_PRESET[type],
+      },
+    })),
   shaderAnimation: { ...DEFAULT_SHADER_ANIMATION },
   setShaderAnimation: (patch) =>
     set((state) => ({ shaderAnimation: { ...state.shaderAnimation, ...patch } })),
@@ -455,6 +480,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   elasticBubble3D: createInitialElasticBubble3D(),
   updateElasticBubble3D: (patch) =>
     set((state) => ({ elasticBubble3D: { ...state.elasticBubble3D, ...patch } })),
+  resetThreeTool: () =>
+    set((state) =>
+      state.three3DTool === "elasticBubble3D"
+        ? { elasticBubble3D: createInitialElasticBubble3D() }
+        : { particleForms3D: createInitialParticleForms3D() },
+    ),
 
   /* export */
   format: "png",

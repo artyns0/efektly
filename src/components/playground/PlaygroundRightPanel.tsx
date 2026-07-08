@@ -25,6 +25,7 @@ import type { EffectType } from "../../types/effects";
 import { ExportPanel } from "../panels/ExportPanel";
 import { VideoRecordButton } from "./VideoRecordButton";
 import { EffectControlsSwitch } from "./EffectControlsSwitch";
+import { ResetButton } from "../controls/ResetButton";
 import { ThreePropertiesPanel } from "../panels/ThreePropertiesPanel";
 import { ThreeBubblePropertiesPanel } from "../panels/ThreeBubblePropertiesPanel";
 import { SHADER_TYPES } from "../../data/shaders";
@@ -56,22 +57,25 @@ function PropertyHeader({
   icon: Icon,
   title,
   subtitle,
+  onReset,
 }: {
   icon: LucideIcon;
   title: string;
   subtitle: string;
+  onReset?: () => void;
 }) {
   return (
     <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.06] bg-linen/[0.02] px-3 py-2.5">
       <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-flame/30 bg-flame/10 text-flame">
         <Icon className="size-4" strokeWidth={1.8} />
       </span>
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium text-linen">{title}</span>
         <span className="text-[10px] uppercase tracking-wide text-linen/40">
           {subtitle}
         </span>
       </span>
+      {onReset && <ResetButton onClick={onReset} />}
     </div>
   );
 }
@@ -95,6 +99,7 @@ function PropertiesTab() {
   const effects = useAppStore((s) => s.effects);
   const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
+  const resetEffect = useAppStore((s) => s.resetEffect);
 
   // 3D mode → tool-specific controls.
   if (mode === "three") {
@@ -132,6 +137,7 @@ function PropertiesTab() {
         icon={Icon}
         title={selected.name}
         subtitle={selected.enabled ? "Effect" : "Effect · Off"}
+        onReset={() => resetEffect(selected.id)}
       />
       <div className="rounded-2xl border border-white/[0.06] bg-linen/[0.015] p-3">
         <EffectControlsSwitch effect={selected} />
