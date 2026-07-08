@@ -39,7 +39,7 @@ export function ExportPanel({
   videoRecordAction,
 }: {
   /** Optional action rendered in the Video Export card when no clip exists
-   *  (playground provides a Record/Stop button; classic passes nothing). */
+   *  (the playground toolbar provides a Record/Stop button). */
   videoRecordAction?: ReactNode;
 } = {}) {
   const format = useAppStore((s) => s.format);

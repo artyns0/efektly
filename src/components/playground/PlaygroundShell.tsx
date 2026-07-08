@@ -9,7 +9,7 @@ import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 import { useTimeline } from "./useTimeline";
 
 /* ------------------------------------------------------------------ */
-/*  Motion-design playground layout (behind ?layout=playground).       */
+/*  Efektly main shell (default at /).                                 */
 /*  toolbar / rail / left panel / center(preview + timeline) /         */
 /*  right panel (collapsible) / status bar. Widgets reuse the app.     */
 /* ------------------------------------------------------------------ */
