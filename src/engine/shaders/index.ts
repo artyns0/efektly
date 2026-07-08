@@ -17,6 +17,7 @@ import { renderKineticStripes } from "./kineticStripes";
 import { renderSparkBurst } from "./sparkBurst";
 import { renderKineticLines } from "./kineticLines";
 import { renderAuraOrb } from "./auraOrb";
+import { renderHoloyudu } from "./holoyudu";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dispatcher — routes to the active procedural renderer.      */
@@ -35,6 +36,7 @@ export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set([
   "sparkBurst",
   "kineticLines",
   "auraOrb",
+  "holoyudu",
 ]);
 
 export function renderShader(
@@ -92,6 +94,9 @@ export function renderShader(
       break;
     case "auraOrb":
       renderAuraOrb(ctx, w, h, settings.auraOrb, timeSec);
+      break;
+    case "holoyudu":
+      renderHoloyudu(ctx, w, h, settings.holoyudu, timeSec);
       break;
   }
 }

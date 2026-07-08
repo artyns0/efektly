@@ -27,6 +27,7 @@ export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "sparkBurst", label: "Spark Burst" },
   { id: "kineticLines", label: "Kinetic Lines" },
   { id: "auraOrb", label: "Aura Orb" },
+  { id: "holoyudu", label: "Holoyudu" },
 ];
 
 export function createInitialShaderSettings(): ShaderSettingsMap {
@@ -125,6 +126,17 @@ export function createInitialShaderSettings(): ShaderSettingsMap {
       rimColor: "#BFE0FF", background: "#040309", colorShift: 50,
       speed: 1, pulseAmount: 30, pulseSpeed: 0.6, loopDuration: 10,
     },
+    holoyudu: {
+      colorA: "#7B5CFF", colorB: "#38E1FF", colorC: "#FF5CC8",
+      colorCount: 3, hueShift: 0, saturation: 70, blendAmount: 60,
+      highlightStrength: 55, highlightAngle: 35, highlightWidth: 40,
+      highlightSoftness: 55, gloss: 60,
+      flowStrength: 45, flowAngle: 30, flowDensity: 45, flowSpeed: 1,
+      fluidMap: 45, distortion: 35, noise: 12,
+      interferenceScale: 45, bandDensity: 40, bandSoftness: 55,
+      textureInfluence: 15, luminanceInfluence: 40, edgeInfluence: 30,
+      opacity: 100, preserveDark: false, background: "#04040A",
+    },
   };
 }
 
@@ -214,6 +226,14 @@ export const SHADER_PRESETS: Record<ShaderTypeId, ShaderPreset[]> = {
     { name: "Cosmic Rim", settings: { colorA: "#2A1E6B", colorB: "#8A5CF6", highlightColor: "#CFC0FF", rimColor: "#B9F0FF", background: "#02030A", rimWidth: 45, glowIntensity: 55, bloomAmount: 50, flowScale: 60, flowDistortion: 55 } },
     { name: "Dream Orb", settings: { colorA: "#FF9A7A", colorB: "#F35C9E", highlightColor: "#FFF3E6", rimColor: "#FFD8C0", background: "#0A0508", glowIntensity: 70, bloomAmount: 65, pulseAmount: 45, plasma: 40 } },
   ],
+  holoyudu: [
+    { name: "Holo Soft", settings: { colorA: "#8FA8FF", colorB: "#B8E6FF", colorC: "#E0C8FF", colorCount: 3, saturation: 55, blendAmount: 70, highlightStrength: 45, bandDensity: 30, bandSoftness: 70, flowStrength: 35, background: "#05060F" } },
+    { name: "Yudu Shine", settings: { colorA: "#FF5CC8", colorB: "#7B5CFF", colorC: "#38E1FF", colorCount: 3, saturation: 85, highlightStrength: 75, gloss: 80, highlightWidth: 30, bandDensity: 45, background: "#080410" } },
+    { name: "Editorial Chrome", settings: { colorA: "#DDE3EA", colorB: "#9AA6B8", colorC: "#C0CAD8", colorCount: 2, saturation: 25, highlightStrength: 70, gloss: 85, bandDensity: 35, flowStrength: 30, background: "#0B0D12" } },
+    { name: "Spectrum Glow", settings: { colorA: "#FF4D4D", colorB: "#4DFF88", colorC: "#4D8CFF", colorCount: 3, saturation: 95, blendAmount: 75, bandDensity: 55, interferenceScale: 60, background: "#04060A" } },
+    { name: "Iridescent Flow", settings: { colorA: "#7B5CFF", colorB: "#38E1FF", colorC: "#FF5CC8", colorCount: 3, saturation: 75, flowStrength: 65, fluidMap: 70, distortion: 55, flowSpeed: 1.4, bandDensity: 40, background: "#04040A" } },
+    { name: "Dark Hologram", settings: { colorA: "#5CE0FF", colorB: "#9A5CFF", colorC: "#FF6CC0", colorCount: 3, saturation: 70, preserveDark: true, highlightStrength: 60, bandDensity: 50, background: "#020207" } },
+  ],
   kineticLines: [
     { name: "Orbit Lines", settings: { mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, morph: 45, glow: 20, loopDuration: 6, colorA: LINEN, background: ONYX } },
     { name: "Wave Smear", settings: { mode: "waveSmear", lineCount: 48, lineWidth: 2, scale: 70, morph: 55, glow: 12, loopDuration: 7, colorA: LINEN, background: "#050505" } },
@@ -243,4 +263,5 @@ export const DEFAULT_PRESET: Record<ShaderTypeId, string> = {
   sparkBurst: "Tiger Sparks",
   kineticLines: "Orbit Lines",
   auraOrb: "Blue Pink",
+  holoyudu: "Iridescent Flow",
 };

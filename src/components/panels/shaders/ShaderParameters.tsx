@@ -108,6 +108,26 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     speedS("pulseSpeed", "Pulse Speed"),
     { kind: "slider", key: "loopDuration", label: "Loop Duration", min: 1, max: 20, step: 0.5, unit: "s" },
   ],
+  holoyudu: [
+    { kind: "color", key: "colorC", label: "Color C" },
+    { kind: "slider", key: "colorCount", label: "Color Count", min: 1, max: 3, step: 1 },
+    pctS("hueShift", "Hue Shift"), pctS("saturation", "Saturation"),
+    pctS("blendAmount", "Blend Amount"),
+    pctS("highlightStrength", "Highlight Strength"),
+    { kind: "slider", key: "highlightAngle", label: "Highlight Angle", min: 0, max: 360, step: 1, unit: "°" },
+    pctS("highlightWidth", "Highlight Width"), pctS("highlightSoftness", "Highlight Softness"),
+    pctS("gloss", "Shine / Gloss"),
+    pctS("flowStrength", "Flow Strength"),
+    { kind: "slider", key: "flowAngle", label: "Flow Angle", min: 0, max: 360, step: 1, unit: "°" },
+    pctS("flowDensity", "Flow Density"), speedS("flowSpeed", "Flow Speed"),
+    pctS("fluidMap", "Fluid Map Amount"), pctS("distortion", "Distortion"),
+    pctS("noise", "Noise Amount"),
+    pctS("interferenceScale", "Interference Scale"), pctS("bandDensity", "Band Density"),
+    pctS("bandSoftness", "Band Softness"), pctS("textureInfluence", "Texture Influence"),
+    pctS("luminanceInfluence", "Luminance Influence"), pctS("edgeInfluence", "Edge Influence"),
+    pctS("opacity", "Opacity"),
+    { kind: "toggle", key: "preserveDark", label: "Preserve Dark Areas" },
+  ],
 };
 
 /**

@@ -16,7 +16,8 @@ export type ShaderTypeId =
   | "kineticStripes"
   | "sparkBurst"
   | "kineticLines"
-  | "auraOrb";
+  | "auraOrb"
+  | "holoyudu";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
 
@@ -252,6 +253,43 @@ export interface AuraOrbSettings {
   loopDuration: number; // seconds
 }
 
+/** Holoyudu — procedural holographic / iridescent interference shader. */
+export interface HoloyuduSettings {
+  /* color */
+  colorA: string;
+  colorB: string;
+  colorC: string;
+  colorCount: number; // 1–3
+  hueShift: number; // 0–100
+  saturation: number; // 0–100
+  blendAmount: number; // 0–100
+  /* highlight */
+  highlightStrength: number; // 0–100
+  highlightAngle: number; // degrees
+  highlightWidth: number; // 0–100
+  highlightSoftness: number; // 0–100
+  gloss: number; // 0–100
+  /* flow */
+  flowStrength: number; // 0–100
+  flowAngle: number; // degrees
+  flowDensity: number; // 0–100
+  flowSpeed: number; // 0–3
+  fluidMap: number; // 0–100
+  distortion: number; // 0–100
+  noise: number; // 0–100
+  /* interference */
+  interferenceScale: number; // 0–100
+  bandDensity: number; // 0–100
+  bandSoftness: number; // 0–100
+  textureInfluence: number; // 0–100
+  luminanceInfluence: number; // 0–100
+  edgeInfluence: number; // 0–100
+  /* output */
+  opacity: number; // 0–100
+  preserveDark: boolean;
+  background: string;
+}
+
 export interface ShaderSettingsMap {
   dotGrid: DotGridSettings;
   meshLiquid: MeshLiquidSettings;
@@ -267,6 +305,7 @@ export interface ShaderSettingsMap {
   sparkBurst: SparkBurstSettings;
   kineticLines: KineticLinesSettings;
   auraOrb: AuraOrbSettings;
+  holoyudu: HoloyuduSettings;
 }
 
 /** A partial of any one shader's settings (for updates + presets). */
@@ -284,7 +323,8 @@ export type ShaderSettingsPatch = Partial<
     KineticStripesSettings &
     SparkBurstSettings &
     KineticLinesSettings &
-    AuraOrbSettings
+    AuraOrbSettings &
+    HoloyuduSettings
 >;
 
 export interface ShaderAnimation {

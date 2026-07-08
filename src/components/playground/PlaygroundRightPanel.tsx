@@ -13,6 +13,7 @@ import {
   MousePointerSquareDashed,
   PenTool,
   ScanEye,
+  Waves,
   StretchHorizontal,
   Tv,
   Type,
@@ -51,6 +52,7 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
   visionTracker: ScanEye,
+  fluxMelt: Waves,
 };
 
 function PropertyHeader({
