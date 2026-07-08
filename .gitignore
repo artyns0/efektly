@@ -1,5 +1,9 @@
-node_modules
-dist
+﻿node_modules/
+dist/
+.claude/
+.env
+.env.*
+!.env.example
 *.local
+*.tsbuildinfo
 .DS_Store
-.claude/settings.local.json
