@@ -107,6 +107,9 @@ export function PlaygroundToolbar() {
           className="h-7 w-auto select-none"
           draggable={false}
         />
+        <span className="rounded bg-flame/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-flame">
+          Beta
+        </span>
         <span className="hidden text-[10px] font-medium uppercase tracking-[0.14em] text-linen/40 lg:inline">
           Upload. Stylize. Export.
         </span>
