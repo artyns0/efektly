@@ -1,4 +1,4 @@
-import type { MotionStyle, ParticlesSettings } from "../../types/shaders";
+import type { ParticlesSettings } from "../../types/shaders";
 import { hexToRgb, mixRgb, rgba } from "./shaderUtils";
 
 /* ------------------------------------------------------------------ */
@@ -39,9 +39,7 @@ export function renderParticles(
   h: number,
   s: ParticlesSettings,
   timeSec: number,
-  _motion: MotionStyle,
 ): void {
-  void _motion;
   const time = timeSec * s.speed;
   const dt = lastTime < 0 ? 0.016 : Math.min(0.05, Math.max(0.001, time - lastTime));
   lastTime = time;

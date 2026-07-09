@@ -36,14 +36,12 @@ import type {
   ElasticBubble3DSettings,
   ImageParticles3DSettings,
   InteractiveParticles3DSettings,
-  ParticleForms3DSettings,
   ThreeToolId,
 } from "../types/three";
 import {
   createInitialElasticBubble3D,
   createInitialImageParticles3D,
   createInitialInteractiveParticles3D,
-  createInitialParticleForms3D,
   IMAGE_PARTICLE_PRESETS,
   INTERACTIVE_PARTICLE_PRESETS,
 } from "../data/three";
@@ -146,8 +144,6 @@ interface AppState {
   /* 3D workspace — real-time generative 3D, separate from shader mode */
   three3DTool: ThreeToolId;
   setThree3DTool: (tool: ThreeToolId) => void;
-  particleForms3D: ParticleForms3DSettings;
-  updateParticleForms3D: (patch: Partial<ParticleForms3DSettings>) => void;
   elasticBubble3D: ElasticBubble3DSettings;
   updateElasticBubble3D: (patch: Partial<ElasticBubble3DSettings>) => void;
   interactiveParticles3D: InteractiveParticles3DSettings;
@@ -486,9 +482,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   /* 3D workspace */
   three3DTool: "interactiveParticles3D",
   setThree3DTool: (three3DTool) => set({ three3DTool }),
-  particleForms3D: createInitialParticleForms3D(),
-  updateParticleForms3D: (patch) =>
-    set((state) => ({ particleForms3D: { ...state.particleForms3D, ...patch } })),
   elasticBubble3D: createInitialElasticBubble3D(),
   updateElasticBubble3D: (patch) =>
     set((state) => ({ elasticBubble3D: { ...state.elasticBubble3D, ...patch } })),
@@ -519,12 +512,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       switch (state.three3DTool) {
         case "elasticBubble3D":
           return { elasticBubble3D: createInitialElasticBubble3D() };
-        case "interactiveParticles3D":
-          return { interactiveParticles3D: createInitialInteractiveParticles3D() };
         case "imageParticles3D":
           return { imageParticles3D: createInitialImageParticles3D() };
         default:
-          return { particleForms3D: createInitialParticleForms3D() };
+          return { interactiveParticles3D: createInitialInteractiveParticles3D() };
       }
     }),
 

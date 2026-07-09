@@ -1,8 +1,6 @@
 import { useAppStore } from "../../store/useAppStore";
-import type { MotionStyle } from "../../types/shaders";
 import { Section } from "../controls/Section";
 import { SliderControl } from "../controls/SliderControl";
-import { SegmentedControl } from "../controls/SegmentedControl";
 import { Toggle } from "../controls/Toggle";
 import { ColorField } from "../controls/ColorField";
 import { ShaderTypeSelector } from "../panels/shaders/ShaderTypeSelector";
@@ -14,13 +12,6 @@ import { ResetButton } from "../controls/ResetButton";
 /*  Shader controls body (no input-source toggle — that lives in the   */
 /*  playground toolbar). Shown in the left panel when in Shader mode.  */
 /* ------------------------------------------------------------------ */
-
-const MOTION_STYLES: { value: MotionStyle; label: string }[] = [
-  { value: "drift", label: "Drift" },
-  { value: "pulse", label: "Pulse" },
-  { value: "wave", label: "Wave" },
-  { value: "chaos", label: "Chaos" },
-];
 
 export function ShaderControls() {
   const type = useAppStore((s) => s.shaderType);
@@ -79,15 +70,6 @@ export function ShaderControls() {
             checked={anim.loop}
             onChange={(v) => setAnim({ loop: v })}
           />
-          <div className="flex flex-col gap-2.5">
-            <span className="text-sm text-linen/70">Motion Style</span>
-            <SegmentedControl
-              size="sm"
-              value={anim.motionStyle}
-              onChange={(v) => setAnim({ motionStyle: v })}
-              segments={MOTION_STYLES}
-            />
-          </div>
         </div>
       </Section>
 

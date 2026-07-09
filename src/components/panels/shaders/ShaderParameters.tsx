@@ -32,16 +32,6 @@ const speedS = (key = "speed", label = "Speed"): SField => ({
 });
 
 const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
-  liquidGlass: [
-    pctS("scale", "Scale"), speedS("flowSpeed", "Flow Speed"), pctS("distortion", "Distortion"),
-    pctS("smoothness", "Smoothness"), pctS("highlightIntensity", "Highlight Intensity"),
-    pctS("glassBlur", "Glass Blur"), pctS("warpAmount", "Warp Amount"), pctS("noise", "Noise"),
-    { kind: "color", key: "accentColor", label: "Accent Color" },
-  ],
-  liquidSilk: [
-    pctS("scale", "Scale"), pctS("flow", "Flow"), pctS("distortion", "Distortion"),
-    pctS("highlight", "Highlight"), pctS("smoothness", "Smoothness"), speedS(),
-  ],
   fluidLines: [
     { kind: "slider", key: "lineCount", label: "Line Count", min: 2, max: 60, step: 1 },
     { kind: "slider", key: "lineWidth", label: "Line Width", min: 0.5, max: 6, step: 0.1, unit: "px" },
@@ -52,23 +42,12 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     pctS("spread", "Spread"), speedS("flowSpeed", "Flow Speed"), pctS("diffusion", "Diffusion"),
     pctS("density", "Density"), pctS("softness", "Softness"), pctS("noise", "Noise"),
   ],
-  plasmaGradient: [
-    pctS("scale", "Scale"), speedS(), pctS("intensity", "Intensity"),
-    pctS("contrast", "Contrast"), pctS("smoothness", "Smoothness"),
-    { kind: "color", key: "colorC", label: "Color C" },
-  ],
   orbitParticles: [
     { kind: "slider", key: "count", label: "Particle Count", min: 10, max: 400, step: 5 },
     pctS("radius", "Radius"), speedS("orbitSpeed", "Orbit Speed"),
     pctS("particleSize", "Particle Size"), pctS("glow", "Glow"), pctS("spread", "Spread"),
     { kind: "slider", key: "centerX", label: "Center X", min: 0, max: 1, step: 0.01 },
     { kind: "slider", key: "centerY", label: "Center Y", min: 0, max: 1, step: 0.01 },
-  ],
-  kineticStripes: [
-    { kind: "slider", key: "stripeCount", label: "Stripe Count", min: 2, max: 40, step: 1 },
-    pctS("stripeWidth", "Stripe Width"), speedS(),
-    { kind: "slider", key: "angle", label: "Angle", min: 0, max: 180, step: 1, unit: "°" },
-    pctS("offset", "Offset"), pctS("softness", "Softness"), pctS("contrast", "Contrast"),
   ],
   sparkBurst: [
     { kind: "slider", key: "count", label: "Max Particles", min: 50, max: 1200, step: 10 },

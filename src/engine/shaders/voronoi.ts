@@ -1,4 +1,4 @@
-import type { MotionStyle, VoronoiSettings } from "../../types/shaders";
+import type { VoronoiSettings } from "../../types/shaders";
 import { hexToRgb, mixRgb, rand } from "./shaderUtils";
 
 /* ------------------------------------------------------------------ */
@@ -27,9 +27,7 @@ export function renderVoronoi(
   h: number,
   s: VoronoiSettings,
   timeSec: number,
-  _motion: MotionStyle,
 ): void {
-  void _motion;
   // Work at reduced resolution — cheap enough for real-time.
   const bw = Math.max(1, Math.round(w / 5));
   const bh = Math.max(1, Math.round(h / 5));

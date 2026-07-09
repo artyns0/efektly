@@ -1,4 +1,4 @@
-import type { MeshLiquidSettings, MotionStyle } from "../../types/shaders";
+import type { MeshLiquidSettings } from "../../types/shaders";
 import { hexToRgb, mixRgb, rgba } from "./shaderUtils";
 
 /* ------------------------------------------------------------------ */
@@ -16,9 +16,7 @@ export function renderMeshLiquid(
   h: number,
   s: MeshLiquidSettings,
   timeSec: number,
-  _motion: MotionStyle,
 ): void {
-  void _motion;
   const t = timeSec * s.speed;
   const a = hexToRgb(s.colorA);
   const b = hexToRgb(s.colorB);

@@ -26,7 +26,6 @@ import { ExportPanel } from "../panels/ExportPanel";
 import { VideoRecordButton } from "./VideoRecordButton";
 import { EffectControlsSwitch } from "./EffectControlsSwitch";
 import { ResetButton } from "../controls/ResetButton";
-import { ThreePropertiesPanel } from "../panels/ThreePropertiesPanel";
 import { ThreeBubblePropertiesPanel } from "../panels/ThreeBubblePropertiesPanel";
 import { ThreeInteractivePropertiesPanel } from "../panels/ThreeInteractivePropertiesPanel";
 import { ThreeImagePropertiesPanel } from "../panels/ThreeImagePropertiesPanel";
@@ -106,9 +105,8 @@ function PropertiesTab() {
   // 3D mode → tool-specific controls.
   if (mode === "three") {
     if (three3DTool === "elasticBubble3D") return <ThreeBubblePropertiesPanel />;
-    if (three3DTool === "interactiveParticles3D") return <ThreeInteractivePropertiesPanel />;
     if (three3DTool === "imageParticles3D") return <ThreeImagePropertiesPanel />;
-    return <ThreePropertiesPanel />;
+    return <ThreeInteractivePropertiesPanel />;
   }
 
   // Shader mode → show the active shader as the selected item.

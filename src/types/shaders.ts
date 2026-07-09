@@ -7,13 +7,9 @@ export type ShaderTypeId =
   | "meshLiquid"
   | "voronoi"
   | "particles"
-  | "liquidGlass"
-  | "liquidSilk"
   | "fluidLines"
   | "inkFlow"
-  | "plasmaGradient"
   | "orbitParticles"
-  | "kineticStripes"
   | "sparkBurst"
   | "kineticLines"
   | "auraOrb"
@@ -21,8 +17,6 @@ export type ShaderTypeId =
   | "nebulas";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
-
-export type MotionStyle = "drift" | "pulse" | "wave" | "chaos";
 
 /* ----- Per-shader parameter sets (each carries its own colors) ----- */
 
@@ -74,33 +68,6 @@ export interface ParticlesSettings {
 
 /* ----- Shader pack v2 ----- */
 
-export interface LiquidGlassSettings {
-  scale: number;
-  flowSpeed: number;
-  distortion: number;
-  smoothness: number;
-  highlightIntensity: number;
-  glassBlur: number;
-  warpAmount: number;
-  noise: number;
-  colorA: string;
-  colorB: string;
-  accentColor: string;
-  background: string;
-}
-
-export interface LiquidSilkSettings {
-  scale: number;
-  flow: number;
-  distortion: number;
-  highlight: number;
-  smoothness: number;
-  speed: number;
-  colorA: string;
-  colorB: string;
-  background: string;
-}
-
 export interface FluidLinesSettings {
   lineCount: number;
   lineWidth: number;
@@ -126,18 +93,6 @@ export interface InkFlowSettings {
   background: string;
 }
 
-export interface PlasmaGradientSettings {
-  scale: number;
-  speed: number;
-  intensity: number;
-  contrast: number;
-  smoothness: number;
-  colorA: string;
-  colorB: string;
-  colorC: string;
-  background: string;
-}
-
 export interface OrbitParticlesSettings {
   count: number;
   radius: number;
@@ -147,19 +102,6 @@ export interface OrbitParticlesSettings {
   spread: number;
   centerX: number;
   centerY: number;
-  colorA: string;
-  colorB: string;
-  background: string;
-}
-
-export interface KineticStripesSettings {
-  stripeCount: number;
-  stripeWidth: number;
-  speed: number;
-  angle: number;
-  offset: number;
-  softness: number;
-  contrast: number;
   colorA: string;
   colorB: string;
   background: string;
@@ -343,13 +285,9 @@ export interface ShaderSettingsMap {
   meshLiquid: MeshLiquidSettings;
   voronoi: VoronoiSettings;
   particles: ParticlesSettings;
-  liquidGlass: LiquidGlassSettings;
-  liquidSilk: LiquidSilkSettings;
   fluidLines: FluidLinesSettings;
   inkFlow: InkFlowSettings;
-  plasmaGradient: PlasmaGradientSettings;
   orbitParticles: OrbitParticlesSettings;
-  kineticStripes: KineticStripesSettings;
   sparkBurst: SparkBurstSettings;
   kineticLines: KineticLinesSettings;
   auraOrb: AuraOrbSettings;
@@ -363,13 +301,9 @@ export type ShaderSettingsPatch = Partial<
     MeshLiquidSettings &
     VoronoiSettings &
     ParticlesSettings &
-    LiquidGlassSettings &
-    LiquidSilkSettings &
     FluidLinesSettings &
     InkFlowSettings &
-    PlasmaGradientSettings &
     OrbitParticlesSettings &
-    KineticStripesSettings &
     SparkBurstSettings &
     KineticLinesSettings &
     AuraOrbSettings &
@@ -381,7 +315,6 @@ export interface ShaderAnimation {
   animate: boolean;
   speed: number; // 0–3 global time multiplier
   loop: boolean;
-  motionStyle: MotionStyle;
 }
 
 export interface ShaderPreset {

@@ -1,4 +1,4 @@
-import type { DotGridSettings, MotionStyle } from "../../types/shaders";
+import type { DotGridSettings } from "../../types/shaders";
 import { hexToRgb, rgba } from "./shaderUtils";
 
 /* ------------------------------------------------------------------ */
@@ -13,7 +13,6 @@ export function renderDotGrid(
   h: number,
   s: DotGridSettings,
   timeSec: number,
-  motion: MotionStyle,
 ): void {
   ctx.fillStyle = s.background;
   ctx.fillRect(0, 0, w, h);
@@ -32,24 +31,8 @@ export function renderDotGrid(
 
   for (let gy = half; gy < h + half; gy += spacing) {
     for (let gx = half; gx < w + half; gx += spacing) {
-      // Positional drift depends on motion style.
-      let ox = 0;
-      let oy = 0;
-      switch (motion) {
-        case "wave":
-          oy = Math.sin(t + gx * 0.03) * driftAmt * 1.6;
-          break;
-        case "chaos":
-          ox = Math.sin(t * 1.3 + gx * 0.05 + gy * 0.03) * driftAmt;
-          oy = Math.cos(t * 1.1 + gy * 0.05) * driftAmt;
-          break;
-        case "pulse":
-          break; // size-only
-        case "drift":
-        default:
-          ox = Math.sin(t * 0.6 + gy * 0.02) * driftAmt;
-          oy = Math.cos(t * 0.5 + gx * 0.02) * driftAmt;
-      }
+      const ox = Math.sin(t * 0.6 + gy * 0.02) * driftAmt;
+      const oy = Math.cos(t * 0.5 + gx * 0.02) * driftAmt;
 
       // Size pulse.
       const phase = Math.sin(t * 1.2 + (gx + gy) * 0.03);

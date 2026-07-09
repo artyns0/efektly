@@ -4,7 +4,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Crosshair, Maximize } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { setPreviewCanvas } from "../../engine/preview/canvasRegistry";
-import { ParticleForms } from "../../engine/three/particleForms";
 import { ElasticBubble } from "../../engine/three/elasticBubble";
 import { InteractiveParticles } from "../../engine/three/interactiveParticles";
 import { ImageParticles } from "../../engine/three/imageParticles";
@@ -57,16 +56,14 @@ export function ThreeViewport() {
     key.position.set(3, 5, 4);
     scene.add(key);
 
-    const forms = new ParticleForms();
     const bubble = new ElasticBubble();
     const interactive = new InteractiveParticles();
     const imageP = new ImageParticles();
 
     const objFor = (tool: ThreeToolId): THREE.Object3D => {
       if (tool === "elasticBubble3D") return bubble.mesh;
-      if (tool === "interactiveParticles3D") return interactive.points;
       if (tool === "imageParticles3D") return imageP.points;
-      return forms.points;
+      return interactive.points;
     };
 
     let currentTool: ThreeToolId = useAppStore.getState().three3DTool;
@@ -131,7 +128,17 @@ export function ThreeViewport() {
         scene.add(objFor(currentTool));
       }
 
-      if (tool === "interactiveParticles3D") {
+      if (tool === "imageParticles3D") {
+        const s = state.imageParticles3D;
+        bg.set(s.background); scene.background = bg;
+        imageP.sync(s, state.mediaImage);
+        imageP.tick(now / 1000, dt, s);
+      } else if (tool === "elasticBubble3D") {
+        const s = state.elasticBubble3D;
+        bg.set(s.background); scene.background = bg;
+        bubble.sync(s);
+        bubble.tick(now / 1000, dt, s);
+      } else {
         const s = state.interactiveParticles3D;
         bg.set(s.background); scene.background = bg;
         // Feed the smoothed pointer onto a plane through the form's centre.
@@ -146,21 +153,6 @@ export function ThreeViewport() {
         }
         interactive.sync(s);
         interactive.tick(now / 1000, dt, s);
-      } else if (tool === "imageParticles3D") {
-        const s = state.imageParticles3D;
-        bg.set(s.background); scene.background = bg;
-        imageP.sync(s, state.mediaImage);
-        imageP.tick(now / 1000, dt, s);
-      } else if (tool === "elasticBubble3D") {
-        const s = state.elasticBubble3D;
-        bg.set(s.background); scene.background = bg;
-        bubble.sync(s);
-        bubble.tick(now / 1000, dt, s);
-      } else {
-        const s = state.particleForms3D;
-        bg.set(s.background); scene.background = bg;
-        forms.sync(s);
-        forms.tick(now / 1000, dt, s);
       }
 
       controls.update();
@@ -179,7 +171,6 @@ export function ThreeViewport() {
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
       controls.dispose();
-      forms.dispose();
       bubble.dispose();
       interactive.dispose();
       imageP.dispose();
