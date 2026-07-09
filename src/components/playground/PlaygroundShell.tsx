@@ -16,7 +16,20 @@ import { useTimeline } from "./useTimeline";
 export function PlaygroundShell() {
   const rightOpen = useAppStore((s) => s.exportPanelOpen);
   const setRightOpen = useAppStore((s) => s.setExportPanelOpen);
+  const mode = useAppStore((s) => s.mode);
+  const railSection = useAppStore((s) => s.railSection);
+  const mediaImage = useAppStore((s) => s.mediaImage);
+  const mediaVideo = useAppStore((s) => s.mediaVideo);
   useTimeline();
+
+  // Startup state: Source mode with nothing loaded. The side panels have
+  // nothing to act on yet, so they step aside and the welcome cards get the
+  // full width. Any media, or any other mode, brings the editor back.
+  const isWelcome =
+    mode === "media" &&
+    railSection === "source" &&
+    mediaImage === null &&
+    mediaVideo === null;
 
   return (
     <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-[#070707] text-linen">
@@ -24,18 +37,20 @@ export function PlaygroundShell() {
         <PlaygroundToolbar />
 
         <div className="flex min-h-0 flex-1 gap-3 p-3">
-          {/* Left panel */}
-          <aside className="scroll-thin w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
-            <PlaygroundPanel />
-          </aside>
+          {/* Left panel — hidden during the startup welcome state */}
+          {!isWelcome && (
+            <aside className="scroll-thin w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
+              <PlaygroundPanel />
+            </aside>
+          )}
 
           {/* Center: preview (video transport lives inside the preview) */}
           <div className="flex min-w-0 flex-1 flex-col">
             <PlaygroundPreview />
           </div>
 
-          {/* Right panel — collapsible */}
-          {rightOpen ? (
+          {/* Right panel — collapsible, and absent during the welcome state */}
+          {isWelcome ? null : rightOpen ? (
             <aside className="scroll-thin relative w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
               <button
                 type="button"

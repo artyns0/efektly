@@ -2,12 +2,8 @@ import { useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
-import {
-  ACCEPT_ATTR,
-  detectMediaKind,
-  loadImageFromFile,
-  loadVideoFromFile,
-} from "../../lib/media";
+import { useMediaImport } from "../../hooks/useMediaImport";
+import { ACCEPT_ATTR } from "../../lib/media";
 
 /* ------------------------------------------------------------------ */
 /*  Source card + uploader (images and videos).                        */
@@ -20,41 +16,14 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
   const source = useAppStore((s) => s.source);
   const mediaType = useAppStore((s) => s.mediaType);
   const mediaUrl = useAppStore((s) => s.mediaUrl);
-  const setImageMedia = useAppStore((s) => s.setImageMedia);
-  const setVideoMedia = useAppStore((s) => s.setVideoMedia);
   const clearMedia = useAppStore((s) => s.clearMedia);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { handleFiles, error, clearError } = useMediaImport();
 
   const hasMedia = mediaUrl !== null;
   const isVideo = mediaType === "video";
-
-  const handleFiles = async (files: FileList | null) => {
-    setError(null);
-    const file = files?.[0];
-    if (!file) return;
-    const kind = detectMediaKind(file);
-    if (!kind) {
-      setError("Unsupported file. Use PNG, JPG, SVG, or MP4.");
-      return;
-    }
-    try {
-      if (kind === "image") {
-        setImageMedia(await loadImageFromFile(file));
-      } else {
-        setVideoMedia(await loadVideoFromFile(file));
-      }
-    } catch (e) {
-      // Surface the specific message (e.g. the 20-second limit) when present.
-      const msg =
-        e instanceof Error && /20 seconds/.test(e.message)
-          ? e.message
-          : `That ${kind} could not be opened.`;
-      setError(msg);
-    }
-  };
 
   const dropHandlers = {
     onClick: () => inputRef.current?.click(),
@@ -198,7 +167,7 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
             aria-label="Remove media"
             onClick={(e) => {
               e.stopPropagation();
-              setError(null);
+              clearError();
               clearMedia();
             }}
             className="grid size-7 shrink-0 place-items-center rounded-lg text-linen/40 transition-colors hover:bg-linen/[0.06] hover:text-linen"

@@ -1,213 +1,268 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FilePlus2, MoveRight } from "lucide-react";
+import { cn } from "../../lib/cn";
+import { useAppStore } from "../../store/useAppStore";
+import { useMediaImport } from "../../hooks/useMediaImport";
+import { ACCEPT_ATTR } from "../../lib/media";
+import {
+  UPLOAD_COVER,
+  WORKSPACE_CARDS,
+  type WorkspaceCard,
+  type WorkspaceCardId,
+} from "./previewCards";
 
 /* ------------------------------------------------------------------ */
-/*  Placeholder "flowing mesh" visual.                                 */
-/*  Canvas 2D, additive: a domain-warped grid whose rows/columns drift */
-/*  and breathe. Lines are tinted flame -> cream across the field,      */
-/*  glowing nodes sit at the warp peaks, over an onyx ground with a     */
-/*  warm key light and a cool counter-glow. Purely decorative for the   */
-/*  UI shell — the real effect/shader engine replaces it later.        */
+/*  Preview welcome state — shown inside the preview frame when the     */
+/*  app opens with no media loaded. A micro-dot field behind an upload  */
+/*  card (click or drop to import) and three shortcuts into the other   */
+/*  workspaces. Replaced by the live canvas as soon as media exists.    */
 /* ------------------------------------------------------------------ */
 
-const COLS = 22; // vertical mesh lines
-const ROWS = 14; // horizontal mesh lines
+const FORMATS = ["PNG", "JPEG", "SVG", "MP4"];
 
-// Monochrome idle animation: soft grey -> white by t in [0,1].
-function meshColor(t: number, alpha: number): string {
-  const v = Math.round(150 + 105 * t); // 150..255 grey
-  return `rgba(${v},${v},${v},${alpha})`;
+/** Cover art + the dark scrim that keeps the card text readable. */
+function Cover({
+  src,
+  className,
+  scrim,
+}: {
+  src: string;
+  className: string;
+  scrim: string;
+}) {
+  return (
+    <>
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        draggable={false}
+        className={cn(
+          "pointer-events-none absolute inset-0 size-full select-none object-cover opacity-[0.88] transition-opacity duration-200 ease-out group-hover:opacity-[0.97]",
+          className,
+        )}
+      />
+      <div className={cn("pointer-events-none absolute inset-0", scrim)} />
+    </>
+  );
 }
 
-function makeSprite(kind: "flame" | "cream"): HTMLCanvasElement {
-  const size = 40;
-  const c = document.createElement("canvas");
-  c.width = size;
-  c.height = size;
-  const g = c.getContext("2d")!;
-  const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  if (kind === "flame") {
-    grad.addColorStop(0, "rgba(230,230,230,1)");
-    grad.addColorStop(0.32, "rgba(200,200,200,0.55)");
-    grad.addColorStop(1, "rgba(200,200,200,0)");
-  } else {
-    grad.addColorStop(0, "rgba(255,255,255,1)");
-    grad.addColorStop(0.4, "rgba(243,243,243,0.5)");
-    grad.addColorStop(1, "rgba(243,243,243,0)");
-  }
-  g.fillStyle = grad;
-  g.fillRect(0, 0, size, size);
-  return c;
+function WorkspaceCardTile({
+  card,
+  wide,
+  onOpen,
+}: {
+  card: WorkspaceCard;
+  wide?: boolean;
+  onOpen: (id: WorkspaceCardId) => void;
+}) {
+  const Icon = card.icon;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(card.id)}
+      className={cn(
+        "group relative isolate flex size-full min-w-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0C0C0D] text-left",
+        "transition-[transform,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.14]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/40",
+        wide ? "min-h-[190px] items-center" : "min-h-[260px] flex-col justify-end",
+      )}
+    >
+      <Cover
+        src={card.cover}
+        className={card.coverClass}
+        scrim={
+          wide
+            ? // Wide plate: art on the right, text reads over a left-side fade.
+              "bg-gradient-to-r from-[#0C0C0D] via-[#0C0C0D]/85 to-transparent"
+            : // Tall tile: art on top, text sits in the darkened lower half.
+              "bg-gradient-to-t from-[#0C0C0D] via-[#0C0C0D]/85 to-transparent"
+        }
+      />
+
+      <span
+        className={cn(
+          "relative z-10 flex flex-col gap-2 p-5",
+          wide && "max-w-[62%]",
+        )}
+      >
+        <Icon
+          className="size-4 text-linen/40 transition-colors group-hover:text-flame"
+          strokeWidth={1.75}
+        />
+        <span className="text-[15px] font-semibold text-linen">{card.title}</span>
+        <span className="text-xs leading-relaxed text-linen/45">{card.helper}</span>
+        <MoveRight className="mt-1 size-4 text-linen/25 transition-[transform,color] duration-200 ease-out group-hover:translate-x-[3px] group-hover:text-flame" />
+      </span>
+    </button>
+  );
 }
 
 export function PreviewPlaceholder() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const setMode = useAppStore((s) => s.setMode);
+  const setRailSection = useAppStore((s) => s.setRailSection);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
+  const { handleFiles, error } = useMediaImport();
 
+  const openWorkspace = (id: WorkspaceCardId) => {
+    if (id === "effects") {
+      setMode("media");
+      setRailSection("effects");
+      // Effects need a source; say so instead of dropping the user into an
+      // empty panel with no explanation.
+      setHint("Import media first to apply effects.");
+    } else if (id === "shader") {
+      setMode("shader");
+    } else {
+      setMode("three");
+    }
+  };
+
+  // The hint is a passing note, not a persistent message.
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!hint) return;
+    const id = window.setTimeout(() => setHint(null), 4000);
+    return () => window.clearTimeout(id);
+  }, [hint]);
 
-    const sprites = { flame: makeSprite("flame"), cream: makeSprite("cream") };
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [effects, shader, three] = WORKSPACE_CARDS;
 
-    let width = 0;
-    let height = 0;
-    let raf = 0;
-    let start = performance.now();
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = rect.width;
-      height = rect.height;
-      canvas.width = Math.max(1, Math.floor(width * dpr));
-      canvas.height = Math.max(1, Math.floor(height * dpr));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    // Domain-warped displacement field. Returns the on-screen point for a
-    // normalized grid coordinate (u, v) at time t — layered sines give the
-    // soft, organic "cloth in wind" flow.
-    const warp = (u: number, v: number, t: number) => {
-      const m = Math.min(width, height);
-      const amp = m * 0.05;
-      const dx =
-        Math.sin(u * 3.1 + v * 2.2 + t * 0.5) +
-        0.5 * Math.sin(v * 4.4 - t * 0.7 + 1.3);
-      const dy =
-        Math.cos(v * 3.6 + u * 1.8 - t * 0.6) +
-        0.5 * Math.cos(u * 5.0 + t * 0.45 + 2.1);
-      // gentle global swell so the whole sheet breathes
-      const swell = 0.6 + 0.4 * Math.sin(t * 0.35 + u * 1.5);
-      // inset the sheet so it floats inside the stage
-      const px = (0.08 + u * 0.84) * width + dx * amp * swell;
-      const py = (0.1 + v * 0.8) * height + dy * amp * swell;
-      return { px, py };
-    };
-
-    const draw = (now: number) => {
-      const t = (now - start) / 1000;
-      ctx.clearRect(0, 0, width, height);
-
-      /* --- ground: warm key light + cool counter-glow --- */
-      const warm = ctx.createRadialGradient(
-        width * 0.68, height * 0.32, 0,
-        width * 0.68, height * 0.32, Math.max(width, height) * 0.8,
-      );
-      warm.addColorStop(0, "rgba(255,255,255,0.10)");
-      warm.addColorStop(0.5, "rgba(255,255,255,0.03)");
-      warm.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = warm;
-      ctx.fillRect(0, 0, width, height);
-
-      const cool = ctx.createRadialGradient(
-        width * 0.18, height * 0.84, 0,
-        width * 0.18, height * 0.84, Math.max(width, height) * 0.6,
-      );
-      cool.addColorStop(0, "rgba(243,240,232,0.06)");
-      cool.addColorStop(1, "rgba(243,240,232,0)");
-      ctx.fillStyle = cool;
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.globalCompositeOperation = "lighter";
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      /* --- 1. horizontal mesh lines (rows) --- */
-      for (let j = 0; j <= ROWS; j++) {
-        const v = j / ROWS;
-        ctx.beginPath();
-        for (let i = 0; i <= COLS; i++) {
-          const { px, py } = warp(i / COLS, v, t);
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
+  return (
+    <div
+      className="relative size-full overflow-auto bg-[#0B0B0C]"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={(e) => {
+        // dragleave also fires when crossing into a child, so only clear the
+        // state once the pointer has actually left the preview.
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setDragging(false);
         }
-        const fade = Math.sin(v * Math.PI); // dim toward top/bottom edges
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = meshColor(v, 0.6);
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = meshColor(v, 0.16 + 0.22 * fade);
-        ctx.stroke();
-      }
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragging(false);
+        handleFiles(e.dataTransfer.files);
+      }}
+    >
+      {/* Micro-dot field, faded toward the edges. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(243,240,232,0.10) 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
+          maskImage:
+            "radial-gradient(ellipse 80% 80% at 50% 45%, black 40%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 80% 80% at 50% 45%, black 40%, transparent 100%)",
+        }}
+      />
+      {/* Barely-there warm centre so the black does not read as flat. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 55% at 50% 42%, rgba(255,90,31,0.05), transparent 70%)",
+        }}
+      />
 
-      /* --- 2. vertical mesh lines (columns) --- */
-      for (let i = 0; i <= COLS; i++) {
-        const u = i / COLS;
-        ctx.beginPath();
-        for (let j = 0; j <= ROWS; j++) {
-          const { px, py } = warp(u, j / ROWS, t);
-          if (j === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        const fade = Math.sin(u * Math.PI);
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = meshColor(u, 0.5);
-        ctx.lineWidth = 1.0;
-        ctx.strokeStyle = meshColor(u, 0.1 + 0.16 * fade);
-        ctx.stroke();
-      }
-      ctx.shadowBlur = 0;
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPT_ATTR}
+        className="hidden"
+        onChange={(e) => {
+          handleFiles(e.target.files);
+          e.target.value = ""; // allow re-selecting the same file
+        }}
+      />
 
-      /* --- 3. glowing nodes riding the warp peaks --- */
-      for (let j = 0; j <= ROWS; j += 1) {
-        const v = j / ROWS;
-        for (let i = 0; i <= COLS; i += 1) {
-          const u = i / COLS;
-          // light only the nodes near a moving wavefront, so highlights travel
-          const pulse = Math.sin(u * 3.1 + v * 2.2 + t * 0.5);
-          if (pulse < 0.45) continue;
-          const { px, py } = warp(u, v, t);
-          const env = Math.sin(u * Math.PI) * Math.sin(v * Math.PI);
-          const a = (pulse - 0.45) * env * 0.9;
-          if (a < 0.02) continue;
-          const sprite = v < 0.5 ? sprites.flame : sprites.cream;
-          const s = 6 + 12 * (pulse - 0.45);
-          ctx.globalAlpha = a;
-          ctx.drawImage(sprite, px - s / 2, py - s / 2, s, s);
-        }
-      }
+      <div className="relative grid min-h-full place-items-center p-6">
+        <div className="flex w-full max-w-4xl flex-col gap-4">
+          {/* Tall upload card on the left; two tiles above a wide plate right. */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <button
+              type="button"
+              aria-label="Upload media"
+              onClick={() => inputRef.current?.click()}
+              className={cn(
+                "group relative isolate flex min-h-[300px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border p-8 lg:row-span-2 lg:min-h-[464px]",
+                "transition-[transform,border-color,background-color] duration-200 ease-out",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/40",
+                dragging
+                  ? "border-dashed border-flame/60 bg-flame/[0.05]"
+                  : "border-white/[0.07] bg-[#0C0C0D] hover:-translate-y-0.5 hover:border-flame/25",
+              )}
+            >
+              <img
+                src={UPLOAD_COVER}
+                alt=""
+                aria-hidden
+                draggable={false}
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] w-full select-none object-cover object-bottom opacity-[0.88] transition-opacity duration-200 ease-out group-hover:opacity-[0.97]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0C0C0D]/30 via-[#0C0C0D]/80 to-[#0C0C0D]" />
 
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = "source-over";
+              <span className="relative z-10 flex flex-col items-center gap-3">
+                <span
+                  className={cn(
+                    "grid size-14 place-items-center rounded-xl border border-white/[0.07] bg-black/40 transition-colors duration-200",
+                    dragging ? "text-flame" : "text-linen/30 group-hover:text-flame",
+                  )}
+                >
+                  <FilePlus2 className="size-6" strokeWidth={1.5} />
+                </span>
+                <span className="text-lg font-semibold text-linen">
+                  {dragging ? "Drop to import" : "Upload or Drag Media"}
+                </span>
+                <span className="max-w-[16rem] text-center text-xs leading-relaxed text-linen/45">
+                  Add images or videos to start creating your vision.
+                </span>
+                <span className="text-xs font-medium text-flame/80 transition-colors duration-200 group-hover:text-flame">
+                  Click to browse{" "}
+                  <span className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-[3px]">
+                    →
+                  </span>
+                </span>
+              </span>
 
-      /* --- 4. onyx depth: vignette + floor shadow --- */
-      const vignette = ctx.createRadialGradient(
-        width * 0.5, height * 0.48, Math.min(width, height) * 0.32,
-        width * 0.5, height * 0.5, Math.max(width, height) * 0.78,
-      );
-      vignette.addColorStop(0, "rgba(11,11,11,0)");
-      vignette.addColorStop(1, "rgba(7,7,7,0.6)");
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0, 0, width, height);
+              <span className="relative z-10 mt-auto flex flex-wrap justify-center gap-1.5 pt-6">
+                {FORMATS.map((f) => (
+                  <span
+                    key={f}
+                    className="rounded-md border border-white/[0.06] bg-black/50 px-2 py-1 font-mono text-[10px] tracking-wide text-linen/40"
+                  >
+                    {f}
+                  </span>
+                ))}
+              </span>
+            </button>
 
-      const floor = ctx.createLinearGradient(0, height * 0.6, 0, height);
-      floor.addColorStop(0, "rgba(7,7,7,0)");
-      floor.addColorStop(1, "rgba(7,7,7,0.5)");
-      ctx.fillStyle = floor;
-      ctx.fillRect(0, 0, width, height);
+            <WorkspaceCardTile card={effects} onOpen={openWorkspace} />
+            <WorkspaceCardTile card={shader} onOpen={openWorkspace} />
 
-      if (!reduceMotion) raf = requestAnimationFrame(draw);
-    };
+            <div className="lg:col-span-2">
+              <WorkspaceCardTile card={three} wide onOpen={openWorkspace} />
+            </div>
+          </div>
 
-    resize();
-    start = performance.now();
-    raf = requestAnimationFrame(draw);
-
-    const observer = new ResizeObserver(() => {
-      resize();
-      if (reduceMotion) {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(draw);
-      }
-    });
-    observer.observe(canvas);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      observer.disconnect();
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="block size-full" />;
+          <p
+            className={cn(
+              "text-center text-xs transition-colors duration-200",
+              error ? "text-flame" : hint ? "text-linen/70" : "text-linen/50",
+            )}
+          >
+            {error ??
+              hint ??
+              "Drag & drop media anywhere in the preview to import."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
