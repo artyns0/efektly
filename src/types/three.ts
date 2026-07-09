@@ -2,7 +2,11 @@
 /*  3D workspace types — real-time generative 3D, separate from Shader. */
 /* ------------------------------------------------------------------ */
 
-export type ThreeToolId = "particleForms3D" | "elasticBubble3D";
+export type ThreeToolId =
+  | "particleForms3D"
+  | "elasticBubble3D"
+  | "interactiveParticles3D"
+  | "imageParticles3D";
 
 export type ParticleShape =
   | "sphere"
@@ -41,6 +45,71 @@ export interface ParticleForms3DSettings {
   colorB: string;
   gradientMix: number; // 0–100
   background: string;
+}
+
+/* ----- Particle Form 3D (mouse-interactive) ----- */
+
+export type InteractiveShape = "sphere" | "shell" | "blob" | "cloud" | "field";
+export type InteractiveColorMode = "gradient" | "solid" | "chromatic";
+export type MouseMode = "repel" | "attract" | "disturb";
+
+export interface InteractiveParticles3DSettings {
+  preset: string;
+  shape: InteractiveShape;
+  /* particles */
+  particleCount: number; // 1000–24000
+  pointSize: number; // 0–100
+  opacity: number; // 0–100
+  glow: number; // 0–100
+  softness: number; // 0–100
+  /* motion */
+  speed: number; // 0–3
+  turbulence: number; // 0–100
+  noiseAmount: number; // 0–100
+  morph: number; // 0–100
+  loopSpeed: number; // 0–3
+  /* interaction */
+  interactionRadius: number; // 0–100
+  interactionStrength: number; // 0–100
+  mouseMode: MouseMode;
+  smoothing: number; // 0–100 (interpolation)
+  /* color */
+  colorMode: InteractiveColorMode;
+  colorA: string;
+  colorB: string;
+  background: string;
+  /* rotation */
+  autoRotate: boolean;
+}
+
+/* ----- Image to 3D Particles ----- */
+
+export type ImageColorMode = "original" | "monochrome" | "duotone";
+
+export interface ImageParticles3DSettings {
+  preset: string;
+  /* reconstruction */
+  depthStrength: number; // 0–100
+  particleDensity: number; // 0–100
+  pointSize: number; // 0–100
+  brightnessInfluence: number; // 0–100
+  edgeSensitivity: number; // 0–100
+  zSpread: number; // 0–100
+  smoothness: number; // 0–100
+  contrastInfluence: number; // 0–100
+  threshold: number; // 0–100 (drop dark background)
+  silhouetteStrength: number; // 0–100
+  /* color */
+  colorMode: ImageColorMode;
+  colorA: string;
+  colorB: string;
+  glow: number; // 0–100
+  opacity: number; // 0–100
+  background: string;
+  /* scene */
+  rotationSensitivity: number; // 0–100
+  autoRotate: boolean;
+  parallaxStrength: number; // 0–100
 }
 
 export interface ElasticBubble3DSettings {

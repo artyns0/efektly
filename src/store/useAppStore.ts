@@ -34,12 +34,18 @@ import type {
 } from "../types/app";
 import type {
   ElasticBubble3DSettings,
+  ImageParticles3DSettings,
+  InteractiveParticles3DSettings,
   ParticleForms3DSettings,
   ThreeToolId,
 } from "../types/three";
 import {
   createInitialElasticBubble3D,
+  createInitialImageParticles3D,
+  createInitialInteractiveParticles3D,
   createInitialParticleForms3D,
+  IMAGE_PARTICLE_PRESETS,
+  INTERACTIVE_PARTICLE_PRESETS,
 } from "../data/three";
 
 /* ------------------------------------------------------------------ */
@@ -144,6 +150,12 @@ interface AppState {
   updateParticleForms3D: (patch: Partial<ParticleForms3DSettings>) => void;
   elasticBubble3D: ElasticBubble3DSettings;
   updateElasticBubble3D: (patch: Partial<ElasticBubble3DSettings>) => void;
+  interactiveParticles3D: InteractiveParticles3DSettings;
+  updateInteractiveParticles3D: (patch: Partial<InteractiveParticles3DSettings>) => void;
+  applyInteractiveParticlePreset: (name: string) => void;
+  imageParticles3D: ImageParticles3DSettings;
+  updateImageParticles3D: (patch: Partial<ImageParticles3DSettings>) => void;
+  applyImageParticlePreset: (name: string) => void;
   /** Restore the active 3D tool's settings to its defaults. */
   resetThreeTool: () => void;
 
@@ -472,7 +484,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({ shaderAnimation: { ...state.shaderAnimation, ...patch } })),
 
   /* 3D workspace */
-  three3DTool: "particleForms3D",
+  three3DTool: "interactiveParticles3D",
   setThree3DTool: (three3DTool) => set({ three3DTool }),
   particleForms3D: createInitialParticleForms3D(),
   updateParticleForms3D: (patch) =>
@@ -480,12 +492,41 @@ export const useAppStore = create<AppState>((set, get) => ({
   elasticBubble3D: createInitialElasticBubble3D(),
   updateElasticBubble3D: (patch) =>
     set((state) => ({ elasticBubble3D: { ...state.elasticBubble3D, ...patch } })),
+  interactiveParticles3D: createInitialInteractiveParticles3D(),
+  updateInteractiveParticles3D: (patch) =>
+    set((state) => ({
+      interactiveParticles3D: { ...state.interactiveParticles3D, ...patch },
+    })),
+  applyInteractiveParticlePreset: (name) =>
+    set((state) => {
+      const p = INTERACTIVE_PARTICLE_PRESETS[name];
+      if (!p) return {};
+      return {
+        interactiveParticles3D: { ...state.interactiveParticles3D, ...p, preset: name },
+      };
+    }),
+  imageParticles3D: createInitialImageParticles3D(),
+  updateImageParticles3D: (patch) =>
+    set((state) => ({ imageParticles3D: { ...state.imageParticles3D, ...patch } })),
+  applyImageParticlePreset: (name) =>
+    set((state) => {
+      const p = IMAGE_PARTICLE_PRESETS[name];
+      if (!p) return {};
+      return { imageParticles3D: { ...state.imageParticles3D, ...p, preset: name } };
+    }),
   resetThreeTool: () =>
-    set((state) =>
-      state.three3DTool === "elasticBubble3D"
-        ? { elasticBubble3D: createInitialElasticBubble3D() }
-        : { particleForms3D: createInitialParticleForms3D() },
-    ),
+    set((state) => {
+      switch (state.three3DTool) {
+        case "elasticBubble3D":
+          return { elasticBubble3D: createInitialElasticBubble3D() };
+        case "interactiveParticles3D":
+          return { interactiveParticles3D: createInitialInteractiveParticles3D() };
+        case "imageParticles3D":
+          return { imageParticles3D: createInitialImageParticles3D() };
+        default:
+          return { particleForms3D: createInitialParticleForms3D() };
+      }
+    }),
 
   /* export */
   format: "png",
