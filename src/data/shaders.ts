@@ -28,7 +28,7 @@ export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "kineticLines", label: "Kinetic Lines" },
   { id: "auraOrb", label: "Aura Orb" },
   { id: "holoyudu", label: "Holoyudu" },
-  { id: "nebulaDrift", label: "Nebula Drift" },
+  { id: "nebulas", label: "Nebulas" },
 ];
 
 export function createInitialShaderSettings(): ShaderSettingsMap {
@@ -138,13 +138,23 @@ export function createInitialShaderSettings(): ShaderSettingsMap {
       textureInfluence: 15, luminanceInfluence: 40, edgeInfluence: 30,
       opacity: 100, preserveDark: false, background: "#04040A",
     },
-    nebulaDrift: {
-      pixelRatio: 48, maxIterations: 5, rayStepSize: 55,
-      evolutionSpeed: 1, fogDensity: 60, fractalScale: 42, cloudRadius: 62,
-      glowSoftness: 65,
-      redPhase: 62, greenPhase: 48, bluePhase: 30,
-      loop: true, loopSpeed: 1, driftStrength: 40, flowRotation: 20,
-      opacity: 100, colorA: "#8FB8FF", colorB: "#FFC7E6", background: "#05060F",
+    nebulas: {
+      /* performance */
+      pixelRatio: 65, maxIterations: 9, stepSize: 42, qualityMode: "balanced",
+      /* nebula controls */
+      evolutionSpeed: 0.8, fogDensity: 28, detailScale: 30, fieldRadius: 70,
+      glowSoftness: 40, contrast: 50, softness: 52, flowStrength: 55,
+      warp: 48, depthFade: 55, brightness: 62,
+      /* color phase */
+      redPhase: 30, greenPhase: 45, bluePhase: 62,
+      /* motion / composition */
+      drift: 30, swirl: 35, rotation: 0, centerPull: 35, spread: 45,
+      loopSpeed: 1, autoAnimate: true,
+      /* color / look */
+      saturation: 54, highlights: 55, bloom: 45, prism: 45,
+      backgroundMix: 88, colorBalance: 45,
+      /* output */
+      opacity: 100, colorA: "#9FD8FF", colorB: "#FFCBA8", background: "#0A0C14",
     },
   };
 }
@@ -243,12 +253,16 @@ export const SHADER_PRESETS: Record<ShaderTypeId, ShaderPreset[]> = {
     { name: "Iridescent Flow", settings: { colorA: "#7B5CFF", colorB: "#38E1FF", colorC: "#FF5CC8", colorCount: 3, saturation: 75, flowStrength: 65, fluidMap: 70, distortion: 55, flowSpeed: 1.4, bandDensity: 40, background: "#04040A" } },
     { name: "Dark Hologram", settings: { colorA: "#5CE0FF", colorB: "#9A5CFF", colorC: "#FF6CC0", colorCount: 3, saturation: 70, preserveDark: true, highlightStrength: 60, bandDensity: 50, background: "#020207" } },
   ],
-  nebulaDrift: [
-    { name: "Aurora Mist", settings: { redPhase: 40, greenPhase: 55, bluePhase: 68, fogDensity: 55, glowSoftness: 75, fractalScale: 38, cloudRadius: 68, driftStrength: 45, colorA: "#7CF0D8", colorB: "#9FB8FF", background: "#03060C" } },
-    { name: "Pastel Veil", settings: { redPhase: 66, greenPhase: 50, bluePhase: 36, fogDensity: 50, glowSoftness: 82, fractalScale: 34, cloudRadius: 72, driftStrength: 32, colorA: "#BFE0FF", colorB: "#FFD6EC", background: "#06070F" } },
-    { name: "Spectral Cloud", settings: { redPhase: 72, greenPhase: 40, bluePhase: 22, fogDensity: 68, glowSoftness: 60, fractalScale: 50, cloudRadius: 60, maxIterations: 7, driftStrength: 48, colorA: "#9A8CFF", colorB: "#FFB0D8", background: "#04040C" } },
-    { name: "Dream Bloom", settings: { redPhase: 80, greenPhase: 58, bluePhase: 44, fogDensity: 58, glowSoftness: 88, fractalScale: 30, cloudRadius: 74, driftStrength: 38, colorA: "#FFD9A8", colorB: "#FFAFE0", background: "#080510" } },
-    { name: "Soft Prism Fog", settings: { redPhase: 55, greenPhase: 62, bluePhase: 70, fogDensity: 46, glowSoftness: 72, fractalScale: 44, cloudRadius: 66, driftStrength: 55, flowRotation: 40, colorA: "#A8F0FF", colorB: "#C7B8FF", background: "#04060E" } },
+  nebulas: [
+    /* Silk Veil = default; closest to the main reference. */
+    { name: "Silk Veil", settings: { redPhase: 30, greenPhase: 45, bluePhase: 62, detailScale: 30, flowStrength: 55, warp: 48, prism: 45, softness: 52, contrast: 50, highlights: 55, bloom: 45, saturation: 54, centerPull: 35, spread: 45, colorBalance: 45, brightness: 62, colorA: "#9FD8FF", colorB: "#FFCBA8", background: "#0A0C14" } },
+    { name: "Spectral Bloom", settings: { redPhase: 26, greenPhase: 42, bluePhase: 60, detailScale: 36, flowStrength: 62, warp: 58, prism: 62, softness: 34, contrast: 58, highlights: 62, bloom: 50, saturation: 58, centerPull: 48, spread: 40, colorBalance: 48, brightness: 58, colorA: "#8FE6FF", colorB: "#FFB48F", background: "#0B0A12" } },
+    { name: "Prism Haze", settings: { redPhase: 34, greenPhase: 48, bluePhase: 64, detailScale: 24, flowStrength: 46, warp: 40, prism: 82, softness: 55, contrast: 46, highlights: 44, bloom: 34, saturation: 52, centerPull: 24, spread: 55, colorBalance: 40, brightness: 54, colorA: "#B8E4FF", colorB: "#E8C6FF", background: "#0A0B16" } },
+    { name: "Soft Aurora", settings: { redPhase: 40, greenPhase: 56, bluePhase: 72, detailScale: 26, flowStrength: 50, warp: 44, prism: 34, softness: 58, contrast: 44, highlights: 38, bloom: 30, saturation: 44, centerPull: 20, spread: 52, colorBalance: 30, brightness: 52, colorA: "#8FF0DC", colorB: "#A8C4FF", background: "#060B12" } },
+    { name: "Ghost Current", settings: { redPhase: 38, greenPhase: 50, bluePhase: 62, detailScale: 22, flowStrength: 40, warp: 34, prism: 26, softness: 70, contrast: 38, highlights: 28, bloom: 22, saturation: 34, centerPull: 30, spread: 60, colorBalance: 44, brightness: 50, colorA: "#C4D8E8", colorB: "#D8CCE0", background: "#0B0D12" } },
+    { name: "Halo Drift", settings: { redPhase: 28, greenPhase: 44, bluePhase: 60, detailScale: 20, flowStrength: 44, warp: 38, prism: 50, softness: 48, contrast: 50, highlights: 58, bloom: 48, saturation: 50, centerPull: 62, spread: 34, colorBalance: 52, brightness: 57, colorA: "#A8DCFF", colorB: "#FFD4B0", background: "#090B13" } },
+    { name: "Radiant Fold", settings: { redPhase: 22, greenPhase: 40, bluePhase: 58, detailScale: 44, flowStrength: 70, warp: 66, prism: 56, softness: 30, contrast: 62, highlights: 66, bloom: 54, saturation: 62, centerPull: 42, spread: 38, colorBalance: 58, brightness: 60, colorA: "#7FD8FF", colorB: "#FFB07A", background: "#0C0910" } },
+    { name: "Dream Plasma", settings: { redPhase: 44, greenPhase: 60, bluePhase: 78, detailScale: 34, flowStrength: 58, warp: 54, prism: 70, softness: 46, contrast: 54, highlights: 54, bloom: 46, saturation: 60, centerPull: 36, spread: 46, colorBalance: 36, brightness: 58, colorA: "#B08CFF", colorB: "#FFA8D8", background: "#0A0714" } },
   ],
   kineticLines: [
     { name: "Orbit Lines", settings: { mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, morph: 45, glow: 20, loopDuration: 6, colorA: LINEN, background: ONYX } },
@@ -280,5 +294,5 @@ export const DEFAULT_PRESET: Record<ShaderTypeId, string> = {
   kineticLines: "Orbit Lines",
   auraOrb: "Blue Pink",
   holoyudu: "Iridescent Flow",
-  nebulaDrift: "Aurora Mist",
+  nebulas: "Silk Veil",
 };

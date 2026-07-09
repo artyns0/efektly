@@ -38,7 +38,7 @@ const ICONS: Record<ShaderTypeId, LucideIcon> = {
   kineticLines: Radar,
   auraOrb: CircleDot,
   holoyudu: Gem,
-  nebulaDrift: Cloudy,
+  nebulas: Cloudy,
 };
 
 export function ShaderTypeSelector() {

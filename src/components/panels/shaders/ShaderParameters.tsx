@@ -7,6 +7,7 @@ import type {
 import { SliderControl } from "../../controls/SliderControl";
 import { SegmentedControl } from "../../controls/SegmentedControl";
 import { Toggle } from "../../controls/Toggle";
+import { SelectControl } from "../../controls/SelectControl";
 import { ColorField } from "../../controls/ColorField";
 
 const COLOR_MODES: { value: ShaderColorMode; label: string }[] = [
@@ -20,7 +21,8 @@ const COLOR_MODES: { value: ShaderColorMode; label: string }[] = [
 type SField =
   | { kind: "slider"; key: string; label: string; min: number; max: number; step?: number; unit?: string }
   | { kind: "toggle"; key: string; label: string }
-  | { kind: "color"; key: string; label: string };
+  | { kind: "color"; key: string; label: string }
+  | { kind: "select"; key: string; label: string; options: { value: string; label: string }[] };
 
 const pctS = (key: string, label: string): SField => ({
   kind: "slider", key, label, min: 0, max: 100, step: 1, unit: "%",
@@ -128,26 +130,50 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     pctS("opacity", "Opacity"),
     { kind: "toggle", key: "preserveDark", label: "Preserve Dark Areas" },
   ],
-  nebulaDrift: [
-    /* performance & raymarching */
+  nebulas: [
+    /* 1 — performance */
     pctS("pixelRatio", "Pixel Ratio"),
-    { kind: "slider", key: "maxIterations", label: "Max Iterations", min: 2, max: 8, step: 1 },
-    pctS("rayStepSize", "Ray Step Size"),
-    /* nebula */
+    { kind: "slider", key: "maxIterations", label: "Max Iterations", min: 2, max: 16, step: 1 },
+    pctS("stepSize", "Step Size"),
+    {
+      kind: "select", key: "qualityMode", label: "Quality Mode",
+      options: [
+        { value: "draft", label: "Draft" },
+        { value: "balanced", label: "Balanced" },
+        { value: "high", label: "High" },
+      ],
+    },
+    /* 2 — nebula controls */
     speedS("evolutionSpeed", "Evolution Speed"),
     pctS("fogDensity", "Fog Density"),
-    pctS("fractalScale", "Fractal Scale"),
-    pctS("cloudRadius", "Cloud Radius"),
+    pctS("detailScale", "Detail Scale"),
+    pctS("fieldRadius", "Field Radius"),
     pctS("glowSoftness", "Glow Softness"),
-    /* color phase */
+    pctS("contrast", "Contrast"),
+    pctS("softness", "Softness"),
+    pctS("flowStrength", "Flow Strength"),
+    pctS("warp", "Distortion / Warp"),
+    pctS("depthFade", "Depth Fade"),
+    pctS("brightness", "Brightness"),
+    /* 3 — color phase */
     pctS("redPhase", "Red Phase"),
     pctS("greenPhase", "Green Phase"),
     pctS("bluePhase", "Blue Phase"),
-    /* motion / loop */
-    { kind: "toggle", key: "loop", label: "Loop" },
+    /* 4 — motion / composition */
+    pctS("drift", "Drift"),
+    pctS("swirl", "Swirl"),
+    { kind: "slider", key: "rotation", label: "Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    pctS("centerPull", "Center Pull"),
+    pctS("spread", "Spread"),
     speedS("loopSpeed", "Loop Speed"),
-    pctS("driftStrength", "Drift Strength"),
-    { kind: "slider", key: "flowRotation", label: "Flow Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    { kind: "toggle", key: "autoAnimate", label: "Auto Animate" },
+    /* 5 — color / look */
+    pctS("saturation", "Saturation"),
+    pctS("highlights", "Highlights"),
+    pctS("bloom", "Bloom / Glow"),
+    pctS("prism", "Spectral Separation"),
+    pctS("backgroundMix", "Background Mix"),
+    pctS("colorBalance", "Color Balance"),
     pctS("opacity", "Opacity"),
   ],
 };
@@ -204,6 +230,17 @@ export function ShaderParameters() {
                 key={f.key}
                 label={f.label}
                 checked={Boolean(sset[f.key])}
+                onChange={(v) => set({ [f.key]: v } as ShaderSettingsPatch)}
+              />
+            );
+          }
+          if (f.kind === "select") {
+            return (
+              <SelectControl
+                key={f.key}
+                label={f.label}
+                value={String(sset[f.key] ?? f.options[0].value)}
+                options={f.options}
                 onChange={(v) => set({ [f.key]: v } as ShaderSettingsPatch)}
               />
             );

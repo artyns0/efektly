@@ -18,7 +18,7 @@ export type ShaderTypeId =
   | "kineticLines"
   | "auraOrb"
   | "holoyudu"
-  | "nebulaDrift";
+  | "nebulas";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
 
@@ -291,27 +291,46 @@ export interface HoloyuduSettings {
   background: string;
 }
 
-/** Nebula Drift — soft volumetric pastel nebula (fbm cloud field). */
-export interface NebulaDriftSettings {
-  /* performance & raymarching */
-  pixelRatio: number; // 0–100 (buffer scale)
-  maxIterations: number; // 2–8 (fbm octaves)
-  rayStepSize: number; // 0–100 (warp / detail)
-  /* nebula */
+export type NebulaQuality = "draft" | "balanced" | "high";
+
+/** Nebulas — silky iridescent volumetric nebula (GPU domain-warp + prism). */
+export interface NebulasSettings {
+  /* performance */
+  pixelRatio: number; // 0–100 (offscreen resolution)
+  maxIterations: number; // 2–16 (domain-warp iterations)
+  stepSize: number; // 0–100 (warp lacunarity)
+  qualityMode: NebulaQuality;
+  /* nebula controls */
   evolutionSpeed: number; // 0–3
   fogDensity: number; // 0–100
-  fractalScale: number; // 0–100
-  cloudRadius: number; // 0–100
+  detailScale: number; // 0–100
+  fieldRadius: number; // 0–100
   glowSoftness: number; // 0–100
+  contrast: number; // 0–100
+  softness: number; // 0–100
+  flowStrength: number; // 0–100
+  warp: number; // 0–100
+  depthFade: number; // 0–100
+  brightness: number; // 0–100
   /* color phase */
   redPhase: number; // 0–100
   greenPhase: number; // 0–100
   bluePhase: number; // 0–100
-  /* motion / loop */
-  loop: boolean;
+  /* motion / composition */
+  drift: number; // 0–100
+  swirl: number; // 0–100
+  rotation: number; // degrees
+  centerPull: number; // 0–100
+  spread: number; // 0–100
   loopSpeed: number; // 0–3
-  driftStrength: number; // 0–100
-  flowRotation: number; // degrees
+  autoAnimate: boolean;
+  /* color / look */
+  saturation: number; // 0–100
+  highlights: number; // 0–100
+  bloom: number; // 0–100
+  prism: number; // 0–100 (spectral separation)
+  backgroundMix: number; // 0–100
+  colorBalance: number; // 0–100 (cool → warm)
   /* output */
   opacity: number; // 0–100
   colorA: string;
@@ -335,7 +354,7 @@ export interface ShaderSettingsMap {
   kineticLines: KineticLinesSettings;
   auraOrb: AuraOrbSettings;
   holoyudu: HoloyuduSettings;
-  nebulaDrift: NebulaDriftSettings;
+  nebulas: NebulasSettings;
 }
 
 /** A partial of any one shader's settings (for updates + presets). */
@@ -355,7 +374,7 @@ export type ShaderSettingsPatch = Partial<
     KineticLinesSettings &
     AuraOrbSettings &
     HoloyuduSettings &
-    NebulaDriftSettings
+    NebulasSettings
 >;
 
 export interface ShaderAnimation {
