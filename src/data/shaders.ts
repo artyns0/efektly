@@ -28,6 +28,7 @@ export const SHADER_TYPES: { id: ShaderTypeId; label: string }[] = [
   { id: "kineticLines", label: "Kinetic Lines" },
   { id: "auraOrb", label: "Aura Orb" },
   { id: "holoyudu", label: "Holoyudu" },
+  { id: "nebulaDrift", label: "Nebula Drift" },
 ];
 
 export function createInitialShaderSettings(): ShaderSettingsMap {
@@ -137,6 +138,14 @@ export function createInitialShaderSettings(): ShaderSettingsMap {
       textureInfluence: 15, luminanceInfluence: 40, edgeInfluence: 30,
       opacity: 100, preserveDark: false, background: "#04040A",
     },
+    nebulaDrift: {
+      pixelRatio: 48, maxIterations: 5, rayStepSize: 55,
+      evolutionSpeed: 1, fogDensity: 60, fractalScale: 42, cloudRadius: 62,
+      glowSoftness: 65,
+      redPhase: 62, greenPhase: 48, bluePhase: 30,
+      loop: true, loopSpeed: 1, driftStrength: 40, flowRotation: 20,
+      opacity: 100, colorA: "#8FB8FF", colorB: "#FFC7E6", background: "#05060F",
+    },
   };
 }
 
@@ -234,6 +243,13 @@ export const SHADER_PRESETS: Record<ShaderTypeId, ShaderPreset[]> = {
     { name: "Iridescent Flow", settings: { colorA: "#7B5CFF", colorB: "#38E1FF", colorC: "#FF5CC8", colorCount: 3, saturation: 75, flowStrength: 65, fluidMap: 70, distortion: 55, flowSpeed: 1.4, bandDensity: 40, background: "#04040A" } },
     { name: "Dark Hologram", settings: { colorA: "#5CE0FF", colorB: "#9A5CFF", colorC: "#FF6CC0", colorCount: 3, saturation: 70, preserveDark: true, highlightStrength: 60, bandDensity: 50, background: "#020207" } },
   ],
+  nebulaDrift: [
+    { name: "Aurora Mist", settings: { redPhase: 40, greenPhase: 55, bluePhase: 68, fogDensity: 55, glowSoftness: 75, fractalScale: 38, cloudRadius: 68, driftStrength: 45, colorA: "#7CF0D8", colorB: "#9FB8FF", background: "#03060C" } },
+    { name: "Pastel Veil", settings: { redPhase: 66, greenPhase: 50, bluePhase: 36, fogDensity: 50, glowSoftness: 82, fractalScale: 34, cloudRadius: 72, driftStrength: 32, colorA: "#BFE0FF", colorB: "#FFD6EC", background: "#06070F" } },
+    { name: "Spectral Cloud", settings: { redPhase: 72, greenPhase: 40, bluePhase: 22, fogDensity: 68, glowSoftness: 60, fractalScale: 50, cloudRadius: 60, maxIterations: 7, driftStrength: 48, colorA: "#9A8CFF", colorB: "#FFB0D8", background: "#04040C" } },
+    { name: "Dream Bloom", settings: { redPhase: 80, greenPhase: 58, bluePhase: 44, fogDensity: 58, glowSoftness: 88, fractalScale: 30, cloudRadius: 74, driftStrength: 38, colorA: "#FFD9A8", colorB: "#FFAFE0", background: "#080510" } },
+    { name: "Soft Prism Fog", settings: { redPhase: 55, greenPhase: 62, bluePhase: 70, fogDensity: 46, glowSoftness: 72, fractalScale: 44, cloudRadius: 66, driftStrength: 55, flowRotation: 40, colorA: "#A8F0FF", colorB: "#C7B8FF", background: "#04060E" } },
+  ],
   kineticLines: [
     { name: "Orbit Lines", settings: { mode: "orbit", lineCount: 40, lineWidth: 1.2, scale: 60, morph: 45, glow: 20, loopDuration: 6, colorA: LINEN, background: ONYX } },
     { name: "Wave Smear", settings: { mode: "waveSmear", lineCount: 48, lineWidth: 2, scale: 70, morph: 55, glow: 12, loopDuration: 7, colorA: LINEN, background: "#050505" } },
@@ -264,4 +280,5 @@ export const DEFAULT_PRESET: Record<ShaderTypeId, string> = {
   kineticLines: "Orbit Lines",
   auraOrb: "Blue Pink",
   holoyudu: "Iridescent Flow",
+  nebulaDrift: "Aurora Mist",
 };

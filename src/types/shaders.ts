@@ -17,7 +17,8 @@ export type ShaderTypeId =
   | "sparkBurst"
   | "kineticLines"
   | "auraOrb"
-  | "holoyudu";
+  | "holoyudu"
+  | "nebulaDrift";
 
 export type ShaderColorMode = "brand" | "mono" | "duo";
 
@@ -290,6 +291,34 @@ export interface HoloyuduSettings {
   background: string;
 }
 
+/** Nebula Drift — soft volumetric pastel nebula (fbm cloud field). */
+export interface NebulaDriftSettings {
+  /* performance & raymarching */
+  pixelRatio: number; // 0–100 (buffer scale)
+  maxIterations: number; // 2–8 (fbm octaves)
+  rayStepSize: number; // 0–100 (warp / detail)
+  /* nebula */
+  evolutionSpeed: number; // 0–3
+  fogDensity: number; // 0–100
+  fractalScale: number; // 0–100
+  cloudRadius: number; // 0–100
+  glowSoftness: number; // 0–100
+  /* color phase */
+  redPhase: number; // 0–100
+  greenPhase: number; // 0–100
+  bluePhase: number; // 0–100
+  /* motion / loop */
+  loop: boolean;
+  loopSpeed: number; // 0–3
+  driftStrength: number; // 0–100
+  flowRotation: number; // degrees
+  /* output */
+  opacity: number; // 0–100
+  colorA: string;
+  colorB: string;
+  background: string;
+}
+
 export interface ShaderSettingsMap {
   dotGrid: DotGridSettings;
   meshLiquid: MeshLiquidSettings;
@@ -306,6 +335,7 @@ export interface ShaderSettingsMap {
   kineticLines: KineticLinesSettings;
   auraOrb: AuraOrbSettings;
   holoyudu: HoloyuduSettings;
+  nebulaDrift: NebulaDriftSettings;
 }
 
 /** A partial of any one shader's settings (for updates + presets). */
@@ -324,7 +354,8 @@ export type ShaderSettingsPatch = Partial<
     SparkBurstSettings &
     KineticLinesSettings &
     AuraOrbSettings &
-    HoloyuduSettings
+    HoloyuduSettings &
+    NebulaDriftSettings
 >;
 
 export interface ShaderAnimation {

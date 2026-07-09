@@ -18,6 +18,7 @@ import { renderSparkBurst } from "./sparkBurst";
 import { renderKineticLines } from "./kineticLines";
 import { renderAuraOrb } from "./auraOrb";
 import { renderHoloyudu } from "./holoyudu";
+import { renderNebulaDrift } from "./nebulaDrift";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dispatcher — routes to the active procedural renderer.      */
@@ -37,6 +38,7 @@ export const IMPLEMENTED_SHADERS: ReadonlySet<ShaderTypeId> = new Set([
   "kineticLines",
   "auraOrb",
   "holoyudu",
+  "nebulaDrift",
 ]);
 
 export function renderShader(
@@ -97,6 +99,9 @@ export function renderShader(
       break;
     case "holoyudu":
       renderHoloyudu(ctx, w, h, settings.holoyudu, timeSec);
+      break;
+    case "nebulaDrift":
+      renderNebulaDrift(ctx, w, h, settings.nebulaDrift, timeSec);
       break;
   }
 }

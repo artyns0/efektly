@@ -3,6 +3,7 @@ import {
   Activity,
   AlignJustify,
   CircleDot,
+  Cloudy,
   Gem,
   CloudFog,
   Droplets,
@@ -37,6 +38,7 @@ const ICONS: Record<ShaderTypeId, LucideIcon> = {
   kineticLines: Radar,
   auraOrb: CircleDot,
   holoyudu: Gem,
+  nebulaDrift: Cloudy,
 };
 
 export function ShaderTypeSelector() {

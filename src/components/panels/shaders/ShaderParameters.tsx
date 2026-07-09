@@ -128,6 +128,28 @@ const SHADER_SCHEMAS: Partial<Record<ShaderTypeId, SField[]>> = {
     pctS("opacity", "Opacity"),
     { kind: "toggle", key: "preserveDark", label: "Preserve Dark Areas" },
   ],
+  nebulaDrift: [
+    /* performance & raymarching */
+    pctS("pixelRatio", "Pixel Ratio"),
+    { kind: "slider", key: "maxIterations", label: "Max Iterations", min: 2, max: 8, step: 1 },
+    pctS("rayStepSize", "Ray Step Size"),
+    /* nebula */
+    speedS("evolutionSpeed", "Evolution Speed"),
+    pctS("fogDensity", "Fog Density"),
+    pctS("fractalScale", "Fractal Scale"),
+    pctS("cloudRadius", "Cloud Radius"),
+    pctS("glowSoftness", "Glow Softness"),
+    /* color phase */
+    pctS("redPhase", "Red Phase"),
+    pctS("greenPhase", "Green Phase"),
+    pctS("bluePhase", "Blue Phase"),
+    /* motion / loop */
+    { kind: "toggle", key: "loop", label: "Loop" },
+    speedS("loopSpeed", "Loop Speed"),
+    pctS("driftStrength", "Drift Strength"),
+    { kind: "slider", key: "flowRotation", label: "Flow Rotation", min: 0, max: 360, step: 1, unit: "°" },
+    pctS("opacity", "Opacity"),
+  ],
 };
 
 /**
