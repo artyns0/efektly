@@ -70,6 +70,9 @@ export function PlaygroundToolbar() {
       },
     });
 
+  // Shader + 3D draw to a live canvas, which is what Record captures.
+  const canvasMode = mode === "shader" || mode === "three";
+
   const active: NavKey | null =
     mode === "shader"
       ? "shader"
@@ -186,13 +189,15 @@ export function PlaygroundToolbar() {
           aria-label={isRecording ? "Stop recording" : "Record"}
           aria-pressed={isRecording}
           onClick={handleRecord}
-          disabled={!canCapture || (mode !== "shader" && !isRecording)}
+          disabled={!canCapture || (!canvasMode && !isRecording)}
           title={
-            mode !== "shader"
-              ? "Recording is available in Shader mode. Use Export MP4 for media video."
+            !canvasMode
+              ? "Recording is available in Shader and 3D modes. Use Export MP4 for media video."
               : isRecording
                 ? "Stop recording"
-                : "Record shader preview"
+                : mode === "three"
+                  ? "Record 3D viewport"
+                  : "Record shader preview"
           }
           className={cn(
             "inline-flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-35",

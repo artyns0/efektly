@@ -1,13 +1,20 @@
 /* ------------------------------------------------------------------ */
-/*  Record the live canvas to WebM via captureStream + MediaRecorder.  */
-/*  WebM only. Auto-stops at maxMs. Local-first — nothing uploaded.    */
+/*  Record the live canvas via captureStream + MediaRecorder.          */
+/*  Auto-stops at maxMs. Local-first — nothing uploaded.               */
 /* ------------------------------------------------------------------ */
 
 export const MAX_RECORD_MS = 20_000;
 
-/** Pick the best-supported WebM MIME type. */
-export function pickWebmMime(): string {
+/**
+ * Prefer MP4. MediaRecorder's WebM carries no duration in its header, so such
+ * a clip reports duration 0 — it cannot be seeked, looped, or re-exported once
+ * imported into Media. WebM stays as the fallback for browsers without MP4.
+ */
+export function pickRecordMime(): string {
   const candidates = [
+    "video/mp4;codecs=avc1.42E01E",
+    "video/mp4;codecs=avc1",
+    "video/mp4",
     "video/webm;codecs=vp9",
     "video/webm;codecs=vp8",
     "video/webm",
@@ -18,6 +25,11 @@ export function pickWebmMime(): string {
     }
   }
   return "video/webm";
+}
+
+/** File extension matching a recorded blob's MIME type. */
+export function recordingExtension(mime: string): "mp4" | "webm" {
+  return mime.includes("mp4") ? "mp4" : "webm";
 }
 
 export function canRecord(): boolean {
@@ -44,7 +56,7 @@ export function recordCanvas(
   o: RecorderOptions,
 ): RecorderHandle {
   const maxMs = o.maxMs ?? MAX_RECORD_MS;
-  const mime = pickWebmMime();
+  const mime = pickRecordMime();
   const stream = canvas.captureStream(o.fps);
   const chunks: BlobPart[] = [];
   const startedAt = performance.now();

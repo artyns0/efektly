@@ -160,3 +160,71 @@ export function loadVideoFromFile(file: File): Promise<LoadedVideo> {
     };
   });
 }
+
+/**
+ * MediaRecorder WebM carries no duration in its header, so the element reports
+ * Infinity until it is seeked past the end. Seeking to a huge time forces the
+ * browser to resolve the real duration; we then rewind to the start.
+ */
+function resolveDuration(video: HTMLVideoElement): Promise<void> {
+  if (isFinite(video.duration) && video.duration > 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      video.removeEventListener("durationchange", onChange);
+      video.currentTime = 0;
+      resolve();
+    };
+    const onChange = () => {
+      if (isFinite(video.duration) && video.duration > 0) done();
+    };
+    video.addEventListener("durationchange", onChange);
+    video.currentTime = 1e6;
+    window.setTimeout(done, 1500); // never hang if it stays unresolved
+  });
+}
+
+/**
+ * Load an in-memory recording (Shader/3D capture) as media, exactly as if the
+ * user had uploaded it. The caller owns the returned `url`; the store revokes
+ * it when the media is replaced or cleared.
+ */
+export async function loadVideoFromBlob(
+  blob: Blob,
+  name: string,
+): Promise<LoadedVideo> {
+  const url = URL.createObjectURL(blob);
+  const video = document.createElement("video");
+  video.src = url;
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = "auto";
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      video.onloadeddata = () => resolve();
+      video.onerror = () => reject(new Error("Could not decode recording"));
+    });
+    await resolveDuration(video);
+  } catch (err) {
+    URL.revokeObjectURL(url);
+    throw err;
+  }
+
+  return {
+    video,
+    url,
+    meta: {
+      name,
+      width: video.videoWidth,
+      height: video.videoHeight,
+      format: blob.type.includes("webm") ? "WEBM" : "MP4",
+      sizeLabel: formatFileSize(blob.size),
+      durationLabel: isFinite(video.duration)
+        ? formatDuration(video.duration)
+        : undefined,
+    },
+  };
+}

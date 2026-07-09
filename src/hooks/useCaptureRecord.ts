@@ -12,6 +12,10 @@ import {
   recordCanvas,
   type RecorderHandle,
 } from "../engine/export/recordCanvas";
+import {
+  canRecordEncoded,
+  recordCanvasEncoded,
+} from "../engine/export/recordCanvasEncoded";
 
 /* ------------------------------------------------------------------ */
 /*  Capture + Record actions, shared by the classic TopBar and the     */
@@ -70,8 +74,10 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
   const mediaImage = useAppStore((s) => s.mediaImage);
   const mediaVideo = useAppStore((s) => s.mediaVideo);
 
-  const isShader = mode === "shader";
-  const canCapture = mediaImage !== null || mediaVideo !== null || isShader;
+  // Shader + 3D render straight to a live canvas, so they can always be
+  // captured/recorded regardless of whether media happens to be loaded.
+  const isCanvasMode = mode === "shader" || mode === "three";
+  const canCapture = mediaImage !== null || mediaVideo !== null || isCanvasMode;
 
   const reveal = options?.onResult ?? (() => setMode("export"));
 
@@ -80,11 +86,11 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
       useAppStore.getState();
     const media = img ?? vid;
     let frame: HTMLCanvasElement | null = null;
-    if (media) {
-      frame = renderNativeFrame(media, effects);
-    } else if (m === "shader") {
+    if (m === "shader" || m === "three") {
       const canvas = getPreviewCanvas();
       if (canvas) frame = snapshotCanvas(canvas);
+    } else if (media) {
+      frame = renderNativeFrame(media, effects);
     }
     if (!frame) return;
     setCapture(frame, makeThumb(frame));
@@ -97,22 +103,24 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
       return;
     }
     const state = useAppStore.getState();
-    const media = state.mediaImage ?? state.mediaVideo;
-    if (!canRecord()) return;
 
-    // Shader mode: record the live procedural canvas directly.
-    if (!media) {
+    // Shader + 3D: record the live preview canvas (2D or WebGL) directly.
+    // WebCodecs gives a seekable MP4; MediaRecorder is the fallback.
+    if (state.mode === "shader" || state.mode === "three") {
       const canvas = getPreviewCanvas();
       if (!canvas) return;
+      if (!canRecordEncoded() && !canRecord()) return;
+      const from = state.mode === "three" ? "three" : "shader";
+      const start = canRecordEncoded() ? recordCanvasEncoded : recordCanvas;
       state.setRecording(true);
-      activeRecorder = recordCanvas(canvas, {
+      activeRecorder = start(canvas, {
         fps: state.fps,
         onTick: (ms) => useAppStore.getState().setRecordElapsed(ms),
         onComplete: (blob, durationMs) => {
           activeRecorder = null;
           const s = useAppStore.getState();
           s.setRecording(false);
-          s.setRecordedClip({ blob, durationMs });
+          s.setRecordedClip({ blob, durationMs, from });
           reveal();
         },
         onError: () => {
@@ -122,6 +130,11 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
       });
       return;
     }
+
+    if (!canRecord()) return;
+
+    const media = state.mediaImage ?? state.mediaVideo;
+    if (!media) return;
 
     // Dedicated recording canvas at the selected video export resolution.
     const { w: sw, h: sh } = intrinsicSize(media);
@@ -157,7 +170,7 @@ export function useCaptureRecord(options?: CaptureRecordOptions): CaptureRecordA
         activeRecorder = null;
         const s = useAppStore.getState();
         s.setRecording(false);
-        s.setRecordedClip({ blob, durationMs });
+        s.setRecordedClip({ blob, durationMs, from: "shader" });
         reveal();
       },
       onError: () => {

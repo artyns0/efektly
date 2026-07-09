@@ -143,7 +143,7 @@ export interface SourceMedia {
   name: string;
   width: number;
   height: number;
-  format: "JPG" | "PNG" | "SVG" | "MP4";
+  format: "JPG" | "PNG" | "SVG" | "MP4" | "WEBM";
   sizeLabel: string;
   /** Videos only — formatted like "0:12". */
   durationLabel?: string;

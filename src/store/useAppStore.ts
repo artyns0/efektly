@@ -205,9 +205,17 @@ interface AppState {
   recordedUrl: string | null;
   recordedSize: number | null;
   recordedDurationMs: number | null;
+  /** Kept so the clip can be imported into Media without re-fetching the URL. */
+  recordedBlob: Blob | null;
+  /** Which workspace produced the clip — used to name the imported file. */
+  recordedFrom: "shader" | "three" | null;
   setRecording: (v: boolean) => void;
   setRecordElapsed: (ms: number) => void;
-  setRecordedClip: (payload: { blob: Blob; durationMs: number }) => void;
+  setRecordedClip: (payload: {
+    blob: Blob;
+    durationMs: number;
+    from: "shader" | "three";
+  }) => void;
   clearRecording: () => void;
 
   /* settings panel */
@@ -569,22 +577,32 @@ export const useAppStore = create<AppState>((set, get) => ({
   recordedUrl: null,
   recordedSize: null,
   recordedDurationMs: null,
+  recordedBlob: null,
+  recordedFrom: null,
   setRecording: (isRecording) =>
     set({ isRecording, recordElapsedMs: isRecording ? 0 : get().recordElapsedMs }),
   setRecordElapsed: (recordElapsedMs) => set({ recordElapsedMs }),
-  setRecordedClip: ({ blob, durationMs }) => {
+  setRecordedClip: ({ blob, durationMs, from }) => {
     const prev = get().recordedUrl;
     if (prev) URL.revokeObjectURL(prev);
     set({
       recordedUrl: URL.createObjectURL(blob),
       recordedSize: blob.size,
       recordedDurationMs: durationMs,
+      recordedBlob: blob,
+      recordedFrom: from,
     });
   },
   clearRecording: () => {
     const prev = get().recordedUrl;
     if (prev) URL.revokeObjectURL(prev);
-    set({ recordedUrl: null, recordedSize: null, recordedDurationMs: null });
+    set({
+      recordedUrl: null,
+      recordedSize: null,
+      recordedDurationMs: null,
+      recordedBlob: null,
+      recordedFrom: null,
+    });
   },
 
   /* settings */

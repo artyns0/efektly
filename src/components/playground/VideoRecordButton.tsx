@@ -12,8 +12,11 @@ import { formatClock } from "../../utils/time";
 
 export function VideoRecordButton() {
   const setExportPanelOpen = useAppStore((s) => s.setExportPanelOpen);
+  const mode = useAppStore((s) => s.mode);
   const { canCapture, isRecording, recordElapsedMs, handleRecord } =
     useCaptureRecord({ onResult: () => setExportPanelOpen(true) });
+
+  const target = mode === "three" ? "3D viewport" : "shader preview";
 
   if (isRecording) {
     return (
@@ -40,7 +43,7 @@ export function VideoRecordButton() {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-linen/40">
-        No recording yet — record the live shader preview (max 20s).
+        No recording yet — record the live {target} (max 20s).
       </p>
       <Button
         variant="primary"
