@@ -168,6 +168,162 @@ export const EFFECT_SCHEMAS: Partial<Record<EffectType, FieldDef[]>> = {
       ],
     },
   ],
+  ledScan: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Stadium Cyan", label: "Stadium Cyan" },
+        { value: "Magenta Pulse", label: "Magenta Pulse" },
+        { value: "White Matrix", label: "White Matrix" },
+        { value: "RGB Stage", label: "RGB Stage" },
+      ],
+      patches: {
+        "Stadium Cyan": { colorMode: "cyan", ledSize: 30, glow: 55, brightness: 70, gridOpacity: 40, sensitivity: 55 },
+        "Magenta Pulse": { colorMode: "magenta", ledSize: 34, glow: 65, brightness: 72, gridOpacity: 45, sensitivity: 55 },
+        "White Matrix": { colorMode: "white", ledSize: 22, glow: 45, brightness: 82, gridOpacity: 55, sensitivity: 60 },
+        "RGB Stage": { colorMode: "rgb", ledSize: 30, glow: 50, brightness: 70, gridOpacity: 35, sensitivity: 50 },
+      },
+    },
+    pct("sensitivity", "Sensitivity"),
+    pct("ledSize", "LED Size"),
+    pct("glow", "Glow"),
+    pct("brightness", "Brightness"),
+    {
+      kind: "select", key: "colorMode", label: "Color Mode",
+      options: [
+        { value: "cyan", label: "Cyan" },
+        { value: "magenta", label: "Magenta" },
+        { value: "white", label: "White" },
+        { value: "rgb", label: "RGB" },
+      ],
+    },
+    pct("gridOpacity", "Grid Opacity"),
+  ],
+  nightVision: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Military NVG", label: "Military NVG" },
+        { value: "Security Amber", label: "Security Amber" },
+        { value: "Clean Tactical", label: "Clean Tactical" },
+        { value: "Dirty Sensor", label: "Dirty Sensor" },
+      ],
+      patches: {
+        "Military NVG": { colorMode: "green", gain: 60, contrast: 55, noise: 25, scanlineDensity: 50, scanlineIntensity: 35, vignette: 55, glow: 40 },
+        "Security Amber": { colorMode: "amber", gain: 55, contrast: 50, noise: 30, scanlineDensity: 60, scanlineIntensity: 45, vignette: 60, glow: 35 },
+        "Clean Tactical": { colorMode: "green", gain: 65, contrast: 60, noise: 8, scanlineDensity: 30, scanlineIntensity: 20, vignette: 40, glow: 30 },
+        "Dirty Sensor": { colorMode: "green", gain: 70, contrast: 65, noise: 65, scanlineDensity: 70, scanlineIntensity: 55, vignette: 70, glow: 50 },
+      },
+    },
+    {
+      kind: "select", key: "colorMode", label: "Color Mode",
+      options: [
+        { value: "green", label: "Green" },
+        { value: "amber", label: "Amber" },
+      ],
+    },
+    pct("gain", "Gain"),
+    pct("contrast", "Contrast"),
+    pct("noise", "Noise"),
+    pct("scanlineDensity", "Scanline Density"),
+    pct("scanlineIntensity", "Scanline Intensity"),
+    pct("vignette", "Vignette"),
+    pct("glow", "Glow"),
+  ],
+  inverseStrobe: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Slow Pulse", label: "Slow Pulse" },
+        { value: "Hard Inverse", label: "Hard Inverse" },
+        { value: "Club Flash", label: "Club Flash" },
+        { value: "Negative Beat", label: "Negative Beat" },
+      ],
+      patches: {
+        "Slow Pulse": { speed: 20, threshold: 50, flashIntensity: 55, effectMix: 100, phaseOffset: 0 },
+        "Hard Inverse": { speed: 40, threshold: 45, flashIntensity: 70, effectMix: 100, phaseOffset: 0 },
+        "Club Flash": { speed: 70, threshold: 55, flashIntensity: 90, effectMix: 100, phaseOffset: 0 },
+        "Negative Beat": { speed: 55, threshold: 48, flashIntensity: 75, effectMix: 100, phaseOffset: 25 },
+      },
+    },
+    pct("speed", "Speed"),
+    pct("threshold", "Threshold"),
+    pct("flashIntensity", "Flash Intensity"),
+    pct("effectMix", "Effect Mix"),
+    pct("phaseOffset", "Phase Offset"),
+  ],
+  motionTrails: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Ghost", label: "Ghost" },
+        { value: "Long Exposure", label: "Long Exposure" },
+        { value: "Cyan Echo", label: "Cyan Echo" },
+        { value: "Magenta Echo", label: "Magenta Echo" },
+        { value: "Hard Stutter", label: "Hard Stutter" },
+      ],
+      patches: {
+        Ghost: { trailLength: 45, fade: 55, motionThreshold: 25, blendMode: "screen", tintAmount: 0, echoMode: "off", echoSpacing: 30 },
+        "Long Exposure": { trailLength: 85, fade: 20, motionThreshold: 15, blendMode: "lighten", tintAmount: 0, echoMode: "off", echoSpacing: 30 },
+        "Cyan Echo": { trailLength: 60, fade: 45, motionThreshold: 25, blendMode: "screen", tint: "#38E1FF", tintAmount: 60, echoMode: "multi", echoSpacing: 35 },
+        "Magenta Echo": { trailLength: 60, fade: 45, motionThreshold: 25, blendMode: "screen", tint: "#FF3EC8", tintAmount: 60, echoMode: "multi", echoSpacing: 35 },
+        "Hard Stutter": { trailLength: 40, fade: 65, motionThreshold: 30, blendMode: "add", tintAmount: 0, echoMode: "single", echoSpacing: 55 },
+      },
+    },
+    pct("trailLength", "Trail Length"),
+    pct("fade", "Fade"),
+    pct("motionThreshold", "Motion Threshold"),
+    {
+      kind: "select", key: "blendMode", label: "Blend Mode",
+      options: [
+        { value: "screen", label: "Screen" },
+        { value: "add", label: "Add" },
+        { value: "lighten", label: "Lighten" },
+        { value: "normal", label: "Normal" },
+      ],
+    },
+    { kind: "color", key: "tint", label: "Tint" },
+    pct("tintAmount", "Tint Amount"),
+    {
+      kind: "select", key: "echoMode", label: "Echo Mode",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "single", label: "Single" },
+        { value: "multi", label: "Multi" },
+      ],
+    },
+    pct("echoSpacing", "Echo Spacing"),
+  ],
+  slitScan: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Classic Horizontal", label: "Classic Horizontal" },
+        { value: "Vertical Melt", label: "Vertical Melt" },
+        { value: "Radial Time Warp", label: "Radial Time Warp" },
+        { value: "Deep Stretch", label: "Deep Stretch" },
+      ],
+      patches: {
+        "Classic Horizontal": { direction: "horizontal", bufferLength: 50, speed: 50, center: 0.5, timeDepth: 60, reverse: false },
+        "Vertical Melt": { direction: "vertical", bufferLength: 55, speed: 45, center: 0.5, timeDepth: 65, reverse: false },
+        "Radial Time Warp": { direction: "radial", bufferLength: 60, speed: 55, center: 0, timeDepth: 70, reverse: false },
+        "Deep Stretch": { direction: "horizontal", bufferLength: 90, speed: 70, center: 0.2, timeDepth: 90, reverse: false },
+      },
+    },
+    {
+      kind: "select", key: "direction", label: "Direction",
+      options: [
+        { value: "horizontal", label: "Horizontal" },
+        { value: "vertical", label: "Vertical" },
+        { value: "radial", label: "Radial" },
+      ],
+    },
+    pct("bufferLength", "Buffer Length"),
+    pct("speed", "Speed"),
+    { kind: "slider", key: "center", label: "Center", min: 0, max: 1, step: 0.01 },
+    pct("timeDepth", "Time Depth"),
+    { kind: "toggle", key: "reverse", label: "Reverse" },
+  ],
   visionTracker: [
     /* detection */
     pct("threshold", "Threshold"),

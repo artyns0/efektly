@@ -1,21 +1,26 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  AlignHorizontalJustifyCenter,
   AlignVerticalJustifyCenter,
   Aperture,
   BarChart2,
+  Eye,
   Flower,
   FlipHorizontal2,
   Grid2x2,
   Hash,
+  LayoutGrid,
   Lightbulb,
   MonitorPlay,
   Monitor,
   MousePointerSquareDashed,
   PenTool,
   ScanEye,
+  Sparkles,
   StretchHorizontal,
   Tv,
   Type,
+  Waves,
   Wind,
   Zap,
 } from "lucide-react";
@@ -51,6 +56,11 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   vhsBleed: Tv,
   kaleidoscope: Flower,
   neonEdge: Lightbulb,
+  ledScan: LayoutGrid,
+  nightVision: Eye,
+  inverseStrobe: Sparkles,
+  motionTrails: Waves,
+  slitScan: AlignHorizontalJustifyCenter,
   visionTracker: ScanEye,
 };
 

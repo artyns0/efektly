@@ -21,6 +21,11 @@ export type EffectType =
   | "vhsBleed"
   | "kaleidoscope"
   | "neonEdge"
+  | "ledScan"
+  | "nightVision"
+  | "inverseStrobe"
+  | "motionTrails"
+  | "slitScan"
   | "visionTracker";
 
 /** Drives the small status chip shown on each stack item. */
@@ -276,6 +281,80 @@ export interface NeonEdgeSettings {
   background: "black" | "original";
 }
 
+/* ----- LED Scan ----- */
+
+export type LedColorMode = "cyan" | "magenta" | "white" | "rgb";
+
+export interface LedScanSettings {
+  preset: string;
+  sensitivity: number; // 0–100, edge emphasis
+  ledSize: number; // 0–100 (small = fine detail, large = chunky)
+  glow: number; // 0–100
+  brightness: number; // 0–100
+  colorMode: LedColorMode;
+  gridOpacity: number; // 0–100, dark grid between LEDs
+}
+
+/* ----- Night Vision ----- */
+
+export type NightVisionMode = "green" | "amber";
+
+export interface NightVisionSettings {
+  preset: string;
+  colorMode: NightVisionMode;
+  gain: number; // 0–100 luminance gain
+  contrast: number; // 0–100 crush
+  noise: number; // 0–100 sensor noise
+  scanlineDensity: number; // 0–100
+  scanlineIntensity: number; // 0–100
+  vignette: number; // 0–100
+  glow: number; // 0–100 phosphor glow
+}
+
+/* ----- Inverse Strobe ----- */
+
+export interface InverseStrobeSettings {
+  preset: string;
+  speed: number; // 0–100 cycle speed
+  threshold: number; // 0–100 B/W threshold
+  flashIntensity: number; // 0–100
+  effectMix: number; // 0–100 blend with source
+  phaseOffset: number; // 0–100 cycle phase
+  /** Set true once the photosensitivity warning has been acknowledged. */
+  acknowledged: boolean;
+}
+
+/* ----- Motion Trails (video-only, temporal) ----- */
+
+export type TrailBlend = "screen" | "add" | "lighten" | "normal";
+export type EchoMode = "off" | "single" | "multi";
+
+export interface MotionTrailsSettings {
+  preset: string;
+  trailLength: number; // 0–100 → history frames
+  fade: number; // 0–100 per-step fade
+  motionThreshold: number; // 0–100 frame-difference gate
+  blendMode: TrailBlend;
+  tint: string;
+  tintAmount: number; // 0–100
+  echoMode: EchoMode;
+  echoSpacing: number; // 0–100
+}
+
+/* ----- Slit Scan (video-only, temporal) ----- */
+
+export type SlitMode = "horizontal" | "vertical" | "radial";
+
+export interface SlitScanSettings {
+  preset: string;
+  direction: SlitMode;
+  bufferLength: number; // 0–100 → history frames
+  speed: number; // 0–100 time step per strip
+  center: number; // 0–1 current-time position
+  timeDepth: number; // 0–100 how far back the edges read
+  reverse: boolean;
+}
+
 /* ----- Vision Tracker ----- */
 
 export type VisionShapeMode =
@@ -361,6 +440,11 @@ export interface EffectSettingsMap {
   vhsBleed: VhsBleedSettings;
   kaleidoscope: KaleidoscopeSettings;
   neonEdge: NeonEdgeSettings;
+  ledScan: LedScanSettings;
+  nightVision: NightVisionSettings;
+  inverseStrobe: InverseStrobeSettings;
+  motionTrails: MotionTrailsSettings;
+  slitScan: SlitScanSettings;
   visionTracker: VisionTrackerSettings;
 }
 
@@ -381,6 +465,11 @@ export type EffectSettingsPatch =
   | Partial<VhsBleedSettings>
   | Partial<KaleidoscopeSettings>
   | Partial<NeonEdgeSettings>
+  | Partial<LedScanSettings>
+  | Partial<NightVisionSettings>
+  | Partial<InverseStrobeSettings>
+  | Partial<MotionTrailsSettings>
+  | Partial<SlitScanSettings>
   | Partial<VisionTrackerSettings>;
 
 interface EffectBase<T extends EffectType> {
@@ -409,4 +498,9 @@ export type EffectInstance =
   | EffectBase<"vhsBleed">
   | EffectBase<"kaleidoscope">
   | EffectBase<"neonEdge">
+  | EffectBase<"ledScan">
+  | EffectBase<"nightVision">
+  | EffectBase<"inverseStrobe">
+  | EffectBase<"motionTrails">
+  | EffectBase<"slitScan">
   | EffectBase<"visionTracker">;

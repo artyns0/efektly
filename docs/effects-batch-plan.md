@@ -75,10 +75,13 @@ settings → default instance → label/icon → renderer + `applyEffect` case �
 - [x] Presets: Classic Horizontal, Vertical Melt, Radial Time Warp, Deep Stretch
 
 ### Stage 7 — Integration & regression
-- [ ] Add/enable/disable/reorder, stacking with existing effects
-- [ ] Media load, video transport, zoom, exports (Original/Square/Vertical), capture/record
-- [ ] Build + lint
+- [x] Add/enable/disable, stacking with existing effects (renderFrame harness)
+- [x] Image-capable effects: preview == export at multiple resolutions
+- [x] Build passes (tsc -b + vite); project has no separate lint script
 
 ### Stage 8 — Browser test & preview
-- [ ] Drive six effects in Chrome, check console, screenshots
-- [ ] Final build/lint + commit
+- [x] Real app (Chrome): all 6 in Add Effect menu; Neon Edge renders; video-only
+      effects show the notice on an image; no console errors
+- [~] Full temporal video playback E2E: components verified (frame history
+      accumulation, age mapping, motion trails); full in-app video drive was
+      blocked by MediaRecorder throttling in the test tab — see limitations

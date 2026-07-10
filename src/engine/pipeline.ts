@@ -15,6 +15,11 @@ import { renderCrtMonitor } from "./effects/crtMonitor";
 import { renderVhsBleed } from "./effects/vhsBleed";
 import { renderKaleidoscope } from "./effects/kaleidoscope";
 import { renderNeonEdge } from "./effects/neonEdge";
+import { renderLedScan } from "./effects/ledScan";
+import { renderNightVision } from "./effects/nightVision";
+import { renderInverseStrobe } from "./effects/inverseStrobe";
+import { renderMotionTrails } from "./effects/motionTrails";
+import { renderSlitScan } from "./effects/slitScan";
 import { renderVisionTracker } from "./effects/visionTracker";
 
 /* ------------------------------------------------------------------ */
@@ -55,6 +60,9 @@ export function effectAnimates(fx: EffectInstance): boolean {
   if (fx.type === "crtMonitor") return fx.settings.flicker > 0;
   if (fx.type === "vhsBleed")
     return fx.settings.timeDrift > 0 || fx.settings.trackingNoise > 0;
+  if (fx.type === "nightVision") return fx.settings.noise > 0;
+  if (fx.type === "inverseStrobe")
+    return fx.settings.speed > 0 && fx.settings.acknowledged;
   return false;
 }
 
@@ -157,6 +165,21 @@ export function applyEffect(
       break;
     case "neonEdge":
       renderNeonEdge(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "ledScan":
+      renderLedScan(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
+      break;
+    case "nightVision":
+      renderNightVision(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, time);
+      break;
+    case "inverseStrobe":
+      renderInverseStrobe(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, time);
+      break;
+    case "motionTrails":
+      renderMotionTrails(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, fx.id);
+      break;
+    case "slitScan":
+      renderSlitScan(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, fx.id);
       break;
     case "visionTracker":
       renderVisionTracker(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { DEFAULT_PALETTE, SAMPLE_SOURCE } from "../data/mockData";
 import { createInitialEffects, defaultEffectSettings } from "../data/effects";
 import { disposeHistory } from "../engine/effects/frameHistory";
+import { disposeMotionTrails } from "../engine/effects/motionTrails";
 import {
   createInitialShaderSettings,
   DEFAULT_PRESET,
@@ -413,6 +414,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   removeFromStack: (id) => {
     // Free any temporal frame history the removed effect was holding.
     disposeHistory(id);
+    disposeMotionTrails(id);
     set((state) => ({
       stackedEffectIds: state.stackedEffectIds.filter((x) => x !== id),
       effects: state.effects.map((fx) =>
