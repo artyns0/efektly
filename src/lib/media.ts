@@ -161,6 +161,11 @@ export function loadVideoFromFile(file: File): Promise<LoadedVideo> {
   });
 }
 
+// Session cache of decoded remote images, so re-importing the same high-res
+// photo does not re-download it. Bounded to avoid unbounded memory growth.
+const remoteImageCache = new Map<string, HTMLImageElement>();
+const REMOTE_CACHE_LIMIT = 8;
+
 /**
  * Load a remote image by URL, hotlinked rather than copied. `crossOrigin`
  * keeps the canvas untainted so effects and export keep working; the caller
@@ -173,10 +178,23 @@ export function loadImageFromUrl(
   url: string,
   meta: Omit<SourceMedia, "width" | "height">,
 ): Promise<LoadedImage> {
+  const cached = remoteImageCache.get(url);
+  if (cached?.complete && cached.naturalWidth > 0) {
+    return Promise.resolve({
+      image: cached,
+      url,
+      meta: { ...meta, width: cached.naturalWidth, height: cached.naturalHeight },
+    });
+  }
+
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.crossOrigin = "anonymous";
-    image.onload = () =>
+    image.onload = () => {
+      if (remoteImageCache.size >= REMOTE_CACHE_LIMIT) {
+        remoteImageCache.delete(remoteImageCache.keys().next().value!);
+      }
+      remoteImageCache.set(url, image);
       resolve({
         image,
         url,
@@ -186,6 +204,7 @@ export function loadImageFromUrl(
           height: image.naturalHeight,
         },
       });
+    };
     image.onerror = () => reject(new Error("Could not load that image."));
     image.src = url;
   });

@@ -150,8 +150,13 @@ export interface MediaAttribution {
   photographerUsername: string;
   photographerUrl: string;
   unsplashPhotoUrl: string;
-  /** The hotlinked image URL currently backing the media. */
+  /** Canonical full-resolution URL backing the media (used for Original export). */
   sourceUrl: string;
+  /** Lighter URL suitable for interactive preview. */
+  previewUrl: string;
+  /** Original photo dimensions reported by Unsplash. */
+  originalWidth: number;
+  originalHeight: number;
 }
 
 export interface SourceMedia {

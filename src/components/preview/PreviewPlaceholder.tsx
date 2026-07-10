@@ -121,10 +121,8 @@ function Reveal({ children }: { children: React.ReactNode }) {
 
 export function PreviewPlaceholder() {
   const setMode = useAppStore((s) => s.setMode);
-  const setRailSection = useAppStore((s) => s.setRailSection);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-  const [hint, setHint] = useState<string | null>(null);
   const [stockOpen, setStockOpen] = useState(false);
   const { handleFiles, importUnsplashPhoto, importing, error } = useMediaImport();
 
@@ -142,27 +140,10 @@ export function PreviewPlaceholder() {
   };
 
   const openWorkspace = (id: WorkspaceCardId) => {
-    if (id === "effects") {
-      setMode("media");
-      setRailSection("effects");
-      // Effects need a source; say so instead of dropping the user into an
-      // empty panel with no explanation.
-      setHint("Import media first to apply effects.");
-    } else if (id === "shader") {
-      setMode("shader");
-    } else {
-      setMode("three");
-    }
+    setMode(id === "shader" ? "shader" : "three");
   };
 
-  // The hint is a passing note, not a persistent message.
-  useEffect(() => {
-    if (!hint) return;
-    const id = window.setTimeout(() => setHint(null), 4000);
-    return () => window.clearTimeout(id);
-  }, [hint]);
-
-  const [effects, shader, three] = WORKSPACE_CARDS;
+  const [shader, three] = WORKSPACE_CARDS;
 
   return (
     <div
@@ -215,11 +196,12 @@ export function PreviewPlaceholder() {
 
       <div className="relative grid min-h-full place-items-center p-6">
         <div className="flex w-full max-w-4xl flex-col gap-4">
-          {/* Tall upload card on the left; two tiles above a wide plate right.
-              The cluster lifts a little to make room for the library. */}
+          {/* Tall upload card on the left; two balanced wide cards stacked on
+              the right. The cluster lifts a little to make room for the
+              library. */}
           <div
             className={cn(
-              "grid gap-4 transition-transform duration-300 ease-out lg:grid-cols-3",
+              "grid gap-4 transition-transform duration-300 ease-out lg:grid-cols-2",
               stockOpen && "-translate-y-2",
             )}
           >
@@ -320,12 +302,10 @@ export function PreviewPlaceholder() {
               </div>
             </div>
 
-            <WorkspaceCardTile card={effects} onOpen={openWorkspace} />
-            <WorkspaceCardTile card={shader} onOpen={openWorkspace} />
-
-            <div className="lg:col-span-2">
-              <WorkspaceCardTile card={three} wide onOpen={openWorkspace} />
-            </div>
+            {/* Right column: two balanced horizontal cards that together match
+                the upload card's height (it spans both rows). */}
+            <WorkspaceCardTile card={shader} wide onOpen={openWorkspace} />
+            <WorkspaceCardTile card={three} wide onOpen={openWorkspace} />
           </div>
 
           {stockOpen && (
@@ -340,13 +320,12 @@ export function PreviewPlaceholder() {
           <p
             className={cn(
               "text-center text-xs transition-colors duration-200",
-              error ? "text-flame" : hint ? "text-linen/70" : "text-linen/50",
+              error ? "text-flame" : "text-linen/50",
             )}
           >
             {error ??
-              hint ??
               (importing
-                ? "Importing image…"
+                ? "Preparing full-resolution image…"
                 : "Drag & drop media anywhere in the preview to import.")}
           </p>
         </div>

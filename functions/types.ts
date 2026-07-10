@@ -57,3 +57,64 @@ export function unsplashHeaders(key: string): HeadersInit {
     "Accept-Version": "v1",
   };
 }
+
+/* ----- Shared photo shape returned to the frontend ----- */
+
+/** Only the fields the panel + importer need. No key, no extra metadata. */
+export interface PublicPhoto {
+  id: string;
+  width: number;
+  height: number;
+  description: string | null;
+  alt_description: string | null;
+  color: string | null;
+  blur_hash: string | null;
+  urls: { small: string; regular: string; full: string; raw: string };
+  links: { html: string };
+  user: { name: string; username: string; links: { html: string } };
+}
+
+/** Unsplash's raw photo, loosely typed for the fields we read. */
+export interface RawPhoto {
+  id: string;
+  width: number;
+  height: number;
+  description: string | null;
+  alt_description: string | null;
+  color: string | null;
+  blur_hash?: string | null;
+  urls: { small: string; regular: string; full: string; raw: string };
+  links: { html: string };
+  user: { name: string; username: string; links: { html: string } };
+}
+
+/** Narrow an Unsplash photo to the public shape (drops everything else). */
+export function pickPhoto(p: RawPhoto): PublicPhoto {
+  return {
+    id: p.id,
+    width: p.width,
+    height: p.height,
+    description: p.description ?? null,
+    alt_description: p.alt_description ?? null,
+    color: p.color ?? null,
+    blur_hash: p.blur_hash ?? null,
+    urls: {
+      small: p.urls.small,
+      regular: p.urls.regular,
+      full: p.urls.full,
+      raw: p.urls.raw,
+    },
+    links: { html: p.links.html },
+    user: {
+      name: p.user.name,
+      username: p.user.username,
+      links: { html: p.user.links.html },
+    },
+  };
+}
+
+/** page/count query param → positive int, clamped by the caller. */
+export function intParam(value: string | null, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : fallback;
+}

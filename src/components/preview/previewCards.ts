@@ -1,12 +1,12 @@
-import { Boxes, Grid2x2, Layers } from "lucide-react";
+import { Boxes, Layers } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Content map for the preview welcome state. Covers live in          */
-/*  /public/preview so they are served as plain static assets.         */
+/*  /public/images so they are served as plain static assets.          */
 /* ------------------------------------------------------------------ */
 
-export type WorkspaceCardId = "effects" | "shader" | "three";
+export type WorkspaceCardId = "shader" | "three";
 
 export interface WorkspaceCard {
   id: WorkspaceCardId;
@@ -21,15 +21,10 @@ export interface WorkspaceCard {
 /** Cover for the main upload card — landscape sits along the bottom edge. */
 export const UPLOAD_COVER = "/images/uploadbox.png";
 
+// Media Effects is intentionally omitted: Effects still needs imported media,
+// so it has no value as an empty-state entry point. Effects mode itself, the
+// top-nav tab, and the post-import workflow are all unchanged.
 export const WORKSPACE_CARDS: WorkspaceCard[] = [
-  {
-    id: "effects",
-    icon: Grid2x2,
-    title: "Media Effects",
-    helper: "Apply visual effects to your media.",
-    cover: "/images/effectbox.png",
-    coverClass: "object-center",
-  },
   {
     id: "shader",
     icon: Layers,

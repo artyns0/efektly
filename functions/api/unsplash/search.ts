@@ -1,10 +1,13 @@
 import {
   json,
+  intParam,
+  pickPhoto,
   requireKey,
   unsplashHeaders,
   upstreamError,
   UNSPLASH_API,
   type PagesContext,
+  type RawPhoto,
 } from "../../types";
 
 /* ------------------------------------------------------------------ */
@@ -17,46 +20,6 @@ import {
 
 const DEFAULT_PER_PAGE = 12;
 const MAX_PER_PAGE = 20;
-
-export interface SearchPhoto {
-  id: string;
-  width: number;
-  height: number;
-  description: string | null;
-  alt_description: string | null;
-  color: string | null;
-  urls: { small: string; regular: string };
-  links: { html: string };
-  user: { name: string; username: string; links: { html: string } };
-}
-
-interface RawPhoto extends SearchPhoto {
-  urls: { small: string; regular: string; full?: string; raw?: string };
-}
-
-/** Positive integer from a query param, or the fallback. */
-function intParam(value: string | null, fallback: number): number {
-  const n = Number(value);
-  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : fallback;
-}
-
-function pick(p: RawPhoto): SearchPhoto {
-  return {
-    id: p.id,
-    width: p.width,
-    height: p.height,
-    description: p.description ?? null,
-    alt_description: p.alt_description ?? null,
-    color: p.color ?? null,
-    urls: { small: p.urls.small, regular: p.urls.regular },
-    links: { html: p.links.html },
-    user: {
-      name: p.user.name,
-      username: p.user.username,
-      links: { html: p.user.links.html },
-    },
-  };
-}
 
 export async function onRequestGet(ctx: PagesContext): Promise<Response> {
   const key = requireKey(ctx.env);
@@ -86,5 +49,5 @@ export async function onRequestGet(ctx: PagesContext): Promise<Response> {
   if (!res.ok) return upstreamError(res.status);
 
   const data = (await res.json()) as { total: number; results: RawPhoto[] };
-  return json({ total: data.total, results: data.results.map(pick) });
+  return json({ total: data.total, results: data.results.map(pickPhoto) });
 }

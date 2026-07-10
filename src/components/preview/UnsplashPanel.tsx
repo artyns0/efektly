@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { ImageIcon, Search, Sparkles, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ImageIcon, RefreshCw, Search, Sparkles, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import {
+  fetchRandomPhotos,
   photoLabel,
   searchPhotos,
   withUtm,
@@ -11,21 +12,26 @@ import {
 
 /* ------------------------------------------------------------------ */
 /*  Unsplash library — the expanded half of the Source onboarding.     */
-/*  Results are hotlinked thumbnails served straight from Unsplash;    */
-/*  the search itself goes through Efektly's own /api proxy so the     */
-/*  Access Key never reaches the browser.                              */
+/*  Opens on a random inspiration feed (fetched once per session and    */
+/*  cached), with search layered on top. Results are hotlinked          */
+/*  thumbnails; both search and random go through Efektly's /api proxy  */
+/*  so the Access Key never reaches the browser.                        */
 /* ------------------------------------------------------------------ */
 
-const PER_PAGE = 12;
+const COUNT = 12;
 const DEBOUNCE_MS = 450;
 
 /** MIME-typed key the preview's drop handler looks for. */
 export const UNSPLASH_DND_TYPE = "application/x-efektly-unsplash";
 
+// Session cache: the inspiration feed survives closing/reopening the panel,
+// so it costs one request per session unless the user hits Refresh.
+let randomCache: UnsplashPhoto[] | null = null;
+
 function Skeletons() {
   return (
     <>
-      {Array.from({ length: PER_PAGE }, (_, i) => (
+      {Array.from({ length: COUNT }, (_, i) => (
         <div key={i} className="flex flex-col gap-1.5">
           <div className="aspect-[3/4] animate-pulse rounded-xl border border-white/[0.05] bg-white/[0.03]" />
           <div className="h-2 w-3/4 animate-pulse rounded bg-white/[0.03]" />
@@ -75,42 +81,84 @@ export function UnsplashPanel({
 }) {
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
-  const [photos, setPhotos] = useState<UnsplashPhoto[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  const [random, setRandom] = useState<UnsplashPhoto[]>(randomCache ?? []);
+  const [randomLoading, setRandomLoading] = useState(randomCache === null);
+
+  const [results, setResults] = useState<UnsplashPhoto[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Debounce typing into the committed term; Enter commits immediately.
+  const searching = term.length > 0;
+
+  // Inspiration feed: fetched once, then served from the module cache. The ref
+  // guards against React Strict Mode double-invoking the effect.
+  const randomStarted = useRef(false);
+  const loadRandom = (force = false) => {
+    if (!force && randomCache) {
+      setRandom(randomCache);
+      setRandomLoading(false);
+      return;
+    }
+    setRandomLoading(true);
+    setError(null);
+    const controller = new AbortController();
+    fetchRandomPhotos(COUNT, controller.signal)
+      .then((r) => {
+        randomCache = r;
+        setRandom(r);
+        setRandomLoading(false);
+      })
+      .catch((e: unknown) => {
+        if (controller.signal.aborted) return;
+        setError(e instanceof Error ? e.message : "Could not load stock images.");
+        setRandomLoading(false);
+      });
+    return controller;
+  };
+
+  useEffect(() => {
+    if (randomStarted.current) return;
+    randomStarted.current = true;
+    const controller = loadRandom();
+    return () => controller?.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounce typing into a committed term; Enter commits immediately.
   useEffect(() => {
     const id = window.setTimeout(() => setTerm(query.trim()), DEBOUNCE_MS);
     return () => window.clearTimeout(id);
   }, [query]);
 
-  // One request per committed term; stale ones are aborted.
+  // One request per committed term; stale ones are aborted. Clearing the term
+  // simply falls back to the cached inspiration grid (no request).
   useEffect(() => {
     if (!term) {
-      setPhotos([]);
-      setLoading(false);
-      setError(null);
+      setResults([]);
+      setSearchLoading(false);
       return;
     }
     const controller = new AbortController();
-    setLoading(true);
+    setSearchLoading(true);
     setError(null);
-    searchPhotos(term, PER_PAGE, controller.signal)
+    searchPhotos(term, COUNT, controller.signal)
       .then((r) => {
-        setPhotos(r);
-        setLoading(false);
+        setResults(r);
+        setSearchLoading(false);
       })
       .catch((e: unknown) => {
         if (controller.signal.aborted) return;
         setError(e instanceof Error ? e.message : "Could not load stock images.");
-        setPhotos([]);
-        setLoading(false);
+        setResults([]);
+        setSearchLoading(false);
       });
     return () => controller.abort();
   }, [term]);
 
-  const idle = !term && !loading && !error;
+  const loading = searching ? searchLoading : randomLoading;
+  const photos = searching ? results : random;
+  const showEmpty = !loading && !error && photos.length === 0;
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0C0C0D] p-5">
@@ -130,31 +178,53 @@ export function UnsplashPanel({
             <ImageIcon className="size-4 text-linen/50" strokeWidth={1.75} />
             Unsplash Library
           </span>
-          <span className="text-xs text-linen/45">Browse free stock images.</span>
+          <span className="text-xs text-linen/45">
+            Explore inspiring photos from Unsplash.
+          </span>
         </div>
 
-        <label className="relative flex w-full max-w-[240px] items-center">
-          <Search
-            className="pointer-events-none absolute left-3 size-3.5 text-linen/35"
-            strokeWidth={1.9}
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                setTerm(query.trim()); // skip the debounce
-              }
-            }}
-            placeholder="Search free images..."
-            className={cn(
-              "h-9 w-full rounded-lg border border-white/[0.07] bg-black/40 pl-9 pr-3 text-xs text-linen placeholder:text-linen/30",
-              "transition-colors focus:border-flame/40 focus:outline-none",
-            )}
-          />
-        </label>
+        <div className="flex items-center gap-2">
+          <label className="relative flex w-[220px] items-center">
+            <Search
+              className="pointer-events-none absolute left-3 size-3.5 text-linen/35"
+              strokeWidth={1.9}
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setTerm(query.trim()); // skip the debounce
+                }
+              }}
+              placeholder="Search free images..."
+              className={cn(
+                "h-9 w-full rounded-lg border border-white/[0.07] bg-black/40 pl-9 pr-3 text-xs text-linen placeholder:text-linen/30",
+                "transition-colors focus:border-flame/40 focus:outline-none",
+              )}
+            />
+          </label>
+          {!searching && (
+            <button
+              type="button"
+              aria-label="Refresh inspiration"
+              title="Refresh"
+              onClick={() => loadRandom(true)}
+              disabled={randomLoading}
+              className={cn(
+                "grid size-9 shrink-0 place-items-center rounded-lg border border-white/[0.07] bg-black/40 text-linen/50",
+                "transition-colors hover:border-flame/30 hover:text-flame disabled:opacity-50",
+              )}
+            >
+              <RefreshCw
+                className={cn("size-3.5", randomLoading && "animate-spin")}
+                strokeWidth={1.9}
+              />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Results */}
@@ -196,13 +266,8 @@ export function UnsplashPanel({
       </div>
 
       {/* States */}
-      {idle && (
-        <p className="mt-4 text-center text-xs text-linen/40">
-          Search Unsplash for a photo to start from.
-        </p>
-      )}
       {error && <p className="mt-4 text-center text-xs text-flame">{error}</p>}
-      {!loading && !error && term && photos.length === 0 && (
+      {showEmpty && searching && (
         <p className="mt-4 text-center text-xs text-linen/45">
           No photos found for “{term}”. Try another search.
         </p>

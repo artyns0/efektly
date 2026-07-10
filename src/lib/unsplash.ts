@@ -14,16 +14,22 @@ export function withUtm(url: string): string {
 
 export interface UnsplashPhoto {
   id: string;
+  /** Original photo dimensions as reported by Unsplash. */
   width: number;
   height: number;
   description: string | null;
   altDescription: string | null;
   /** Dominant colour, used as the thumbnail placeholder tint. */
   color: string | null;
+  blurHash: string | null;
   /** Hotlinked thumbnail. */
   smallUrl: string;
-  /** Hotlinked full-size image used as the active media source. */
+  /** Optimized ~1080px image — good enough for interactive preview. */
   regularUrl: string;
+  /** Full-resolution image — the canonical source for Original export. */
+  fullUrl: string;
+  /** Uncapped raw image, used to reconstruct an original-width fallback. */
+  rawUrl: string;
   photoUrl: string;
   photographerName: string;
   photographerUsername: string;
@@ -37,7 +43,8 @@ interface ApiPhoto {
   description: string | null;
   alt_description: string | null;
   color: string | null;
-  urls: { small: string; regular: string };
+  blur_hash: string | null;
+  urls: { small: string; regular: string; full: string; raw: string };
   links: { html: string };
   user: { name: string; username: string; links: { html: string } };
 }
@@ -50,13 +57,29 @@ function normalize(p: ApiPhoto): UnsplashPhoto {
     description: p.description,
     altDescription: p.alt_description,
     color: p.color,
+    blurHash: p.blur_hash,
     smallUrl: p.urls.small,
     regularUrl: p.urls.regular,
+    fullUrl: p.urls.full,
+    rawUrl: p.urls.raw,
     photoUrl: p.links.html,
     photographerName: p.user.name,
     photographerUsername: p.user.username,
     photographerUrl: p.user.links.html,
   };
+}
+
+/**
+ * Full-resolution fallback: the raw URL forced to the photo's real width,
+ * preserving the ixid (the `w` param caps at the original, so this never
+ * upscales). Used only when `fullUrl` itself fails to decode.
+ */
+export function originalWidthUrl(p: UnsplashPhoto): string {
+  const u = new URL(p.rawUrl);
+  u.searchParams.set("w", String(p.width));
+  u.searchParams.set("q", "90");
+  u.searchParams.set("fm", "jpg");
+  return u.toString();
 }
 
 /** A readable label for alt text and titles. */
@@ -73,7 +96,7 @@ async function readError(res: Response): Promise<never> {
     /* keep the generic message */
   }
   if (res.status === 429) {
-    message = "Too many searches right now. Try again in a minute.";
+    message = "Too many requests right now. Try again in a minute.";
   }
   throw new Error(message);
 }
@@ -85,6 +108,18 @@ export async function searchPhotos(
 ): Promise<UnsplashPhoto[]> {
   const params = new URLSearchParams({ q: query, perPage: String(perPage) });
   const res = await fetch(`/api/unsplash/search?${params}`, { signal });
+  if (!res.ok) await readError(res);
+  const data = (await res.json()) as { results: ApiPhoto[] };
+  return data.results.map(normalize);
+}
+
+/** Random inspiration feed for the initial (unsearched) panel state. */
+export async function fetchRandomPhotos(
+  count = 12,
+  signal?: AbortSignal,
+): Promise<UnsplashPhoto[]> {
+  const params = new URLSearchParams({ count: String(count) });
+  const res = await fetch(`/api/unsplash/random?${params}`, { signal });
   if (!res.ok) await readError(res);
   const data = (await res.json()) as { results: ApiPhoto[] };
   return data.results.map(normalize);
