@@ -4,6 +4,7 @@ import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { useMediaImport } from "../../hooks/useMediaImport";
 import { ACCEPT_ATTR } from "../../lib/media";
+import { withUtm, UNSPLASH_HOME } from "../../lib/unsplash";
 
 /* ------------------------------------------------------------------ */
 /*  Source card + uploader (images and videos).                        */
@@ -176,6 +177,30 @@ export function MediaSource({ variant = "row" }: { variant?: "row" | "hero" }) {
           </button>
         )}
       </div>
+
+      {/* Required credit, kept visible for as long as the photo is active. */}
+      {source.attribution && (
+        <p className="px-1 text-[11px] leading-relaxed text-linen/40">
+          Photo by{" "}
+          <a
+            href={withUtm(source.attribution.photographerUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-linen/20 underline-offset-2 transition-colors hover:text-linen/70"
+          >
+            {source.attribution.photographerName}
+          </a>{" "}
+          on{" "}
+          <a
+            href={UNSPLASH_HOME}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-linen/20 underline-offset-2 transition-colors hover:text-linen/70"
+          >
+            Unsplash
+          </a>
+        </p>
+      )}
 
       {error && <p className="px-1 text-xs text-flame">{error}</p>}
 

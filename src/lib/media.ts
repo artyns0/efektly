@@ -162,6 +162,36 @@ export function loadVideoFromFile(file: File): Promise<LoadedVideo> {
 }
 
 /**
+ * Load a remote image by URL, hotlinked rather than copied. `crossOrigin`
+ * keeps the canvas untainted so effects and export keep working; the caller
+ * supplies the metadata (including attribution) since the URL carries none.
+ *
+ * The returned `url` is the remote URL itself, not an object URL — the store's
+ * `URL.revokeObjectURL` is a no-op on it.
+ */
+export function loadImageFromUrl(
+  url: string,
+  meta: Omit<SourceMedia, "width" | "height">,
+): Promise<LoadedImage> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () =>
+      resolve({
+        image,
+        url,
+        meta: {
+          ...meta,
+          width: image.naturalWidth,
+          height: image.naturalHeight,
+        },
+      });
+    image.onerror = () => reject(new Error("Could not load that image."));
+    image.src = url;
+  });
+}
+
+/**
  * MediaRecorder WebM carries no duration in its header, so the element reports
  * Infinity until it is seeked past the end. Seeking to a huge time forces the
  * browser to resolve the real duration; we then rewind to the start.

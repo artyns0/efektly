@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAppStore } from "../store/useAppStore";
 import {
   detectMediaKind,
   loadImageFromFile,
+  loadImageFromUrl,
   loadVideoFromFile,
 } from "../lib/media";
+import { photoLabel, trackDownload, type UnsplashPhoto } from "./../lib/unsplash";
 
 /* ------------------------------------------------------------------ */
 /*  Shared file → media-source import, used by the Source card and the  */
@@ -15,6 +17,10 @@ import {
 export interface MediaImportApi {
   /** Load the first accepted file from a picker or a drop event. */
   handleFiles: (files: FileList | null) => Promise<void>;
+  /** Hotlink an Unsplash photo as the active media, pinging download once. */
+  importUnsplashPhoto: (photo: UnsplashPhoto) => Promise<void>;
+  /** True while a remote import is in flight. */
+  importing: boolean;
   error: string | null;
   clearError: () => void;
 }
@@ -23,6 +29,7 @@ export function useMediaImport(): MediaImportApi {
   const setImageMedia = useAppStore((s) => s.setImageMedia);
   const setVideoMedia = useAppStore((s) => s.setVideoMedia);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const handleFiles = async (files: FileList | null) => {
     setError(null);
@@ -49,5 +56,50 @@ export function useMediaImport(): MediaImportApi {
     }
   };
 
-  return { handleFiles, error, clearError: () => setError(null) };
+  // Click and drop can both land on the same photo; only the first import of
+  // a given id should ping Unsplash's download endpoint.
+  const tracked = useRef(new Set<string>());
+
+  /**
+   * The photo is hotlinked, not copied into Efektly. It still becomes real
+   * active media — the same store action an uploaded file uses.
+   */
+  const importUnsplashPhoto = async (photo: UnsplashPhoto) => {
+    setError(null);
+    setImporting(true);
+    try {
+      if (!tracked.current.has(photo.id)) {
+        tracked.current.add(photo.id);
+        void trackDownload(photo.id);
+      }
+      setImageMedia(
+        await loadImageFromUrl(photo.regularUrl, {
+          name: photoLabel(photo),
+          format: "JPG",
+          sizeLabel: "Unsplash",
+          attribution: {
+            source: "unsplash",
+            unsplashPhotoId: photo.id,
+            photographerName: photo.photographerName,
+            photographerUsername: photo.photographerUsername,
+            photographerUrl: photo.photographerUrl,
+            unsplashPhotoUrl: photo.photoUrl,
+            sourceUrl: photo.regularUrl,
+          },
+        }),
+      );
+    } catch {
+      setError("That image could not be imported.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return {
+    handleFiles,
+    importUnsplashPhoto,
+    importing,
+    error,
+    clearError: () => setError(null),
+  };
 }

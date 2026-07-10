@@ -139,6 +139,21 @@ export type PreviewQuality = "draft" | "balanced" | "high";
 
 export type MediaType = "image" | "video";
 
+/**
+ * Provenance for media that came from a stock provider. Kept on the active
+ * source so the required credit stays visible while the user edits.
+ */
+export interface MediaAttribution {
+  source: "unsplash";
+  unsplashPhotoId: string;
+  photographerName: string;
+  photographerUsername: string;
+  photographerUrl: string;
+  unsplashPhotoUrl: string;
+  /** The hotlinked image URL currently backing the media. */
+  sourceUrl: string;
+}
+
 export interface SourceMedia {
   name: string;
   width: number;
@@ -147,6 +162,8 @@ export interface SourceMedia {
   sizeLabel: string;
   /** Videos only — formatted like "0:12". */
   durationLabel?: string;
+  /** Present when the media was imported from a stock provider. */
+  attribution?: MediaAttribution;
 }
 
 /* ----- Static option descriptors used to render controls ----- */

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { FilePlus2, MoveRight } from "lucide-react";
+import { FilePlus2, Images, MoveRight } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { useMediaImport } from "../../hooks/useMediaImport";
 import { ACCEPT_ATTR } from "../../lib/media";
+import { type UnsplashPhoto } from "../../lib/unsplash";
+import { UnsplashPanel, UNSPLASH_DND_TYPE } from "./UnsplashPanel";
 import {
   UPLOAD_COVER,
   WORKSPACE_CARDS,
@@ -63,7 +65,7 @@ function WorkspaceCardTile({
       onClick={() => onOpen(card.id)}
       className={cn(
         "group relative isolate flex size-full min-w-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0C0C0D] text-left",
-        "transition-[transform,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.14]",
+        "transition-[translate,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-white/[0.14]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/40",
         wide ? "min-h-[190px] items-center" : "min-h-[260px] flex-col justify-end",
       )}
@@ -92,9 +94,28 @@ function WorkspaceCardTile({
         />
         <span className="text-[15px] font-semibold text-linen">{card.title}</span>
         <span className="text-xs leading-relaxed text-linen/45">{card.helper}</span>
-        <MoveRight className="mt-1 size-4 text-linen/25 transition-[transform,color] duration-200 ease-out group-hover:translate-x-[3px] group-hover:text-flame" />
+        <MoveRight className="mt-1 size-4 text-linen/25 transition-[translate,color] duration-200 ease-out group-hover:translate-x-[3px] group-hover:text-flame" />
       </span>
     </button>
+  );
+}
+
+/** Fades + slides its child in on mount, matching the cluster's lift. */
+function Reveal({ children }: { children: React.ReactNode }) {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return (
+    <div
+      className={cn(
+        "transition-[opacity,translate] duration-300 ease-out",
+        shown ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -104,7 +125,21 @@ export function PreviewPlaceholder() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
-  const { handleFiles, error } = useMediaImport();
+  const [stockOpen, setStockOpen] = useState(false);
+  const { handleFiles, importUnsplashPhoto, importing, error } = useMediaImport();
+
+  // Files win; otherwise a photo dragged out of the Unsplash panel.
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    if (e.dataTransfer.files.length > 0) {
+      void handleFiles(e.dataTransfer.files);
+      return;
+    }
+    const raw = e.dataTransfer.getData(UNSPLASH_DND_TYPE);
+    if (!raw) return;
+    void importUnsplashPhoto(JSON.parse(raw) as UnsplashPhoto);
+  };
 
   const openWorkspace = (id: WorkspaceCardId) => {
     if (id === "effects") {
@@ -143,11 +178,7 @@ export function PreviewPlaceholder() {
           setDragging(false);
         }
       }}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragging(false);
-        handleFiles(e.dataTransfer.files);
-      }}
+      onDrop={handleDrop}
     >
       {/* Micro-dot field, faded toward the edges. */}
       <div
@@ -184,15 +215,29 @@ export function PreviewPlaceholder() {
 
       <div className="relative grid min-h-full place-items-center p-6">
         <div className="flex w-full max-w-4xl flex-col gap-4">
-          {/* Tall upload card on the left; two tiles above a wide plate right. */}
-          <div className="grid gap-4 lg:grid-cols-3">
-            <button
-              type="button"
+          {/* Tall upload card on the left; two tiles above a wide plate right.
+              The cluster lifts a little to make room for the library. */}
+          <div
+            className={cn(
+              "grid gap-4 transition-transform duration-300 ease-out lg:grid-cols-3",
+              stockOpen && "-translate-y-2",
+            )}
+          >
+            {/* A div, not a button: the Free Stock Images CTA nests inside it. */}
+            <div
+              role="button"
+              tabIndex={0}
               aria-label="Upload media"
               onClick={() => inputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  inputRef.current?.click();
+                }
+              }}
               className={cn(
-                "group relative isolate flex min-h-[300px] flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border p-8 lg:row-span-2 lg:min-h-[464px]",
-                "transition-[transform,border-color,background-color] duration-200 ease-out",
+                "group relative isolate flex min-h-[300px] cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border p-8 lg:row-span-2 lg:min-h-[464px]",
+                "transition-[translate,border-color,background-color] duration-200 ease-out",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/40",
                 dragging
                   ? "border-dashed border-flame/60 bg-flame/[0.05]"
@@ -231,17 +276,49 @@ export function PreviewPlaceholder() {
                 </span>
               </span>
 
-              <span className="relative z-10 mt-auto flex flex-wrap justify-center gap-1.5 pt-6">
-                {FORMATS.map((f) => (
-                  <span
-                    key={f}
-                    className="rounded-md border border-white/[0.06] bg-black/50 px-2 py-1 font-mono text-[10px] tracking-wide text-linen/40"
-                  >
-                    {f}
+              <div className="relative z-10 mt-auto flex w-full flex-col items-center gap-4 pt-6">
+                <span className="flex flex-wrap justify-center gap-1.5">
+                  {FORMATS.map((f) => (
+                    <span
+                      key={f}
+                      className="rounded-md border border-white/[0.06] bg-black/50 px-2 py-1 font-mono text-[10px] tracking-wide text-linen/40"
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation(); // don't also open the file picker
+                    setStockOpen((v) => !v);
+                  }}
+                  aria-expanded={stockOpen}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl border border-white/[0.07] bg-black/50 px-3 py-2.5 text-left",
+                    "transition-colors duration-200 ease-out hover:border-flame/30 hover:bg-black/70",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/40",
+                  )}
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/[0.06] bg-white/[0.03] text-linen/45 transition-colors group-hover:text-linen/60">
+                    <Images className="size-4" strokeWidth={1.75} />
                   </span>
-                ))}
-              </span>
-            </button>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-[13px] font-medium text-linen">
+                      Free Stock Images
+                    </span>
+                    <span className="text-[11px] text-linen/40">Unsplash</span>
+                  </span>
+                  <MoveRight
+                    className={cn(
+                      "size-4 shrink-0 text-linen/30 transition-transform duration-200 ease-out",
+                      stockOpen ? "rotate-90 text-flame" : "",
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
 
             <WorkspaceCardTile card={effects} onOpen={openWorkspace} />
             <WorkspaceCardTile card={shader} onOpen={openWorkspace} />
@@ -251,6 +328,15 @@ export function PreviewPlaceholder() {
             </div>
           </div>
 
+          {stockOpen && (
+            <Reveal>
+              <UnsplashPanel
+                onClose={() => setStockOpen(false)}
+                onPick={(p) => void importUnsplashPhoto(p)}
+              />
+            </Reveal>
+          )}
+
           <p
             className={cn(
               "text-center text-xs transition-colors duration-200",
@@ -259,7 +345,9 @@ export function PreviewPlaceholder() {
           >
             {error ??
               hint ??
-              "Drag & drop media anywhere in the preview to import."}
+              (importing
+                ? "Importing image…"
+                : "Drag & drop media anywhere in the preview to import.")}
           </p>
         </div>
       </div>
