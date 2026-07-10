@@ -267,15 +267,13 @@ export interface KaleidoscopeSettings {
 }
 
 export interface NeonEdgeSettings {
-  edgeThreshold: number;
-  lineWidth: number;
-  glow: number;
-  glowRadius: number;
-  intensity: number;
-  colorA: string;
-  colorB: string;
-  backgroundMix: number;
-  invert: boolean;
+  preset: string;
+  sensitivity: number; // 0–100, edge amount (higher = more edges)
+  thickness: number; // 0–100, edge dilation
+  glow: number; // 0–100
+  brightness: number; // 0–100
+  color: string;
+  background: "black" | "original";
 }
 
 /* ----- Vision Tracker ----- */

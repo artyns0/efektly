@@ -8,6 +8,7 @@ import {
   type MediaEl,
 } from "../pipeline";
 import { targetDims } from "../../utils/canvasFit";
+import { setFrameContext } from "../effects/temporalContext";
 
 /* ------------------------------------------------------------------ */
 /*  Export rendering — the single source of truth for exported frames. */
@@ -34,6 +35,15 @@ export function renderFrame(
   ctx.fillRect(0, 0, w, h);
   const fit = computeFit(media, { width: w, height: h });
   if (!fit) return;
+  // Temporal context for export: video frames arrive in monotonic media-time
+  // order (see mediaVideoExport), so history accumulates correctly.
+  const isVideo = typeof HTMLVideoElement !== "undefined" && media instanceof HTMLVideoElement;
+  setFrameContext({
+    mediaTimeMs: time,
+    resetToken: isVideo ? "export-video" : "export-image",
+    playing: isVideo,
+    isVideo,
+  });
   drawBase(ctx, media, fit);
   for (const fx of effects) {
     if (fx.enabled) applyEffect(ctx, fx, fit, 1, time); // dpr 1: canvas px == CSS px

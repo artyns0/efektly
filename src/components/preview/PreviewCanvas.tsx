@@ -9,6 +9,7 @@ import {
   type FitRect,
   type MediaEl,
 } from "../../engine/pipeline";
+import { setFrameContext } from "../../engine/effects/temporalContext";
 
 /* ------------------------------------------------------------------ */
 /*  Real canvas preview of the uploaded image or video.               */
@@ -65,6 +66,14 @@ export function PreviewCanvas({ source }: { source: MediaEl }) {
         if (video.videoWidth === 0 || cssW === 0) return;
         const fit = computeFit(video, { width: cssW, height: cssH });
         if (!fit) return;
+        // Temporal effects key off the media timeline, not the wall clock, so a
+        // seek/loop resets their frame history rather than smearing across it.
+        setFrameContext({
+          mediaTimeMs: video.currentTime * 1000,
+          resetToken: video.currentSrc || "video",
+          playing: !video.paused && !video.ended,
+          isVideo: true,
+        });
         ctx.clearRect(0, 0, cssW, cssH);
         drawBase(ctx, video, fit);
         for (const fx of enabled) applyEffect(ctx, fx, fit, dpr, time);
@@ -120,6 +129,14 @@ export function PreviewCanvas({ source }: { source: MediaEl }) {
       ctx.clearRect(0, 0, cssW, cssH);
       fit = computeFit(source, { width: cssW, height: cssH });
       if (!fit) return;
+      // Still image: mark the source as non-video so video-only effects show
+      // their notice instead of processing a single frame.
+      setFrameContext({
+        mediaTimeMs: 0,
+        resetToken: "image",
+        playing: false,
+        isVideo: false,
+      });
       drawBase(ctx, source, fit);
       const now = performance.now();
       for (const fx of staticPart) applyEffect(ctx, fx, fit, dpr, now);

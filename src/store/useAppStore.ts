@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { DEFAULT_PALETTE, SAMPLE_SOURCE } from "../data/mockData";
 import { createInitialEffects, defaultEffectSettings } from "../data/effects";
+import { disposeHistory } from "../engine/effects/frameHistory";
 import {
   createInitialShaderSettings,
   DEFAULT_PRESET,
@@ -409,13 +410,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         fx.id === id ? { ...fx, enabled: true } : fx,
       ),
     })),
-  removeFromStack: (id) =>
+  removeFromStack: (id) => {
+    // Free any temporal frame history the removed effect was holding.
+    disposeHistory(id);
     set((state) => ({
       stackedEffectIds: state.stackedEffectIds.filter((x) => x !== id),
       effects: state.effects.map((fx) =>
         fx.id === id ? { ...fx, enabled: false } : fx,
       ),
-    })),
+    }));
+  },
   updateEffectSettings: (id, patch) =>
     set((state) => ({
       effects: state.effects.map((fx) =>

@@ -140,15 +140,33 @@ export const EFFECT_SCHEMAS: Partial<Record<EffectType, FieldDef[]>> = {
     { kind: "color", key: "background", label: "Background" },
   ],
   neonEdge: [
-    pct("edgeThreshold", "Edge Threshold"),
-    pct("lineWidth", "Line Width"),
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Cyan", label: "Cyan" },
+        { value: "White", label: "White" },
+        { value: "Red", label: "Red" },
+        { value: "Gold", label: "Gold" },
+      ],
+      patches: {
+        Cyan: { color: "#38E1FF", sensitivity: 55, thickness: 30, glow: 60, brightness: 70 },
+        White: { color: "#F4F7FF", sensitivity: 50, thickness: 25, glow: 45, brightness: 80 },
+        Red: { color: "#FF4436", sensitivity: 58, thickness: 34, glow: 65, brightness: 68 },
+        Gold: { color: "#FFC148", sensitivity: 52, thickness: 30, glow: 58, brightness: 74 },
+      },
+    },
+    pct("sensitivity", "Sensitivity"),
+    pct("thickness", "Thickness"),
     pct("glow", "Glow"),
-    pct("glowRadius", "Glow Radius"),
-    pct("intensity", "Intensity"),
-    { kind: "color", key: "colorA", label: "Color A" },
-    { kind: "color", key: "colorB", label: "Color B" },
-    pct("backgroundMix", "Background Mix"),
-    { kind: "toggle", key: "invert", label: "Invert" },
+    pct("brightness", "Brightness"),
+    { kind: "color", key: "color", label: "Color" },
+    {
+      kind: "select", key: "background", label: "Background",
+      options: [
+        { value: "black", label: "Black" },
+        { value: "original", label: "Original" },
+      ],
+    },
   ],
   visionTracker: [
     /* detection */

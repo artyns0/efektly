@@ -6,6 +6,7 @@ import type {
   VideoResolutionId,
 } from "../../types/app";
 import { drawFramed, renderNativeFrame } from "./renderExportFrame";
+import { resetAllHistory } from "../effects/frameHistory";
 import { createFrameEncoder } from "./videoEncoder";
 
 /* ------------------------------------------------------------------ */
@@ -139,6 +140,9 @@ export async function exportMediaVideo(
   const wasPaused = video.paused;
   const savedTime = video.currentTime;
   video.pause();
+
+  // Temporal effects rebuild their frame history from the start of the export.
+  resetAllHistory();
 
   try {
     for (let i = 0; i < total; i++) {
