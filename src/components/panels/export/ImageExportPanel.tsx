@@ -44,7 +44,6 @@ export function ImageExportPanel() {
   const projectName = useAppStore((s) => s.projectName);
   const imageFileName = useAppStore((s) => s.imageFileName);
   const setImageFileName = useAppStore((s) => s.setImageFileName);
-  const capturedFrame = useAppStore((s) => s.capturedFrame);
 
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -58,21 +57,27 @@ export function ImageExportPanel() {
     setBusy(true);
     setNote(null);
     try {
-      let native = capturedFrame;
-      if (!native) {
-        const { mediaImage, mediaVideo, effects } = useAppStore.getState();
-        const media = mediaImage ?? mediaVideo;
-        if (media) native = renderNativeFrame(media, effects);
-      }
-      if (!native) {
+      // Always render fresh from the live source + current effect stack. The
+      // export is the single source of truth — never a stale captured frame,
+      // which would drop effects added after capture and cap the resolution.
+      const { mediaImage, mediaVideo, effects } = useAppStore.getState();
+      const media = mediaImage ?? mediaVideo;
+      if (!media) {
         setNote("Nothing to export — upload media first.");
         return;
       }
+      const native = renderNativeFrame(media, effects);
       const outCanvas = renderToExportCanvas(native, resolution, { mode: imageFraming });
       const blob = await encodeCanvas(outCanvas, imageFormat, quality);
       downloadBlob(blob, `${baseName}.${EXT[imageFormat]}`);
-    } catch {
-      setNote("Export failed.");
+    } catch (e) {
+      // Never silently fall back to an unprocessed image — surface the failure.
+      console.error("[export] image export failed:", e);
+      setNote(
+        e instanceof Error && /tainted|cross-origin|SecurityError/i.test(e.message)
+          ? "Export blocked by image security (CORS). Re-import the image."
+          : "Export failed — the effect pipeline could not render this frame.",
+      );
     } finally {
       setBusy(false);
     }
