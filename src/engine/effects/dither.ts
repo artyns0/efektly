@@ -1,5 +1,6 @@
 import type { DitherSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
+import { FX_REF_EDGE } from "./fxUtils";
 
 /* ------------------------------------------------------------------ */
 /*  Dither — the first real effect on the new stack.                   */
@@ -105,9 +106,17 @@ export function renderDither(
   s: DitherSettings,
 ): void {
   const { dx, dy, dw, dh } = rect;
+  // The grid is computed against a fixed ~1080px reference so preview and export
+  // produce the IDENTICAL dither pattern (cell count is resolution-independent);
+  // the crisp blocks are then scaled to the output area. A raw-pixel cell would
+  // otherwise change the grid — and the whole error-diffusion pattern — with
+  // resolution.
+  const long = Math.max(1, Math.max(dw, dh));
+  const ow = Math.max(1, Math.round((dw / long) * FX_REF_EDGE));
+  const oh = Math.max(1, Math.round((dh / long) * FX_REF_EDGE));
   const point = Math.max(1, Math.round(s.pointSize));
-  const cols = Math.max(1, Math.floor(dw / point));
-  const rows = Math.max(1, Math.floor(dh / point));
+  const cols = Math.max(1, Math.floor(ow / point));
+  const rows = Math.max(1, Math.floor(oh / point));
 
   // 1 — downsample the source to the grid.
   const ictx = getInCtx(cols, rows);

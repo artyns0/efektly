@@ -1,6 +1,6 @@
 import type { VisionTrackerSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
-import { clamp, getBuffer, hexToRgb } from "./fxUtils";
+import { clamp, fxScale, getBuffer, hexToRgb } from "./fxUtils";
 
 /* ------------------------------------------------------------------ */
 /*  Vision Tracker — TouchDesigner-style blob tracking overlay.        */
@@ -356,9 +356,12 @@ function drawOverlay(
   const lineC = hexToRgb(s.lineColor);
   const centerC = hexToRgb(s.centerColor);
   const op = clamp(s.opacity / 100, 0, 1);
-  const boxLw = 0.5 + (s.boxThickness / 100) * 4;
-  const lineLw = 0.5 + (s.lineThickness / 100) * 3;
-  const fontPx = 7 + (s.textSize / 100) * 20;
+  // HUD strokes/text are authored in pixels; scale them with the render size so
+  // the overlay stays legible at full-resolution export (hairlines otherwise).
+  const hud = fxScale(dw, dh);
+  const boxLw = (0.5 + (s.boxThickness / 100) * 4) * hud;
+  const lineLw = (0.5 + (s.lineThickness / 100) * 3) * hud;
+  const fontPx = (7 + (s.textSize / 100) * 20) * hud;
 
   ctx.save();
   ctx.beginPath();
@@ -366,7 +369,7 @@ function drawOverlay(
   ctx.clip();
   ctx.globalAlpha = op;
   if (s.glow > 0) {
-    ctx.shadowBlur = (s.glow / 100) * 16;
+    ctx.shadowBlur = (s.glow / 100) * 16 * hud;
   }
   ctx.font = `600 ${fontPx}px ui-monospace, monospace`;
   ctx.textBaseline = "top";

@@ -1,5 +1,6 @@
 import type { GrainSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
+import { fxScale } from "./fxUtils";
 
 /* ------------------------------------------------------------------ */
 /*  Grain — a film/digital grain post effect.                          */
@@ -63,7 +64,9 @@ export function renderGrain(
   const { dx, dy, dw, dh } = rect;
   if (dw < 1 || dh < 1) return;
 
-  const size = Math.max(1, s.size);
+  // Scale the grain cell with the render size so a grain speck stays the same
+  // fraction of the image — matching grain in preview and full-res export.
+  const size = Math.max(1, Math.round(s.size * fxScale(dw, dh)));
   const w = Math.max(1, Math.round(dw / size));
   const h = Math.max(1, Math.round(dh / size));
 

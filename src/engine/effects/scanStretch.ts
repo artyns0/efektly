@@ -22,7 +22,10 @@ export function renderScanStretch(
 
   const horiz = s.direction === "horizontal";
   const span = horiz ? h : w;
-  const band = clamp(s.scanWidth, 2, 200);
+  // scanWidth is authored against a ~720px reference; scale it with the actual
+  // span so the bands cover the same fraction at preview and full-res export
+  // (an absolute px band collapses into invisible slivers at 4K otherwise).
+  const band = clamp((s.scanWidth * span) / 720, 2, span * 0.5);
   const stretch = 1 + (s.stretchAmount / 100) * 20;
   const densityP = s.density / 100;
   const jit = (s.jitter / 100) * band * 2;

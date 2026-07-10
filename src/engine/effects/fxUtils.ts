@@ -24,6 +24,30 @@ export function getBuffer(
 export const clamp = (v: number, lo: number, hi: number) =>
   v < lo ? lo : v > hi ? hi : v;
 
+/* ------------------------------------------------------------------ */
+/*  Resolution normalization.                                          */
+/*                                                                     */
+/*  Effects render into a buffer sized to the fitted media region:     */
+/*  small in the live preview (~CSS px), large at full-resolution      */
+/*  export (native source px). A spatial parameter expressed in raw    */
+/*  pixels therefore covers a different FRACTION of the image at each   */
+/*  size, so preview and export diverge (denser dots, thinner lines,   */
+/*  finer grain at export).                                            */
+/*                                                                     */
+/*  fxScale() maps "pixels authored against a 1080px long edge" onto    */
+/*  the actual render size. Multiply any spatial/detail parameter by    */
+/*  it so a feature keeps a constant fraction of the image — identical   */
+/*  appearance in preview and export. UI slider values are unchanged;   */
+/*  only the internal pixel size is scaled.                            */
+/* ------------------------------------------------------------------ */
+
+export const FX_REF_EDGE = 1080;
+
+/** Normalization factor for the current render size (1.0 at 1080px long edge). */
+export function fxScale(dw: number, dh: number): number {
+  return Math.max(1, Math.max(dw, dh)) / FX_REF_EDGE;
+}
+
 export const lum = (r: number, g: number, b: number) =>
   (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 

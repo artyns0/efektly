@@ -1,6 +1,6 @@
 import type { CrtMonitorSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
-import { clamp, getBuffer } from "./fxUtils";
+import { clamp, fxScale, getBuffer } from "./fxUtils";
 
 /* CRT Monitor — scanlines, RGB mask, curvature approximation, glow. */
 
@@ -14,6 +14,10 @@ export function renderCrtMonitor(
   const { dx, dy, dw, dh } = rect;
   const w = Math.max(1, Math.round(dw));
   const h = Math.max(1, Math.round(dh));
+  // Scanline period, mask triads and glow blur are authored in pixels; scale
+  // them with the render size so the CRT texture reads the same in preview and
+  // full-resolution export instead of collapsing to invisible hairlines.
+  const sc = fxScale(dw, dh);
   const b = getBuffer("crt", w, h);
   b.clearRect(0, 0, w, h);
 
@@ -38,32 +42,41 @@ export function renderCrtMonitor(
   if (s.phosphorGlow > 0) {
     b.globalCompositeOperation = "lighter";
     b.globalAlpha = (s.phosphorGlow / 100) * 0.45;
-    b.filter = `blur(${2 + (s.phosphorGlow / 100) * 8}px)`;
+    b.filter = `blur(${(2 + (s.phosphorGlow / 100) * 8) * sc}px)`;
     b.drawImage(b.canvas, 0, 0);
     b.filter = "none";
     b.globalAlpha = 1;
     b.globalCompositeOperation = "source-over";
   }
 
-  // Scanlines.
+  // Scanlines — period and thickness scale with resolution.
   if (s.scanlines > 0) {
+    const period = Math.max(2, Math.round(3 * sc));
+    const thick = Math.max(1, Math.round(period / 3));
     b.fillStyle = `rgba(0,0,0,${(s.scanlines / 100) * 0.45})`;
-    for (let y = 0; y < h; y += 3) b.fillRect(0, y, w, 1);
+    for (let y = 0; y < h; y += period) b.fillRect(0, y, w, thick);
   }
 
-  // RGB mask — vertical triads.
+  // RGB mask — vertical triads, sub-pixel width scaled with resolution.
   if (s.rgbMask > 0) {
     const a = (s.rgbMask / 100) * 0.12;
     const cols = ["rgba(255,0,0,", "rgba(0,255,0,", "rgba(0,0,255,"];
-    for (let x = 0; x < w; x += 3) {
-      b.fillStyle = cols[(x / 3) % 3 | 0] + a + ")";
-      b.fillRect(x, 0, 1, h);
+    const subW = Math.max(1, Math.round(sc));
+    for (let x = 0, c = 0; x < w; x += subW, c++) {
+      b.fillStyle = cols[c % 3] + a + ")";
+      b.fillRect(x, 0, subW, h);
     }
   }
 
   // Noise.
   if (s.noise > 0) {
-    const n = getBuffer("crt-noise", w >> 2 || 1, h >> 2 || 1, true);
+    const nCell = Math.max(1, Math.round(4 * sc));
+    const n = getBuffer(
+      "crt-noise",
+      Math.max(1, Math.round(w / nCell)),
+      Math.max(1, Math.round(h / nCell)),
+      true,
+    );
     const img = n.createImageData(n.canvas.width, n.canvas.height);
     for (let i = 0; i < img.data.length; i += 4) {
       const v = (Math.random() * 255) | 0;

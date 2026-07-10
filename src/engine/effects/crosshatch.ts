@@ -1,6 +1,6 @@
 import type { CrosshatchSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
-import { clamp, getBuffer, lum, rand } from "./fxUtils";
+import { clamp, fxScale, getBuffer, lum, rand } from "./fxUtils";
 
 /* Crosshatch — luminance-driven hatch shading (Canvas 2D). */
 
@@ -35,15 +35,18 @@ export function renderCrosshatch(
   ctx.fillStyle = s.bgColor;
   ctx.fillRect(dx, dy, dw, dh);
   ctx.translate(dx, dy);
+  // Hatch metrics live in output-pixel space, so scale them with the render
+  // size to keep line spacing/width a constant fraction at any resolution.
+  const sc = fxScale(dw, dh);
   ctx.strokeStyle = s.inkColor;
-  ctx.lineWidth = Math.max(0.5, s.lineWidth);
+  ctx.lineWidth = Math.max(0.5, s.lineWidth * sc);
   ctx.lineCap = "round";
 
-  const spacing = clamp(26 - (s.lineDensity / 100) * 22, 3, 30);
+  const spacing = clamp(26 - (s.lineDensity / 100) * 22, 3, 30) * sc;
   const thr = s.threshold / 100;
   const diag = Math.sqrt(dw * dw + dh * dh);
-  const step = 5;
-  const rough = (s.roughness / 100) * 3;
+  const step = Math.max(2, 5 * sc);
+  const rough = (s.roughness / 100) * 3 * sc;
   const jit = (s.jitter / 100) * spacing * 0.5;
 
   // Two hatch passes: angle1 for tones below thr, angle2 for darker tones.

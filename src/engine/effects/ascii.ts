@@ -1,5 +1,6 @@
 import type { AsciiCharSet, AsciiSettings } from "../../types/effects";
 import type { FitRect } from "./dotMatrix";
+import { FX_REF_EDGE } from "./fxUtils";
 
 /* ------------------------------------------------------------------ */
 /*  ASCII — image to characters.                                       */
@@ -36,6 +37,24 @@ function getSampleCtx(w: number, h: number): CanvasRenderingContext2D {
   return sampleCtx!;
 }
 
+// The glyph pass is drawn here at a fixed reference resolution, then blitted to
+// the output — so preview and export share one identical render and only the
+// final up/down-scale differs (constant glyph coverage → matched tone).
+let outCanvas: HTMLCanvasElement | null = null;
+let outCtx: CanvasRenderingContext2D | null = null;
+
+function getOutCtx(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContext2D] {
+  if (!outCanvas) {
+    outCanvas = document.createElement("canvas");
+    outCtx = outCanvas.getContext("2d");
+  }
+  if (outCanvas.width !== w || outCanvas.height !== h) {
+    outCanvas.width = w;
+    outCanvas.height = h;
+  }
+  return [outCanvas, outCtx!];
+}
+
 function luminance(r: number, g: number, b: number): number {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
@@ -47,9 +66,18 @@ export function renderAscii(
   s: AsciiSettings,
 ): void {
   const { dx, dy, dw, dh } = rect;
+
+  // Fixed reference render size: the glyph pass always runs at ~1080px on the
+  // long edge, so the cell size, font pixels and grid are identical in preview
+  // and export. Only the final blit to dw×dh up/down-scales — glyph coverage
+  // (and therefore tone) stays the same at every output resolution.
+  const long = Math.max(1, Math.max(dw, dh));
+  const ow = Math.max(1, Math.round((dw / long) * FX_REF_EDGE));
+  const oh = Math.max(1, Math.round((dh / long) * FX_REF_EDGE));
+
   const cell = Math.max(4, Math.round(s.cellSize));
-  const cols = Math.max(1, Math.floor(dw / cell));
-  const rows = Math.max(1, Math.floor(dh / cell));
+  const cols = Math.max(1, Math.floor(ow / cell));
+  const rows = Math.max(1, Math.floor(oh / cell));
 
   // Sample one averaged pixel per cell.
   const sctx = getSampleCtx(cols, rows);
@@ -60,18 +88,15 @@ export function renderAscii(
   const ramp = RAMPS[s.charSet] ?? RAMPS.standard;
   const lastIdx = ramp.length - 1;
 
-  // Background (brand mode forces Onyx).
-  ctx.save();
-  ctx.fillStyle = s.colorMode === "brand" ? ONYX : s.bgColor;
-  ctx.fillRect(dx, dy, dw, dh);
-  ctx.beginPath();
-  ctx.rect(dx, dy, dw, dh);
-  ctx.clip();
+  // Draw the glyph pass into the fixed-size offscreen buffer.
+  const [obuf, octx] = getOutCtx(ow, oh);
+  octx.clearRect(0, 0, ow, oh);
+  octx.fillStyle = s.colorMode === "brand" ? ONYX : s.bgColor;
+  octx.fillRect(0, 0, ow, oh);
 
-  // Monospace glyphs sized to the cell.
-  ctx.font = `${cell}px ui-monospace, "JetBrains Mono", monospace`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  octx.font = `${cell}px ui-monospace, "JetBrains Mono", monospace`;
+  octx.textAlign = "center";
+  octx.textBaseline = "middle";
 
   for (let gy = 0; gy < rows; gy++) {
     for (let gx = 0; gx < cols; gx++) {
@@ -91,25 +116,33 @@ export function renderAscii(
 
       const color = glyphColor(s, lum, r, g, b);
       if (!color) continue; // brand mode: dark cells stay empty
-      ctx.fillStyle = color;
+      octx.fillStyle = color;
 
-      const cx = dx + (gx + 0.5) * cell;
-      const cy = dy + (gy + 0.5) * cell;
+      const cx = (gx + 0.5) * cell;
+      const cy = (gy + 0.5) * cell;
 
       if (s.rotation) {
         // Deterministic, subtle per-cell tilt driven by brightness.
         const angle = (lum - 0.5) * 0.7; // ~ ±20°
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle);
-        ctx.fillText(ch, 0, 0);
-        ctx.restore();
+        octx.save();
+        octx.translate(cx, cy);
+        octx.rotate(angle);
+        octx.fillText(ch, 0, 0);
+        octx.restore();
       } else {
-        ctx.fillText(ch, cx, cy);
+        octx.fillText(ch, cx, cy);
       }
     }
   }
 
+  // Blit the reference render into the fitted output area.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(dx, dy, dw, dh);
+  ctx.clip();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(obuf, 0, 0, ow, oh, dx, dy, dw, dh);
   ctx.restore();
 }
 
