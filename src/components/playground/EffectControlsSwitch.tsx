@@ -6,6 +6,7 @@ import { LineArtControls } from "../panels/effects/LineArtControls";
 import { GrainControls } from "../panels/effects/GrainControls";
 import { ReflectionGridControls } from "../panels/effects/ReflectionGridControls";
 import { VerticalEchoControls } from "../panels/effects/VerticalEchoControls";
+import { InverseStrobeControls } from "../panels/effects/InverseStrobeControls";
 import { GenericEffectControls } from "../panels/effects/GenericEffectControls";
 
 /** Routes an effect instance to its control component (bespoke or schema). */
@@ -25,6 +26,8 @@ export function EffectControlsSwitch({ effect }: { effect: EffectInstance }) {
       return <ReflectionGridControls effect={effect} />;
     case "verticalEcho":
       return <VerticalEchoControls effect={effect} />;
+    case "inverseStrobe":
+      return <InverseStrobeControls effect={effect} />;
     default:
       return <GenericEffectControls effect={effect} />;
   }
