@@ -6,6 +6,7 @@ import { PlaygroundPreview } from "./PlaygroundPreview";
 import { PlaygroundRightPanel } from "./PlaygroundRightPanel";
 import { PlaygroundStatusBar } from "./PlaygroundStatusBar";
 import { useTimeline } from "./useTimeline";
+import { FlapMascot } from "../mascot/FlapMascot";
 
 /* ------------------------------------------------------------------ */
 /*  Efektly main shell (default at /).                                 */
@@ -37,12 +38,17 @@ export function PlaygroundShell() {
         <PlaygroundToolbar />
 
         <div className="flex min-h-0 flex-1 gap-3 p-3">
-          {/* Left panel — hidden during the startup welcome state */}
-          {!isWelcome && (
-            <aside className="scroll-thin w-[320px] shrink-0 overflow-y-auto rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-4">
-              <PlaygroundPanel />
-            </aside>
-          )}
+          {/* Left column — Flap has a persistent home above contextual tools. */}
+          <aside className="flex w-[320px] shrink-0 flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#0e0e0e] p-3">
+            <div className="relative z-10 shrink-0">
+              <FlapMascot />
+            </div>
+            {!isWelcome && (
+              <div className="scroll-thin mt-3 min-h-0 flex-1 overflow-y-auto px-1 pb-1 pr-2">
+                <PlaygroundPanel />
+              </div>
+            )}
+          </aside>
 
           {/* Center: preview (video transport lives inside the preview) */}
           <div className="flex min-w-0 flex-1 flex-col">

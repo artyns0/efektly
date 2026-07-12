@@ -64,6 +64,154 @@
 }
 
 @layer components {
+  /* Flap's home mirrors the supplied left-panel reference. The character is
+     rendered by WebGL; CSS only owns the quiet frame and controls. */
+  .flap-home {
+    position: relative;
+    height: 178px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 13px;
+    background:
+      radial-gradient(ellipse at 50% 72%, rgba(255, 75, 16, 0.055), transparent 45%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(0, 0, 0, 0.13));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.018),
+      0 10px 35px rgba(0, 0, 0, 0.12);
+    transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .flap-home--collapsed {
+    height: 44px;
+  }
+
+  .flap-home__header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 0 12px;
+  }
+
+  .flap-home__identity,
+  .flap-home__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .flap-home__identity {
+    min-width: 0;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .flap-home__live {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--color-flame);
+    box-shadow: 0 0 10px rgba(255, 90, 31, 0.72);
+  }
+
+  .flap-home[data-mood="sleepy"] .flap-home__live {
+    background: rgba(243, 240, 232, 0.32);
+    box-shadow: none;
+  }
+
+  .flap-home__name {
+    color: rgba(243, 240, 232, 0.88);
+    font-weight: 650;
+    letter-spacing: 0.015em;
+  }
+
+  .flap-home__mood {
+    overflow: hidden;
+    color: rgba(243, 240, 232, 0.38);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .flap-home__actions {
+    gap: 4px;
+  }
+
+  .flap-home__icon-button {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    place-items: center;
+    border-radius: 7px;
+    color: rgba(243, 240, 232, 0.38);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .flap-home__icon-button:hover {
+    background: rgba(255, 255, 255, 0.055);
+    color: rgba(243, 240, 232, 0.78);
+  }
+
+  .flap-home__icon-button:focus-visible,
+  .flap-home__stage:focus-visible {
+    outline: 1px solid rgba(255, 90, 31, 0.75);
+    outline-offset: -1px;
+  }
+
+  .flap-home__divider {
+    width: 1px;
+    height: 15px;
+    margin: 0 1px;
+    background: rgba(255, 255, 255, 0.065);
+  }
+
+  .flap-home__stage {
+    position: absolute;
+    inset: 37px 0 0;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0 0 13px 13px;
+    cursor: pointer;
+  }
+
+  .flap-home__stage::before {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 52%, transparent 38%, rgba(0, 0, 0, 0.12) 100%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .flap-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .flap-home__hint {
+    position: absolute;
+    right: 10px;
+    bottom: 7px;
+    z-index: 2;
+    color: rgba(243, 240, 232, 0.18);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .flap-home__stage:hover .flap-home__hint {
+    opacity: 1;
+  }
+
   /* Custom range input — flame fill, round thumb. The filled portion is
      driven by an inline --fill custom property set from React state. */
   .ef-range {

@@ -17,6 +17,7 @@ import { SliderControl } from "../../controls/SliderControl";
 import { SelectControl } from "../../controls/SelectControl";
 import { Button } from "../../controls/Button";
 import { NameField } from "./NameField";
+import { emitFlapReaction } from "../../../lib/flapEvents";
 
 const IMAGE_FORMATS = [
   { value: "png", label: "PNG" },
@@ -64,8 +65,10 @@ export function ImageExportPanel() {
       const media = mediaImage ?? mediaVideo;
       if (!media) {
         setNote("Nothing to export — upload media first.");
+        emitFlapReaction("confused");
         return;
       }
+      emitFlapReaction("working", 30_000);
       const native = renderNativeFrame(media, effects);
       const outCanvas = renderToExportCanvas(native, resolution, { mode: imageFraming });
       const blob = await encodeCanvas(outCanvas, imageFormat, quality);
@@ -73,6 +76,7 @@ export function ImageExportPanel() {
     } catch (e) {
       // Never silently fall back to an unprocessed image — surface the failure.
       console.error("[export] image export failed:", e);
+      emitFlapReaction("confused");
       setNote(
         e instanceof Error && /tainted|cross-origin|SecurityError/i.test(e.message)
           ? "Export blocked by image security (CORS). Re-import the image."

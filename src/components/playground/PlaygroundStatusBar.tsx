@@ -9,7 +9,7 @@ export function PlaygroundStatusBar() {
         <span className="size-1.5 rounded-full bg-flame" />
         GPU Accelerated
       </span>
-      <span className="hidden font-mono text-linen/30 md:inline">v0.1.0</span>
+      <span className="hidden font-mono text-linen/30 md:inline">v0.1.1</span>
       <span className="rounded bg-flame/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-flame">
         Beta
       </span>

@@ -2,6 +2,8 @@
 /*  Trigger a local file download from a Blob. Local-first — no upload. */
 /* ------------------------------------------------------------------ */
 
+import { emitFlapReaction } from "../lib/flapEvents";
+
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   downloadUrl(url, filename);
@@ -17,4 +19,5 @@ export function downloadUrl(url: string, filename: string): void {
   document.body.appendChild(a);
   a.click();
   a.remove();
+  emitFlapReaction("celebrate");
 }

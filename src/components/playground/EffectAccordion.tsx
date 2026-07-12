@@ -30,6 +30,7 @@ import {
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import type { EffectType } from "../../types/effects";
+import { emitFlapReaction } from "../../lib/flapEvents";
 
 const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   dither: Grid2x2,
@@ -120,6 +121,7 @@ export function EffectAccordion() {
     addToStack(id);
     pick(id);
     setMenuOpen(false);
+    emitFlapReaction("wow");
   };
 
   return (

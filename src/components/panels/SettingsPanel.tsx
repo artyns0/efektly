@@ -84,7 +84,7 @@ export function SettingsPanel() {
         <div className="flex flex-col gap-1 text-sm text-linen/55">
           <div className="flex justify-between">
             <span>Version</span>
-            <span className="font-mono text-xs text-linen/70">0.1.0</span>
+            <span className="font-mono text-xs text-linen/70">0.1.1</span>
           </div>
           <div className="flex justify-between">
             <span>Storage</span>

@@ -19,6 +19,7 @@ import { SelectControl } from "../../controls/SelectControl";
 import { SliderControl } from "../../controls/SliderControl";
 import { Button } from "../../controls/Button";
 import { NameField } from "./NameField";
+import { emitFlapReaction } from "../../../lib/flapEvents";
 
 const RESOLUTIONS = [
   { value: "original", label: "Original (source)" },
@@ -112,6 +113,7 @@ export function VideoExportPanel() {
     setNote(null);
     setProgress({ frame: 0, total });
     cancelRef.current = { cancelled: false };
+    emitFlapReaction("working", Math.max(30_000, duration * 2_000));
     try {
       const blob = await exportMediaVideo(
         mediaVideo,
@@ -130,8 +132,13 @@ export function VideoExportPanel() {
       downloadBlob(blob, `${baseName}.${container}`);
       setNote("Export complete.");
     } catch (e) {
-      if (e instanceof ExportCancelledError) setNote("Export cancelled.");
-      else setNote(e instanceof Error ? e.message : "Export failed.");
+      if (e instanceof ExportCancelledError) {
+        setNote("Export cancelled.");
+        emitFlapReaction("idle");
+      } else {
+        setNote(e instanceof Error ? e.message : "Export failed.");
+        emitFlapReaction("confused");
+      }
     } finally {
       setBusy(false);
       setProgress(null);
