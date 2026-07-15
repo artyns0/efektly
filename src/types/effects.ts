@@ -26,6 +26,7 @@ export type EffectType =
   | "inverseStrobe"
   | "motionTrails"
   | "slitScan"
+  | "opticalGlass"
   | "visionTracker";
 
 /** Drives the small status chip shown on each stack item. */
@@ -355,6 +356,30 @@ export interface SlitScanSettings {
   reverse: boolean;
 }
 
+/* ----- Optical Glass ----- */
+
+export type OpticalGlassMode = "ribbed" | "blocks" | "slit" | "soft-lens";
+
+export interface OpticalGlassSettings {
+  preset: string;
+  mode: OpticalGlassMode;
+  direction: Axis;
+  cells: number;
+  refraction: number;
+  curvature: number;
+  blur: number;
+  frost: number;
+  gap: number;
+  edgeLight: number;
+  chromaticAberration: number;
+  panelX: number;
+  panelY: number;
+  panelWidth: number;
+  panelHeight: number;
+  feather: number;
+  mix: number;
+}
+
 /* ----- Vision Tracker ----- */
 
 export type VisionShapeMode =
@@ -445,6 +470,7 @@ export interface EffectSettingsMap {
   inverseStrobe: InverseStrobeSettings;
   motionTrails: MotionTrailsSettings;
   slitScan: SlitScanSettings;
+  opticalGlass: OpticalGlassSettings;
   visionTracker: VisionTrackerSettings;
 }
 
@@ -470,6 +496,7 @@ export type EffectSettingsPatch =
   | Partial<InverseStrobeSettings>
   | Partial<MotionTrailsSettings>
   | Partial<SlitScanSettings>
+  | Partial<OpticalGlassSettings>
   | Partial<VisionTrackerSettings>;
 
 interface EffectBase<T extends EffectType> {
@@ -503,4 +530,5 @@ export type EffectInstance =
   | EffectBase<"inverseStrobe">
   | EffectBase<"motionTrails">
   | EffectBase<"slitScan">
+  | EffectBase<"opticalGlass">
   | EffectBase<"visionTracker">;

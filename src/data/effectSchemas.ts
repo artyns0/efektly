@@ -324,6 +324,53 @@ export const EFFECT_SCHEMAS: Partial<Record<EffectType, FieldDef[]>> = {
     pct("timeDepth", "Time Depth"),
     { kind: "toggle", key: "reverse", label: "Reverse" },
   ],
+  opticalGlass: [
+    {
+      kind: "select", key: "preset", label: "Preset",
+      options: [
+        { value: "Ribbed Glass", label: "Ribbed Glass" },
+        { value: "Glass Blocks", label: "Glass Blocks" },
+        { value: "Slit Lens", label: "Slit Lens" },
+        { value: "Soft Lens", label: "Soft Lens" },
+      ],
+      patches: {
+        "Ribbed Glass": { mode: "ribbed", direction: "vertical", cells: 22, refraction: 58, curvature: 72, blur: 12, frost: 5, gap: 8, edgeLight: 38, chromaticAberration: 8 },
+        "Glass Blocks": { mode: "blocks", direction: "vertical", cells: 9, refraction: 52, curvature: 68, blur: 18, frost: 12, gap: 12, edgeLight: 45, chromaticAberration: 4 },
+        "Slit Lens": { mode: "slit", direction: "vertical", cells: 18, refraction: 82, curvature: 88, blur: 3, frost: 0, gap: 5, edgeLight: 24, chromaticAberration: 2 },
+        "Soft Lens": { mode: "soft-lens", direction: "vertical", cells: 12, refraction: 48, curvature: 55, blur: 24, frost: 8, gap: 0, edgeLight: 32, chromaticAberration: 10 },
+      },
+    },
+    {
+      kind: "select", key: "mode", label: "Glass Type",
+      options: [
+        { value: "ribbed", label: "Ribbed" },
+        { value: "blocks", label: "Glass Blocks" },
+        { value: "slit", label: "Slit" },
+        { value: "soft-lens", label: "Soft Lens" },
+      ],
+    },
+    {
+      kind: "select", key: "direction", label: "Direction",
+      options: [
+        { value: "vertical", label: "Vertical" },
+        { value: "horizontal", label: "Horizontal" },
+      ],
+    },
+    { kind: "slider", key: "cells", label: "Ribs / Cells", min: 2, max: 64, step: 1 },
+    pct("refraction", "Refraction"),
+    pct("curvature", "Lens Curvature"),
+    pct("blur", "Glass Blur"),
+    pct("frost", "Frost"),
+    pct("gap", "Cell Gap"),
+    pct("edgeLight", "Edge Light"),
+    pct("chromaticAberration", "Color Dispersion"),
+    pct("panelX", "Panel X"),
+    pct("panelY", "Panel Y"),
+    pct("panelWidth", "Panel Width"),
+    pct("panelHeight", "Panel Height"),
+    pct("feather", "Edge Feather"),
+    pct("mix", "Effect Mix"),
+  ],
   visionTracker: [
     /* detection */
     pct("threshold", "Threshold"),

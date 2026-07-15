@@ -21,7 +21,7 @@ import type { MediaEl } from "../pipeline";
 const REGISTRY: EffectType[] = [
   "dither", "ascii", "glitch", "lineArt", "grain", "crosshatch",
   "scanStretch", "pixelSort", "lightTrails", "crtMonitor", "vhsBleed",
-  "kaleidoscope", "neonEdge", "visionTracker",
+  "kaleidoscope", "neonEdge", "opticalGlass", "visionTracker",
 ];
 
 function inst(type: EffectType): EffectInstance {

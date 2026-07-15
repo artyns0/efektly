@@ -61,6 +61,7 @@ const EFFECT_ICONS: Record<EffectType, LucideIcon> = {
   inverseStrobe: Sparkles,
   motionTrails: Waves,
   slitScan: AlignHorizontalJustifyCenter,
+  opticalGlass: Aperture,
   visionTracker: ScanEye,
 };
 

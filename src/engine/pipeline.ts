@@ -21,6 +21,7 @@ import { renderInverseStrobe } from "./effects/inverseStrobe";
 import { renderMotionTrails } from "./effects/motionTrails";
 import { renderSlitScan } from "./effects/slitScan";
 import { renderVisionTracker } from "./effects/visionTracker";
+import { renderOpticalGlass } from "./effects/opticalGlass";
 
 /* ------------------------------------------------------------------ */
 /*  Effect Stack render pipeline (Canvas 2D).                          */
@@ -180,6 +181,9 @@ export function applyEffect(
       break;
     case "slitScan":
       renderSlitScan(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings, fx.id);
+      break;
+    case "opticalGlass":
+      renderOpticalGlass(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
       break;
     case "visionTracker":
       renderVisionTracker(ctx, snapshotInput(ctx, fit, dpr), fit, fx.settings);
