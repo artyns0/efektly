@@ -1,9 +1,9 @@
-import { PlaygroundShell } from "./components/playground/PlaygroundShell";
+import { LeftSidebarDemoShell } from "./components/ui-demo/LeftSidebarDemoShell";
 
 /**
- * Efektly — the playground shell is the app. (The legacy `?layout=playground`
- * flag is no longer needed; `/` renders the same UI.)
+ * Efektly's current production shell. The former isolated demo route now uses
+ * the same interface as `/`, so existing preview links continue to work.
  */
 export default function App() {
-  return <PlaygroundShell />;
+  return <LeftSidebarDemoShell />;
 }

@@ -97,7 +97,11 @@ function Switch({
  * selection + enable toggle only — detailed controls live in the right
  * Properties panel. "Add Effect" enables an effect from the available list.
  */
-export function EffectAccordion() {
+export function EffectAccordion({
+  sidebarDemo = false,
+}: {
+  sidebarDemo?: boolean;
+} = {}) {
   const effects = useAppStore((s) => s.effects);
   const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
@@ -126,7 +130,12 @@ export function EffectAccordion() {
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div
+      className={cn(
+        "flex flex-col gap-2.5",
+        sidebarDemo && "left-demo-effects min-h-0 flex-1",
+      )}
+    >
       <div className="relative flex items-center justify-between px-0.5">
         <div className="flex items-baseline gap-2">
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
@@ -136,7 +145,7 @@ export function EffectAccordion() {
             {active.length}
           </span>
         </div>
-        <button
+        {!sidebarDemo && <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
           disabled={available.length === 0}
@@ -150,10 +159,10 @@ export function EffectAccordion() {
         >
           <Plus className="size-3.5" />
           Add Effect
-        </button>
+        </button>}
 
         {/* Add menu */}
-        {menuOpen && available.length > 0 && (
+        {!sidebarDemo && menuOpen && available.length > 0 && (
           <div className="scroll-thin absolute right-0 top-9 z-20 max-h-72 w-56 overflow-y-auto rounded-xl border border-white/[0.1] bg-onyx-100 p-1.5 shadow-2xl shadow-black/50">
             {available.map((fx) => {
               const Icon = EFFECT_ICONS[fx.type];
@@ -173,6 +182,7 @@ export function EffectAccordion() {
         )}
       </div>
 
+      <div className={cn(sidebarDemo && "scroll-thin min-h-0 flex-1 overflow-y-auto pr-1")}>
       {active.length === 0 ? (
         <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-dashed border-white/[0.1] bg-linen/[0.015] px-4 py-10 text-center">
           <Layers className="size-6 text-linen/25" strokeWidth={1.5} />
@@ -259,10 +269,44 @@ export function EffectAccordion() {
           })}
         </div>
       )}
+      </div>
 
       <p className="px-1 text-[10px] text-linen/25">
         Select an effect to edit its settings in Properties.
       </p>
+
+      {sidebarDemo && (
+        <div className="relative mt-auto pt-1">
+          {menuOpen && available.length > 0 && (
+            <div className="scroll-thin absolute inset-x-0 bottom-12 z-30 max-h-72 overflow-y-auto rounded-xl border border-white/[0.1] bg-[#111820] p-1.5 shadow-2xl shadow-black/70">
+              {available.map((fx) => {
+                const Icon = EFFECT_ICONS[fx.type];
+                return (
+                  <button
+                    key={fx.id}
+                    type="button"
+                    onClick={() => addEffect(fx.id)}
+                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] text-linen/75 transition-colors hover:bg-white/[0.06] hover:text-linen"
+                  >
+                    <Icon className="size-4 shrink-0 text-linen/50" strokeWidth={1.8} />
+                    {fx.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            disabled={available.length === 0}
+            aria-expanded={menuOpen}
+            className="left-demo-add-effect inline-flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-flame/70 bg-flame/[0.07] text-[13px] font-medium text-linen transition-all hover:bg-flame/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame/55 disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <Plus className="size-4" />
+            Add Effect
+          </button>
+        </div>
+      )}
     </div>
   );
 }

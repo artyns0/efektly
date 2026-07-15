@@ -35,6 +35,7 @@ import { ThreeBubblePropertiesPanel } from "../panels/ThreeBubblePropertiesPanel
 import { ThreeInteractivePropertiesPanel } from "../panels/ThreeInteractivePropertiesPanel";
 import { ThreeImagePropertiesPanel } from "../panels/ThreeImagePropertiesPanel";
 import { SHADER_TYPES } from "../../data/shaders";
+import { ShaderControls } from "./ShaderControls";
 
 /* Playground v2 right panel: Properties / Export tabs. Properties shows the
    settings for the single selected item (effect / shader / source) — no
@@ -104,7 +105,11 @@ function EmptyProperties() {
   );
 }
 
-function PropertiesTab() {
+function PropertiesTab({
+  shaderPropertiesOnRight,
+}: {
+  shaderPropertiesOnRight: boolean;
+}) {
   const mode = useAppStore((s) => s.mode);
   const three3DTool = useAppStore((s) => s.three3DTool);
   const shaderType = useAppStore((s) => s.shaderType);
@@ -112,6 +117,7 @@ function PropertiesTab() {
   const stackedEffectIds = useAppStore((s) => s.stackedEffectIds);
   const selectedEffectId = useAppStore((s) => s.selectedEffectId);
   const resetEffect = useAppStore((s) => s.resetEffect);
+  const resetShader = useAppStore((s) => s.resetShader);
 
   // 3D mode → tool-specific controls.
   if (mode === "three") {
@@ -123,6 +129,21 @@ function PropertiesTab() {
   // Shader mode → show the active shader as the selected item.
   if (mode === "shader") {
     const label = SHADER_TYPES.find((t) => t.id === shaderType)?.label ?? "Shader";
+    if (shaderPropertiesOnRight) {
+      return (
+        <div className="flex flex-col gap-3">
+          <PropertyHeader
+            icon={MonitorPlay}
+            title={label}
+            subtitle="Shader"
+            onReset={() => resetShader(shaderType)}
+          />
+          <div className="rounded-2xl border border-white/[0.06] bg-linen/[0.015] p-3">
+            <ShaderControls variant="properties" />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col gap-3">
         <PropertyHeader icon={MonitorPlay} title={label} subtitle="Shader" />
@@ -156,7 +177,11 @@ function PropertiesTab() {
   );
 }
 
-export function PlaygroundRightPanel() {
+export function PlaygroundRightPanel({
+  shaderPropertiesOnRight = false,
+}: {
+  shaderPropertiesOnRight?: boolean;
+} = {}) {
   const rightTab = useAppStore((s) => s.rightTab);
   const setRightTab = useAppStore((s) => s.setRightTab);
   const projectName = useAppStore((s) => s.projectName);
@@ -184,7 +209,7 @@ export function PlaygroundRightPanel() {
       </div>
 
       {rightTab === "properties" ? (
-        <PropertiesTab />
+        <PropertiesTab shaderPropertiesOnRight={shaderPropertiesOnRight} />
       ) : (
         <div className="flex flex-col gap-4">
           <ExportPanel videoRecordAction={<VideoRecordButton />} />

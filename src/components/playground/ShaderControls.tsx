@@ -13,7 +13,11 @@ import { ResetButton } from "../controls/ResetButton";
 /*  playground toolbar). Shown in the left panel when in Shader mode.  */
 /* ------------------------------------------------------------------ */
 
-export function ShaderControls() {
+export function ShaderControls({
+  variant = "full",
+}: {
+  variant?: "full" | "selector" | "properties";
+} = {}) {
   const type = useAppStore((s) => s.shaderType);
   const settings = useAppStore((s) => s.shaderSettings[type]);
   const updateShaderSettings = useAppStore((s) => s.updateShaderSettings);
@@ -27,18 +31,40 @@ export function ShaderControls() {
     background?: string;
   }) => updateShaderSettings(type, patch);
 
+  if (variant === "selector") {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
+            Shader Library
+          </span>
+        </div>
+        <Section title="Shader Type">
+          <ShaderTypeSelector />
+        </Section>
+        <p className="px-1 text-[10px] leading-relaxed text-linen/30">
+          Select a shader, then adjust its presets and parameters in Properties.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
-          Shader
-        </span>
-        <ResetButton onClick={() => resetShader(type)} />
-      </div>
+      {variant === "full" && (
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-linen/40">
+            Shader
+          </span>
+          <ResetButton onClick={() => resetShader(type)} />
+        </div>
+      )}
 
-      <Section title="Shader Type">
-        <ShaderTypeSelector />
-      </Section>
+      {variant === "full" && (
+        <Section title="Shader Type">
+          <ShaderTypeSelector />
+        </Section>
+      )}
 
       <Section title="Presets">
         <ShaderPresets />
