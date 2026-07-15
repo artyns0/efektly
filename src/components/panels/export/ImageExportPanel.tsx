@@ -18,6 +18,7 @@ import { SelectControl } from "../../controls/SelectControl";
 import { Button } from "../../controls/Button";
 import { NameField } from "./NameField";
 import { emitFlapReaction } from "../../../lib/flapEvents";
+import { getPreviewCanvas } from "../../../engine/preview/canvasRegistry";
 
 const IMAGE_FORMATS = [
   { value: "png", label: "PNG" },
@@ -32,6 +33,17 @@ const RESOLUTION_SELECT = RESOLUTION_OPTIONS.map((o) => ({
   label: `${o.label} · ${o.dimensions}`,
 }));
 const EXT: Record<ExportImageFormat, string> = { png: "png", jpg: "jpg" };
+
+/** Freeze the current live Shader / 3D frame before async encoding starts. */
+function snapshotCanvas(source: HTMLCanvasElement): HTMLCanvasElement {
+  const copy = document.createElement("canvas");
+  copy.width = Math.max(1, source.width);
+  copy.height = Math.max(1, source.height);
+  const ctx = copy.getContext("2d");
+  if (!ctx) throw new Error("Could not create an image export canvas.");
+  ctx.drawImage(source, 0, 0);
+  return copy;
+}
 
 export function ImageExportPanel() {
   const format = useAppStore((s) => s.format);
@@ -58,18 +70,29 @@ export function ImageExportPanel() {
     setBusy(true);
     setNote(null);
     try {
-      // Always render fresh from the live source + current effect stack. The
-      // export is the single source of truth — never a stale captured frame,
-      // which would drop effects added after capture and cap the resolution.
-      const { mediaImage, mediaVideo, effects } = useAppStore.getState();
-      const media = mediaImage ?? mediaVideo;
-      if (!media) {
-        setNote("Nothing to export — upload media first.");
-        emitFlapReaction("confused");
-        return;
+      // Export the workspace that is actually visible. Shader and 3D are
+      // canvas-native and must never fall back to an uploaded Source image.
+      // Media mode still renders a fresh native-resolution effects frame.
+      const { mediaImage, mediaVideo, effects, mode } = useAppStore.getState();
+      let native: HTMLCanvasElement;
+      if (mode === "shader" || mode === "three") {
+        const preview = getPreviewCanvas();
+        if (!preview || preview.width < 1 || preview.height < 1) {
+          setNote("Nothing to export — the live preview is not ready.");
+          emitFlapReaction("confused");
+          return;
+        }
+        native = snapshotCanvas(preview);
+      } else {
+        const media = mediaImage ?? mediaVideo;
+        if (!media) {
+          setNote("Nothing to export — upload media first.");
+          emitFlapReaction("confused");
+          return;
+        }
+        native = renderNativeFrame(media, effects);
       }
       emitFlapReaction("working", 30_000);
-      const native = renderNativeFrame(media, effects);
       const outCanvas = renderToExportCanvas(native, resolution, { mode: imageFraming });
       const blob = await encodeCanvas(outCanvas, imageFormat, quality);
       downloadBlob(blob, `${baseName}.${EXT[imageFormat]}`);
