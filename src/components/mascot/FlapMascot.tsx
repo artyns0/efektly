@@ -1,4 +1,4 @@
-import { ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FlapMood } from "../../lib/flapEvents";
 import { cn } from "../../lib/cn";
@@ -41,7 +41,6 @@ export function FlapMascot() {
 
   const [mood, setMood] = useState<FlapMood>("idle");
   const [gaze, setGaze] = useState<Gaze>({ x: 0, y: 0 });
-  const [quiet, setQuiet] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
   const clearTimer = (ref: React.MutableRefObject<number | null>) => {
@@ -164,20 +163,9 @@ export function FlapMascot() {
         <div className="flap-home__identity">
           <span className="flap-home__live" aria-hidden="true" />
           <span className="flap-home__name">Flap</span>
-          <span className="flap-home__mood">· {MOOD_LABELS[mood]}</span>
         </div>
 
         <div className="flap-home__actions">
-          <button
-            type="button"
-            onClick={() => setQuiet((value) => !value)}
-            className="flap-home__icon-button"
-            aria-label={quiet ? "Resume Flap motion" : "Quiet Flap motion"}
-            aria-pressed={quiet}
-          >
-            {quiet ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
-          </button>
-          <span className="flap-home__divider" />
           <button
             type="button"
             onClick={() => setCollapsed((value) => !value)}
@@ -199,10 +187,9 @@ export function FlapMascot() {
         aria-label={`Flap is ${MOOD_LABELS[mood]}. Click to preview the next reaction.`}
         tabIndex={collapsed ? -1 : 0}
       >
-        <FlapCanvas mood={mood} gaze={gaze} quiet={quiet} />
+        <FlapCanvas mood={mood} gaze={gaze} quiet={false} />
         <span className="flap-home__hint">click to preview reactions</span>
       </button>
     </section>
   );
 }
-
